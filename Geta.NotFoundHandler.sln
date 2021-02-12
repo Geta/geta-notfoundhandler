@@ -5,6 +5,10 @@ VisualStudioVersion = 16.0.30804.86
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Geta.NotFoundHandler", "src\Geta.NotFoundHandler\Geta.NotFoundHandler.csproj", "{00BEC106-B3EE-421B-8ED5-B51EA016FD3D}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AlloyMvcTemplates", "samples\Alloy\AlloyMvcTemplates.csproj", "{BFA5C535-13D2-4DC0-96AB-E164842766F1}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{320DF82B-2EF9-4AFA-9A77-FCE2B94F7038}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,9 +19,16 @@ Global
 		{00BEC106-B3EE-421B-8ED5-B51EA016FD3D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{00BEC106-B3EE-421B-8ED5-B51EA016FD3D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{00BEC106-B3EE-421B-8ED5-B51EA016FD3D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BFA5C535-13D2-4DC0-96AB-E164842766F1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BFA5C535-13D2-4DC0-96AB-E164842766F1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BFA5C535-13D2-4DC0-96AB-E164842766F1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BFA5C535-13D2-4DC0-96AB-E164842766F1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{BFA5C535-13D2-4DC0-96AB-E164842766F1} = {320DF82B-2EF9-4AFA-9A77-FCE2B94F7038}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {76CC4F02-91DF-4BB8-A977-065BC8CB65C5}

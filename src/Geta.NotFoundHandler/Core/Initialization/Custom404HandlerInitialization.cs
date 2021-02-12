@@ -1,4 +1,4 @@
-// Copyright (c) Geta Digital. All rights reserved.
+/*// Copyright (c) Geta Digital. All rights reserved.
 // Licensed under Apache-2.0. See the LICENSE file in the project root for more information
 
 using System;
@@ -6,7 +6,6 @@ using EPiServer.Framework;
 using EPiServer.Framework.Initialization;
 using EPiServer.Logging;
 using EPiServer.ServiceLocation;
-using Geta.NotFound.Core;
 using Geta.NotFoundHandler.Core.CustomRedirects;
 using Geta.NotFoundHandler.Core.Data;
 using Geta.NotFoundHandler.Core.Upgrade;
@@ -106,4 +105,4 @@ namespace Geta.NotFoundHandler.Core.Initialization
             return null;
         }
     }
-}
+}*/
