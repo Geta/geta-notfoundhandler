@@ -3,7 +3,6 @@ using AlloyMvcTemplates.Infrastructure;
 using EPiServer.Cms.UI.AspNetIdentity;
 using EPiServer.Data;
 using EPiServer.DependencyInjection;
-using EPiServer.ServiceLocation;
 using EPiServer.Web.Internal;
 using EPiServer.Web.Routing;
 using Microsoft.AspNetCore.Builder;
@@ -13,6 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System.IO;
 using Geta.NotFoundHandler.Core.Configuration;
+using Geta.NotFoundHandler.Core.Initialization;
 
 namespace EPiServer.Templates.Alloy.Mvc
 {
@@ -64,12 +64,14 @@ namespace EPiServer.Templates.Alloy.Mvc
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            app.UseNotFoundHandler();
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
                 app.UseMiddleware<AdministratorRegistrationPageMiddleware>();
             }
-
+            
             app.UseStaticFiles();
             app.UseRouting();
             app.UseAuthentication();

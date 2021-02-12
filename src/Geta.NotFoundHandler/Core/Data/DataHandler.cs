@@ -30,12 +30,12 @@ namespace Geta.NotFoundHandler.Core.Data
             return keyCounts;
         }
 
-        public static Dictionary<string, int> GetReferrers(string url)
+        public static Dictionary<string, int> GetReferers(string url)
         {
             var dataAccess = DataAccessBaseEx.GetWorker();
             var referers = new Dictionary<string, int>();
 
-            using (var referersDs = dataAccess.GetSuggestionReferrers(url))
+            using (var referersDs = dataAccess.GetSuggestionReferers(url))
             {
                 var table = referersDs.Tables[0];
                 if (table == null) return referers;

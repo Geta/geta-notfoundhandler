@@ -1,16 +1,16 @@
-﻿/*
-// Copyright (c) Geta Digital. All rights reserved.
+﻿// Copyright (c) Geta Digital. All rights reserved.
 // Licensed under Apache-2.0. See the LICENSE file in the project root for more information
 
 using System;
-using System.Diagnostics;
 using System.Linq;
-using System.Net;
 using EPiServer.Logging;
 using Geta.NotFoundHandler.Core.Configuration;
 using Geta.NotFoundHandler.Core.CustomRedirects;
 using Geta.NotFoundHandler.Core.Data;
 using Geta.NotFoundHandler.Core.Logging;
+using Geta.NotFoundHandler.Core.Web;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.Extensions.Options;
 
 namespace Geta.NotFoundHandler.Core
@@ -34,7 +34,7 @@ namespace Geta.NotFoundHandler.Core
             _redirectHandler = redirectHandler ?? throw new ArgumentNullException(nameof(redirectHandler));
         }
 
-        public virtual void Handle(HttpContextBase context)
+        public virtual void Handle(HttpContext context)
         {
             if (context == null) return;
 
@@ -55,12 +55,10 @@ namespace Geta.NotFoundHandler.Core
                 LogDebug("Not handled, custom redirect manager is set to off.", context);
                 return;
             }
-            // If we're only doing this for remote users, we need to test for local host
+
             if (_configuration.HandlerMode == FileNotFoundMode.RemoteOnly)
             {
-                // Determine if we're on localhost
-                var localHost = IsLocalhost(context);
-                if (localHost)
+                if (context.IsLocalRequest())
                 {
                     LogDebug("Determined to be localhost, returning.", context);
                     return;
@@ -70,7 +68,7 @@ namespace Geta.NotFoundHandler.Core
 
             LogDebug("Handling 404 request.", context);
 
-            var notFoundUri = context.Request.Url;
+            var notFoundUri = new Uri(context.Request.GetDisplayUrl());
 
             if (IsResourceFile(notFoundUri))
             {
@@ -78,7 +76,7 @@ namespace Geta.NotFoundHandler.Core
                 return;
             }
 
-            var query = context.Request.ServerVariables["QUERY_STRING"];
+            var query = context.Request.QueryString.ToString();
 
             // avoid duplicate log entries
             if (query != null && query.StartsWith("404;"))
@@ -87,13 +85,13 @@ namespace Geta.NotFoundHandler.Core
                 return;
             }
 
-            var canHandleRedirect = HandleRequest(context.Request.UrlReferrer, notFoundUri, out var newUrl);
+            var headers = context.Request.GetTypedHeaders();
+            var canHandleRedirect = HandleRequest(headers.Referer, notFoundUri, out var newUrl);
             if (canHandleRedirect && newUrl.State == (int)RedirectState.Saved)
             {
                 LogDebug("Handled saved URL", context);
 
                 context
-                    .ClearServerError()
                     .Redirect(newUrl.NewUrl, newUrl.RedirectType);
             }
             else if (canHandleRedirect && newUrl.State == (int)RedirectState.Deleted)
@@ -110,21 +108,20 @@ namespace Geta.NotFoundHandler.Core
             }
 
             MarkHandled(context);
-
         }
 
-        private bool IsHandled(HttpContextBase context)
+        private bool IsHandled(HttpContext context)
         {
-            return context.Items.Contains(HandledRequestItemKey)
+            return context.Items.Keys.Contains(HandledRequestItemKey)
                 && (bool)context.Items[HandledRequestItemKey];
         }
 
-        private void MarkHandled(HttpContextBase context)
+        private void MarkHandled(HttpContext context)
         {
             context.Items[HandledRequestItemKey] = true;
         }
 
-        public virtual bool HandleRequest(Uri referrer, Uri urlNotFound, out CustomRedirect foundRedirect)
+        public virtual bool HandleRequest(Uri referer, Uri urlNotFound, out CustomRedirect foundRedirect)
         {
             var redirect = _redirectHandler.Find(urlNotFound);
 
@@ -142,7 +139,7 @@ namespace Geta.NotFoundHandler.Core
                 if (redirect.State.Equals((int)RedirectState.Saved))
                 {
                     // Found it, however, we need to make sure we're not running in an
-                    // infinite loop. The new url must not be the referrer to this page
+                    // infinite loop. The new url must not be the referer to this page
                     if (string.Compare(redirect.NewUrl, urlNotFound.PathAndQuery, StringComparison.InvariantCultureIgnoreCase) != 0)
                     {
 
@@ -158,16 +155,15 @@ namespace Geta.NotFoundHandler.Core
                 {
                     // Safe logging
                     var logUrl = _configuration.LogWithHostname ? urlNotFound.ToString() : urlNotFound.PathAndQuery;
-                    _requestLogger.LogRequest(logUrl, referrer?.ToString());
+                    _requestLogger.LogRequest(logUrl, referer?.ToString());
                 }
             }
             return false;
         }
 
-        public virtual void SetStatusCodeAndShow404(HttpContextBase context, int statusCode = 404)
+        public virtual void SetStatusCodeAndShow404(HttpContext context, int statusCode = 404)
         {
             context
-                .ClearServerError()
                 .SetStatusCode(statusCode);
         }
 
@@ -195,36 +191,11 @@ namespace Geta.NotFoundHandler.Core
             return false;
         }
 
-        /// <summary>
-        /// Determines whether the current request is on localhost.
-        /// </summary>
-        /// <returns>
-        /// <c>true</c> if current request is localhost; otherwise, <c>false</c>.
-        /// </returns>
-        public virtual bool IsLocalhost(HttpContextBase context)
-        {
-            try
-            {
-                var hostAddress = context.Request.UserHostAddress ?? string.Empty;
-                var address = IPAddress.Parse(hostAddress);
-                Debug.WriteLine("IP Address of user: " + address, "NotFoundHandler");
-
-                var host = Dns.GetHostEntry(Dns.GetHostName());
-                Debug.WriteLine("Host Entry of local computer: " + host.HostName, "NotFoundHandler");
-                return address.Equals(IPAddress.Loopback) || Array.IndexOf(host.AddressList, address) >= 0;
-            }
-            catch
-            {
-                return false;
-            }
-        }
-
-        private void LogDebug(string message, HttpContextBase context)
+        private void LogDebug(string message, HttpContext context)
         {
             Logger.Debug(
                 $"{{0}}{Environment.NewLine}Request URL: {{1}}{Environment.NewLine}Response status code: {{2}}",
-                message, context?.Request.Url, context?.Response.StatusCode);
+                message, context?.Request.Path, context?.Response.StatusCode);
         }
     }
 }
-*/

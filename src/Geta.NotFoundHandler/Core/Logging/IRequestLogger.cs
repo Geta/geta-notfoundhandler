@@ -5,6 +5,6 @@ namespace Geta.NotFoundHandler.Core.Logging
 {
     public interface IRequestLogger
     {
-        void LogRequest(string oldUrl, string referrer);
+        void LogRequest(string oldUrl, string referer);
     }
 }

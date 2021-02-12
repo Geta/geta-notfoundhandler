@@ -29,6 +29,9 @@ namespace Geta.NotFoundHandler.Core.Initialization
             // Load all custom redirects into memory
             // TODO: create better load of the cache (init in a hosted service) https://andrewlock.net/running-async-tasks-on-app-startup-in-asp-net-core-3/
             var handler = CustomRedirectHandler.Current;
+
+            app.UseMiddleware<NotFoundHandlerMiddleware>();
+
             return app;
         }
     }

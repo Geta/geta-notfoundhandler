@@ -21,8 +21,10 @@ namespace Geta.NotFoundHandler.Core.Configuration
             this IServiceCollection services,
             Action<NotFoundHandlerOptions> setupAction)
         {
+            services.AddTransient<DataAccessBaseEx>();
             services.AddSingleton<IRequestLogger>(RequestLogger.Instance);
             services.AddTransient<IRedirectHandler>(_ => CustomRedirectHandler.Current); // Load per-request as it is read from the cache
+            services.AddTransient<RequestHandler>();
 
             services.AddTransient<IRedirectsService, DefaultRedirectsService>();
             services.AddTransient<IRepository<CustomRedirect>, SqlRedirectRepository>();

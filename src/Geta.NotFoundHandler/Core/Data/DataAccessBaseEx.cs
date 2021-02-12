@@ -154,7 +154,7 @@ namespace Geta.NotFoundHandler.Core.Data
             ExecuteNonQuery(sqlCommand);
         }
 
-        public DataSet GetSuggestionReferrers(string url)
+        public DataSet GetSuggestionReferers(string url)
         {
             var sqlCommand =
                 $"SELECT [Referer], COUNT(*) as Requests FROM {SuggestionsTable} where [OldUrl] = @oldurl  GROUP BY [Referer] order by Requests desc";
@@ -200,7 +200,7 @@ namespace Geta.NotFoundHandler.Core.Data
             });
         }
 
-        public void LogSuggestionToDb(string oldUrl, string referrer, DateTime now)
+        public void LogSuggestionToDb(string oldUrl, string referer, DateTime now)
         {
             Executor.Execute(() =>
                {
@@ -213,13 +213,13 @@ namespace Geta.NotFoundHandler.Core.Data
                        var requestedParam = CreateParameter("requested", DbType.DateTime, 0);
                        requestedParam.Value = now;
 
-                       var referrerParam = CreateParameter("referer", DbType.String, 2000);
-                       referrerParam.Value = referrer ?? string.Empty;
+                       var refererParam = CreateParameter("referer", DbType.String, 2000);
+                       refererParam.Value = referer ?? string.Empty;
 
                        var oldUrlParam = CreateParameter("oldurl", DbType.String, 2000);
                        oldUrlParam.Value = oldUrl;
 
-                       using (var command = CreateCommand(sqlCommand, requestedParam, referrerParam, oldUrlParam))
+                       using (var command = CreateCommand(sqlCommand, requestedParam, refererParam, oldUrlParam))
                        {
                            command.ExecuteNonQuery();
                        }

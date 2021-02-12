@@ -26,7 +26,7 @@ namespace Geta.NotFoundHandler.Core.Logging
 
         private static readonly ILogger Logger = LogManager.GetLogger();
 
-        public void LogRequest(string oldUrl, string referrer)
+        public void LogRequest(string oldUrl, string referer)
         {
             var bufferSize = Configuration.BufferSize;
             if (LogQueue.Count > 0 && LogQueue.Count >= bufferSize)
@@ -46,7 +46,7 @@ namespace Geta.NotFoundHandler.Core.Logging
                     }
                 }
             }
-            LogQueue.Enqueue(new LogEvent(oldUrl, DateTime.UtcNow, referrer));
+            LogQueue.Enqueue(new LogEvent(oldUrl, DateTime.UtcNow, referer));
         }
 
         private void LogRequests(ConcurrentQueue<LogEvent> logEvents)
