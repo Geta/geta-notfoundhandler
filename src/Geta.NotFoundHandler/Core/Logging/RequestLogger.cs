@@ -5,9 +5,12 @@ using System;
 using System.Collections.Concurrent;
 using System.Linq;
 using EPiServer.Logging;
+using EPiServer.ServiceLocation;
+using Geta.NotFoundHandler.Core.Configuration;
 using Geta.NotFoundHandler.Core.Data;
+using Microsoft.Extensions.Options;
 
-namespace Geta.NotFound.Core.Logging
+namespace Geta.NotFoundHandler.Core.Logging
 {
     public class RequestLogger : IRequestLogger
     {
@@ -15,13 +18,17 @@ namespace Geta.NotFound.Core.Logging
 
         internal static RequestLogger InternalInstance { get; } = new RequestLogger();
 
+        private NotFoundHandlerOptions _configuration;
+        private NotFoundHandlerOptions Configuration =>
+            _configuration ??= ServiceLocator.Current.GetInstance<IOptions<NotFoundHandlerOptions>>().Value;
+
         private RequestLogger() { }
 
         private static readonly ILogger Logger = LogManager.GetLogger();
 
         public void LogRequest(string oldUrl, string referrer)
         {
-            var bufferSize = Geta.NotFound.Core.Configuration.Configuration.Instance.BufferSize;
+            var bufferSize = Configuration.BufferSize;
             if (LogQueue.Count > 0 && LogQueue.Count >= bufferSize)
             {
                 lock (LogQueue)
@@ -45,8 +52,8 @@ namespace Geta.NotFound.Core.Logging
         private void LogRequests(ConcurrentQueue<LogEvent> logEvents)
         {
             Logger.Debug("Logging 404 errors to database");
-            var bufferSize = Geta.NotFound.Core.Configuration.Configuration.Instance.BufferSize;
-            var threshold = Geta.NotFound.Core.Configuration.Configuration.Instance.ThreshHold;
+            var bufferSize = Configuration.BufferSize;
+            var threshold = Configuration.ThreshHold;
             var start = logEvents.First().Requested;
             var end = logEvents.Last().Requested;
             var diff = (end - start).Seconds;
@@ -72,5 +79,4 @@ namespace Geta.NotFound.Core.Logging
 
         private static ConcurrentQueue<LogEvent> LogQueue { get; } = new ConcurrentQueue<LogEvent>();
     }
-
 }

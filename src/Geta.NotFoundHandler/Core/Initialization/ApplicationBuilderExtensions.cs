@@ -1,6 +1,6 @@
 ﻿using EPiServer.Logging;
-using Geta.NotFound.Core.CustomRedirects;
 using Geta.NotFoundHandler.Core.Configuration;
+using Geta.NotFoundHandler.Core.CustomRedirects;
 using Geta.NotFoundHandler.Core.Data;
 using Geta.NotFoundHandler.Core.Upgrade;
 using Microsoft.AspNetCore.Builder;
@@ -13,9 +13,9 @@ namespace Geta.NotFoundHandler.Core.Initialization
 
         public static IApplicationBuilder UseNotFoundHandler(this IApplicationBuilder app)
         {
-            Logger.Debug("Initializing 404 handler version check");
+            Logger.Debug("Initializing NotFoundHandler version check");
             var dba = DataAccessBaseEx.GetWorker();
-            var version = dba.Check404Version();
+            var version = dba.CheckNotFoundHandlerVersion();
             if (version != NotFoundHandlerOptions.CurrentDbVersion)
             {
                 Logger.Debug("Older version found. Version nr. :" + version);

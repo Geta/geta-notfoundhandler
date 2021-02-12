@@ -3,11 +3,10 @@
 
 using System;
 
-namespace Geta.NotFound.Core.Logging
+namespace Geta.NotFoundHandler.Core.Logging
 {
     public class LogEvent
     {
-
         public LogEvent(string oldUrl, DateTime requested, string referer)
         {
             OldUrl = oldUrl;

@@ -6,9 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
-using Geta.NotFoundHandler.Core.Configuration;
 using Geta.NotFoundHandler.Core.Data;
-using Microsoft.Extensions.Options;
 
 namespace Geta.NotFoundHandler.Core.CustomRedirects
 {
@@ -18,14 +16,10 @@ namespace Geta.NotFoundHandler.Core.CustomRedirects
     public class CustomRedirectCollection : IEnumerable<CustomRedirect>
     {
         private readonly IEnumerable<INotFoundHandler> _providers;
-        private readonly NotFoundHandlerOptions _configuration;
 
-        public CustomRedirectCollection(
-            IOptions<NotFoundHandlerOptions> configuration,
-            IEnumerable<INotFoundHandler> providers)
+        public CustomRedirectCollection(IEnumerable<INotFoundHandler> providers)
         {
             _providers = providers;
-            _configuration = configuration.Value;
         }
 
         /// <summary>

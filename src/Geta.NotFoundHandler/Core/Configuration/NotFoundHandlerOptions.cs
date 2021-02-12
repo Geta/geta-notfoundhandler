@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using Geta.NotFound.Core;
 
 namespace Geta.NotFoundHandler.Core.Configuration
 {

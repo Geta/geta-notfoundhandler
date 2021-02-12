@@ -2,11 +2,9 @@
 // Licensed under Apache-2.0. See the LICENSE file in the project root for more information
 
 using System;
-using Geta.NotFound.Core;
-using Geta.NotFound.Core.CustomRedirects;
-using Geta.NotFound.Core.Logging;
 using Geta.NotFoundHandler.Core.CustomRedirects;
 using Geta.NotFoundHandler.Core.Data;
+using Geta.NotFoundHandler.Core.Logging;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 

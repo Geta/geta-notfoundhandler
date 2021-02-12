@@ -3,7 +3,7 @@
 
 using Geta.NotFoundHandler.Core.Data;
 
-namespace Geta.NotFound.Core.Web
+namespace Geta.NotFoundHandler.Core.Web
 {
     public static class HttpContextBaseExtensions
     {

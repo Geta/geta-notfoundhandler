@@ -6,9 +6,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Xml;
 using EPiServer.Logging;
-using Geta.NotFoundHandler.Core.CustomRedirects;
+using EPiServer.ServiceLocation;
 
-namespace Geta.NotFound.Core.CustomRedirects
+namespace Geta.NotFoundHandler.Core.CustomRedirects
 {
     /// <summary>
     /// Class for reading and writing to the custom redirects file
@@ -22,6 +22,10 @@ namespace Geta.NotFound.Core.CustomRedirects
         private const string Oldurl = "old";
         private const string Skipwildcard = "onWildCardMatchSkipAppend";
         private const string RedirectType = "redirectType";
+
+        private IEnumerable<INotFoundHandler> _providers;
+        private IEnumerable<INotFoundHandler> Providers =>
+            _providers ??= ServiceLocator.Current.GetAllInstances<INotFoundHandler>();
 
         /// <summary>
         /// Reads the custom redirects information from the specified xml file
@@ -40,7 +44,7 @@ namespace Geta.NotFound.Core.CustomRedirects
                 {
                     InnerXml = "<redirects><urls></urls></redirects>"
                 };
-                Logger.Error("404 Handler: The Custom Redirects file does not exist.");
+                Logger.Error("NotFoundHandler: The Custom Redirects file does not exist.");
             }
         }
 
@@ -56,7 +60,7 @@ namespace Geta.NotFound.Core.CustomRedirects
         {
             const string urlpath = "/redirects/urls/url";
 
-            var redirects = new CustomRedirectCollection();
+            var redirects = new CustomRedirectCollection(Providers);
 
             // Parse all url nodes
             var nodes = _customRedirectsXmlFile.SelectNodes(urlpath);
@@ -79,7 +83,7 @@ namespace Geta.NotFound.Core.CustomRedirects
                         bool.TryParse(skipWildCardAttr.Value, out skipWildCardAppend);
                     }
 
-                    var redirectType = NotFoundHandler.Core.Data.RedirectType.Permanent;
+                    var redirectType = Data.RedirectType.Permanent;
                     var redirectTypeAttr = oldNode.Attributes[RedirectType];
                     if (redirectTypeAttr != null)
                     {

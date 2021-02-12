@@ -3,7 +3,7 @@
 
 namespace Geta.NotFoundHandler.Core.Data
 {
-    public interface IRepository<TEntity>
+    public interface IRepository<in TEntity>
         where TEntity : class
     {
         void Save(TEntity entity);

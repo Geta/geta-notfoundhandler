@@ -18,7 +18,7 @@ namespace Geta.NotFoundHandler.Core.Data
 
         private readonly IDatabaseExecutor _executor;
 
-        private const string RedirectsTable = "[dbo].[404Handler.Redirects]";
+        private const string RedirectsTable = "[dbo].[NotFoundHandler.Redirects]";
 
         private const string AllFields = "Id, OldUrl, NewUrl, State, WildCardSkipAppend, RedirectType";
 

@@ -6,7 +6,7 @@ using System.IO;
 using EPiServer.Core;
 using EPiServer.Logging;
 
-namespace Geta.NotFound.Core
+namespace Geta.NotFoundHandler.Core
 {
     public class ErrorHandler
     {

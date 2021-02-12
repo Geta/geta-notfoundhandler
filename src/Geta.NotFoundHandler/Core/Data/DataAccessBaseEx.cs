@@ -170,7 +170,7 @@ namespace Geta.NotFoundHandler.Core.Data
             return ExecuteScalar(sqlCommand);
         }
 
-        public int Check404Version()
+        public int CheckNotFoundHandlerVersion()
         {
             return Executor.Execute(() =>
             {
@@ -227,7 +227,7 @@ namespace Geta.NotFoundHandler.Core.Data
                    catch (Exception ex)
                    {
 
-                       Logger.Error("An error occurred while logging a 404 handler error.", ex);
+                       Logger.Error("An error occurred while logging a NotFoundHandler error.", ex);
                    }
                    return true;
                });

@@ -2,12 +2,12 @@
 // Licensed under Apache-2.0. See the LICENSE file in the project root for more information
 
 using System;
+using System.Collections.Generic;
 using EPiServer.Logging;
 using EPiServer.ServiceLocation;
-using Geta.NotFoundHandler.Core.CustomRedirects;
 using Geta.NotFoundHandler.Core.Upgrade;
 
-namespace Geta.NotFound.Core.CustomRedirects
+namespace Geta.NotFoundHandler.Core.CustomRedirects
 {
     /// <summary>
     /// Handler for custom redirects. Loads and caches the list of custom redirects
@@ -19,11 +19,16 @@ namespace Geta.NotFound.Core.CustomRedirects
         private static readonly object CacheLock = new object();
         private const string CacheKeyCustomRedirectHandlerInstance = "CustomRedirectHandler";
         private CustomRedirectCollection _customRedirects;
-        private IRedirectsService _redirectsService;
-        private IRedirectsService RedirectsService => _redirectsService ??
-                                                      (_redirectsService = ServiceLocator.Current.GetInstance<IRedirectsService>());
 
-        // Should only be instanciated by the static Current method
+        private IRedirectsService _redirectsService;
+        private IRedirectsService RedirectsService =>
+            _redirectsService ??= ServiceLocator.Current.GetInstance<IRedirectsService>();
+
+        private IEnumerable<INotFoundHandler> _providers;
+        private IEnumerable<INotFoundHandler> Providers =>
+            _providers ??= ServiceLocator.Current.GetAllInstances<INotFoundHandler>();
+
+        // Should only be instantiated by the static Current method
         protected CustomRedirectHandler()
         {
         }
@@ -43,8 +48,9 @@ namespace Geta.NotFound.Core.CustomRedirects
         /// stores them in the CustomRedirect property
         /// </summary>
         protected void LoadCustomRedirects()
+
         {
-            _customRedirects = new CustomRedirectCollection();
+            _customRedirects = new CustomRedirectCollection(Providers);
 
             foreach (var redirect in RedirectsService.GetAll())
             {
@@ -56,7 +62,7 @@ namespace Geta.NotFound.Core.CustomRedirects
         /// Static method for getting the current custom redirects handler. Will store
         /// the handler in cache after it has been used.
         /// </summary>
-        /// <returns>An instanciated CustomRedirectHandler</returns>
+        /// <returns>An instantiated CustomRedirectHandler</returns>
         public static CustomRedirectHandler Current
         {
             get
@@ -72,6 +78,7 @@ namespace Geta.NotFound.Core.CustomRedirects
                     // Got the cached version, return it
                     return handler;
                 }
+
                 lock (CacheLock)
                 {
                     // First check if there is a cached version of
@@ -95,10 +102,13 @@ namespace Geta.NotFound.Core.CustomRedirects
                     }
                     catch (Exception ex)
                     {
-                        Logger.Error("An error occurred while loading redirects from dds. CustomRedirectHandlerException has now been set.", ex);
+                        Logger.Error(
+                            "An error occurred while loading redirects from dds. CustomRedirectHandlerException has now been set.",
+                            ex);
                         CustomRedirectHandlerException = ex.ToString();
                         Upgrader.Valid = false;
                     }
+
                     Logger.Debug("End: Load custom redirects from dynamic data store");
 
                     // Store in cache
@@ -130,7 +140,7 @@ namespace Geta.NotFound.Core.CustomRedirects
         /// <summary>
         /// Gets the handler from the cache, if it has been stored there.
         /// </summary>
-        /// <returns>An instanciated CustomRedirectHandler if found in the cache, null if not found</returns>
+        /// <returns>An instantiated CustomRedirectHandler if found in the cache, null if not found</returns>
         private static CustomRedirectHandler GetHandlerFromCache()
         {
             return EPiServer.CacheManager.Get(CacheKeyCustomRedirectHandlerInstance) as CustomRedirectHandler;

@@ -6,11 +6,12 @@ using EPiServer.Framework;
 using EPiServer.Framework.Initialization;
 using EPiServer.Logging;
 using EPiServer.ServiceLocation;
-using Geta.NotFound.Core.CustomRedirects;
+using Geta.NotFound.Core;
+using Geta.NotFoundHandler.Core.CustomRedirects;
 using Geta.NotFoundHandler.Core.Data;
 using Geta.NotFoundHandler.Core.Upgrade;
 
-namespace Geta.NotFound.Core.Initialization
+namespace Geta.NotFoundHandler.Core.Initialization
 {
     /// <inheritdoc />
     /// <summary>
@@ -30,9 +31,9 @@ namespace Geta.NotFound.Core.Initialization
         public void Initialize(InitializationEngine context)
         {
 
-            Logger.Debug("Initializing 404 handler version check");
+            Logger.Debug("Initializing NotFoundHandler version check");
             var dba = DataAccessBaseEx.GetWorker();
-            var version = dba.Check404Version();
+            var version = dba.CheckNotFoundHandlerVersion();
             if (version != Geta.NotFound.Core.Configuration.Configuration.CurrentVersion)
             {
                 Logger.Debug("Older version found. Version nr. :" + version);

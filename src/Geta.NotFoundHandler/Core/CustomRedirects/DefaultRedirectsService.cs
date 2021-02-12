@@ -4,10 +4,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Geta.NotFoundHandler.Core.CustomRedirects;
 using Geta.NotFoundHandler.Core.Data;
 
-namespace Geta.NotFound.Core.CustomRedirects
+namespace Geta.NotFoundHandler.Core.CustomRedirects
 {
     public class DefaultRedirectsService : IRedirectsService
     {

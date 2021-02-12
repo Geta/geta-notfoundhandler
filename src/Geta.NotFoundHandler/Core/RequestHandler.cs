@@ -3,31 +3,32 @@
 
 using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Net;
 using EPiServer.Logging;
-using Geta.NotFound.Core.CustomRedirects;
-using Geta.NotFound.Core.Logging;
 using Geta.NotFoundHandler.Core.Configuration;
 using Geta.NotFoundHandler.Core.CustomRedirects;
 using Geta.NotFoundHandler.Core.Data;
+using Geta.NotFoundHandler.Core.Logging;
+using Microsoft.Extensions.Options;
 
-namespace Geta.NotFound.Core
+namespace Geta.NotFoundHandler.Core
 {
     public class RequestHandler
     {
         private readonly IRedirectHandler _redirectHandler;
         private readonly IRequestLogger _requestLogger;
-        private readonly INotFoundConfiguration _configuration;
-        private const string HandledRequestItemKey = "404handler:handled";
+        private readonly NotFoundHandlerOptions _configuration;
+        private const string HandledRequestItemKey = "NotFoundHandler:handled";
 
         private static readonly ILogger Logger = LogManager.GetLogger();
 
         public RequestHandler(
             IRedirectHandler redirectHandler,
             IRequestLogger requestLogger,
-            INotFoundConfiguration configuration)
+            IOptions<NotFoundHandlerOptions> options)
         {
-            _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+            _configuration = options.Value;
             _requestLogger = requestLogger ?? throw new ArgumentNullException(nameof(requestLogger));
             _redirectHandler = redirectHandler ?? throw new ArgumentNullException(nameof(redirectHandler));
         }
@@ -48,13 +49,13 @@ namespace Geta.NotFound.Core
                 return;
             }
 
-            if (_configuration.FileNotFoundHandlerMode == FileNotFoundMode.Off)
+            if (_configuration.HandlerMode == FileNotFoundMode.Off)
             {
                 LogDebug("Not handled, custom redirect manager is set to off.", context);
                 return;
             }
             // If we're only doing this for remote users, we need to test for local host
-            if (_configuration.FileNotFoundHandlerMode == FileNotFoundMode.RemoteOnly)
+            if (_configuration.HandlerMode == FileNotFoundMode.RemoteOnly)
             {
                 // Determine if we're on localhost
                 var localHost = IsLocalhost(context);
@@ -184,7 +185,7 @@ namespace Geta.NotFound.Core
             if (extPos <= 0) return false;
 
             extension = extension.Substring(extPos + 1);
-            if (_configuration.IgnoredResourceExtensions.Contains(extension))
+            if (_configuration.IgnoredResourceExtensions.Any(x => x == extension))
             {
                 // Ignoring 404 rewrite of known resource extension
                 Logger.Debug("Ignoring rewrite of '{0}'. '{1}' is a known resource extension", notFoundUri.ToString(), extension);
@@ -205,10 +206,10 @@ namespace Geta.NotFound.Core
             {
                 var hostAddress = context.Request.UserHostAddress ?? string.Empty;
                 var address = IPAddress.Parse(hostAddress);
-                Debug.WriteLine("IP Address of user: " + address, "404Handler");
+                Debug.WriteLine("IP Address of user: " + address, "NotFoundHandler");
 
                 var host = Dns.GetHostEntry(Dns.GetHostName());
-                Debug.WriteLine("Host Entry of local computer: " + host.HostName, "404Handler");
+                Debug.WriteLine("Host Entry of local computer: " + host.HostName, "NotFoundHandler");
                 return address.Equals(IPAddress.Loopback) || Array.IndexOf(host.AddressList, address) >= 0;
             }
             catch
