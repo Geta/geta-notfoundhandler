@@ -14,7 +14,11 @@ namespace Geta.NotFoundHandler.Core.Redirects
     /// </summary>
     public class CustomRedirectCollection : IEnumerable<CustomRedirect>
     {
-        private readonly IEnumerable<INotFoundHandler> _providers;
+        private readonly IEnumerable<INotFoundHandler> _providers = new List<INotFoundHandler>();
+
+        public CustomRedirectCollection()
+        {
+        }
 
         public CustomRedirectCollection(IEnumerable<INotFoundHandler> providers)
         {

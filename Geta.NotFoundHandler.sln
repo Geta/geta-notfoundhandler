@@ -20,6 +20,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Geta.NotFoundHandler.Tests", "tests\Geta.NotFoundHandler.Tests\Geta.NotFoundHandler.Tests.csproj", "{80F6A409-357F-4EF2-BAAF-9603180BF1E1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -34,12 +36,17 @@ Global
 		{BFA5C535-13D2-4DC0-96AB-E164842766F1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BFA5C535-13D2-4DC0-96AB-E164842766F1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BFA5C535-13D2-4DC0-96AB-E164842766F1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{80F6A409-357F-4EF2-BAAF-9603180BF1E1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{80F6A409-357F-4EF2-BAAF-9603180BF1E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{80F6A409-357F-4EF2-BAAF-9603180BF1E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{80F6A409-357F-4EF2-BAAF-9603180BF1E1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{BFA5C535-13D2-4DC0-96AB-E164842766F1} = {320DF82B-2EF9-4AFA-9A77-FCE2B94F7038}
+		{80F6A409-357F-4EF2-BAAF-9603180BF1E1} = {751ABE30-032D-40A9-B36C-5549905113BD}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {76CC4F02-91DF-4BB8-A977-065BC8CB65C5}
