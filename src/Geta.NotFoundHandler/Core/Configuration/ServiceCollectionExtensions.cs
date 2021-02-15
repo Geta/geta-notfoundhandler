@@ -30,14 +30,16 @@ namespace Geta.NotFoundHandler.Core.Configuration
             services.AddTransient<IRepository<CustomRedirect>, SqlRedirectRepository>();
             services.AddTransient<IRedirectLoader, SqlRedirectRepository>();
 
+            var providerOptions = new NotFoundHandlerOptions();
+            setupAction(providerOptions);
+            foreach (var provider in providerOptions.Providers)
+            {
+                services.AddSingleton(typeof(INotFoundHandler), provider);
+            }
+
             services.AddOptions<NotFoundHandlerOptions>().Configure<IConfiguration>((options, configuration) =>
             {
                 setupAction(options);
-                foreach (var provider in options.Providers)
-                {
-                    services.AddSingleton(typeof(INotFoundHandler), provider);
-                }
-
                 configuration.GetSection("Geta:NotFoundHandler").Bind(options);
             });
 
