@@ -12,8 +12,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System.IO;
 using AlloyMvcTemplates;
-using Geta.NotFoundHandler.Core.Configuration;
-using Geta.NotFoundHandler.Core.Initialization;
+using Geta.NotFoundHandler.Infrastructure.Configuration;
+using Geta.NotFoundHandler.Infrastructure.Initialization;
 
 namespace EPiServer.Templates.Alloy.Mvc
 {

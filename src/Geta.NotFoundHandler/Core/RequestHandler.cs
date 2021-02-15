@@ -4,11 +4,10 @@
 using System;
 using System.Linq;
 using EPiServer.Logging;
-using Geta.NotFoundHandler.Core.Configuration;
-using Geta.NotFoundHandler.Core.CustomRedirects;
-using Geta.NotFoundHandler.Core.Data;
-using Geta.NotFoundHandler.Core.Logging;
-using Geta.NotFoundHandler.Core.Web;
+using Geta.NotFoundHandler.Core.Redirects;
+using Geta.NotFoundHandler.Core.Suggestions;
+using Geta.NotFoundHandler.Infrastructure.Configuration;
+using Geta.NotFoundHandler.Infrastructure.Web;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.Extensions.Options;
