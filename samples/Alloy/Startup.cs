@@ -11,6 +11,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System.IO;
+using AlloyMvcTemplates;
 using Geta.NotFoundHandler.Core.Configuration;
 using Geta.NotFoundHandler.Core.Initialization;
 
@@ -29,7 +30,7 @@ namespace EPiServer.Templates.Alloy.Mvc
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddNotFoundHandler();
+            services.AddNotFoundHandler(o => { o.AddProvider<NullNotFoundHandlerProvider>(); });
 
             var dbPath = Path.Combine(_webHostingEnvironment.ContentRootPath, "App_Data\\Alloy.mdf");
             var connectionstring = _configuration.GetConnectionString("EPiServerDB") ?? $"Data Source=(LocalDb)\\MSSQLLocalDB;AttachDbFilename={dbPath};Initial Catalog=alloy_mvc_netcore;Integrated Security=True;Connect Timeout=30;MultipleActiveResultSets=True";
