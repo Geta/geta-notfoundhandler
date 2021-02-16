@@ -15,6 +15,6 @@
     <None Include="wwwroot\**\*.*" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Geta.NotFoundHandler\Geta.NotFoundHandler.csproj" />
+    <ProjectReference Include="..\..\src\Geta.NotFoundHandler.Admin\Geta.NotFoundHandler.Admin.csproj" />
   </ItemGroup>
 </Project>
