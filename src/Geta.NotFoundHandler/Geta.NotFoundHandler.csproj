@@ -5,8 +5,8 @@
     <PackageId>Geta.NotFoundHandler</PackageId>
     <Title>404 Handler for EPiServer</Title>
     <PackageVersion>1.0.0</PackageVersion>
-    <Authors>Geta AS</Authors>
-    <Company>Geta AS</Company>
+    <Authors>Geta Digital</Authors>
+    <Company>Geta Digital</Company>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/Geta/404handler</PackageProjectUrl>
     <PackageIcon>icon.png</PackageIcon>
