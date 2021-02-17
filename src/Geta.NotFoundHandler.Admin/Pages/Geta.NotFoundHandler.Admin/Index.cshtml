@@ -1,4 +1,44 @@
 ﻿@page
 @model Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin.IndexModel
 
-@await Component.InvokeAsync("Card", new { message = "Hello from page!" })
+<vc:card message="@Model.Message"></vc:card>
+
+<div class="table-responsive mt-3">
+    <table class="table table-hover table-sm">
+        <thead>
+        <tr>
+            <th>Old URL</th>
+            <th>New URL</th>
+            <th class="col-1">Wildcard</th>
+            <th class="col-1">Redirect Type</th>
+            <th class="col-1"></th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>1,001</td>
+            <td>random</td>
+            <td>data</td>
+            <td>placeholder</td>
+            <td>text</td>
+        </tr>
+        @foreach (var item in Model.Items)
+        {
+            <tr>
+                <td>@item.OldUrl</td>
+                <td>@item.NewUrl</td>
+                <td>
+                    <vc:checkbox-readonly isChecked="@item.WildCardSkipAppend"></vc:checkbox-readonly>
+                </td>
+                <td>@item.RedirectType</td>
+                <td>
+                    <button type="submit" class="btn btn-danger"
+                            asp-page-handler="delete" asp-route-id="@item.Id">
+                        <span data-feather="trash-2"></span> delete
+                    </button>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>
