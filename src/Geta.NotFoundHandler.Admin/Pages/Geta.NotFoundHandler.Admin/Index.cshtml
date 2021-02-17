@@ -1,6 +1,4 @@
 ﻿@page
 @model Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin.IndexModel
-@{
-}
 
-<h1>Not Found Handler</h1>
+@await Component.InvokeAsync("Card", new { message = "Hello from page!" })
