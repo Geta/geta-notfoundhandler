@@ -34,6 +34,7 @@ namespace Geta.NotFoundHandler.Data
                 Create(entity);
                 return;
             }
+
             Update(entity);
         }
 
@@ -45,19 +46,24 @@ namespace Geta.NotFoundHandler.Data
                                     (@id, @oldurl, @newurl, @state, @wildcardskipappend, @redirectType)";
 
             ExecuteNonQuery(() =>
-                CreateCommand(
-                    sqlCommand,
-                    CreateGuidParameter("id", Guid.NewGuid()),
-                    CreateStringParameter("oldurl", entity.OldUrl),
-                    CreateStringParameter("newurl", entity.NewUrl),
-                    CreateIntParameter("state", entity.State),
-                    CreateBoolParameter("wildcardskipappend", entity.WildCardSkipAppend),
-                    CreateIntParameter("redirectType", (int)entity.RedirectType)),
-                    "An error occurred while creating a redirect.");
+                                CreateCommand(
+                                    sqlCommand,
+                                    CreateGuidParameter("id", Guid.NewGuid()),
+                                    CreateStringParameter("oldurl", entity.OldUrl),
+                                    CreateStringParameter("newurl", entity.NewUrl),
+                                    CreateIntParameter("state", entity.State),
+                                    CreateBoolParameter("wildcardskipappend", entity.WildCardSkipAppend),
+                                    CreateIntParameter("redirectType", (int)entity.RedirectType)),
+                            "An error occurred while creating a redirect.");
         }
 
         private void Update(CustomRedirect entity)
         {
+            if (!entity.Id.HasValue)
+            {
+                throw new ArgumentException($"{nameof(entity.Id)} is null. Update requires a valid {nameof(entity.Id)} value.");
+            }
+
             var sqlCommand = $@"UPDATE {RedirectsTable}
                                     SET OldUrl = @oldurl
                                         ,NewUrl = @newurl
@@ -67,27 +73,32 @@ namespace Geta.NotFoundHandler.Data
                                     WHERE Id = @id";
 
             ExecuteNonQuery(() =>
-                CreateCommand(
-                    sqlCommand,
-                    CreateGuidParameter("id", entity.Id.ExternalId),
-                    CreateStringParameter("oldurl", entity.OldUrl),
-                    CreateStringParameter("newurl", entity.NewUrl),
-                    CreateIntParameter("state", entity.State),
-                    CreateBoolParameter("wildcardskipappend", entity.WildCardSkipAppend),
-                    CreateIntParameter("redirectType", (int)entity.RedirectType)),
-                    "An error occurred while updating a redirect.");
+                                CreateCommand(
+                                    sqlCommand,
+                                    CreateGuidParameter("id", entity.Id.Value),
+                                    CreateStringParameter("oldurl", entity.OldUrl),
+                                    CreateStringParameter("newurl", entity.NewUrl),
+                                    CreateIntParameter("state", entity.State),
+                                    CreateBoolParameter("wildcardskipappend", entity.WildCardSkipAppend),
+                                    CreateIntParameter("redirectType", (int)entity.RedirectType)),
+                            "An error occurred while updating a redirect.");
         }
 
         public void Delete(CustomRedirect entity)
         {
+            if (!entity.Id.HasValue)
+            {
+                throw new ArgumentException($"{nameof(entity.Id)} is null. Delete requires a valid {nameof(entity.Id)} value.");
+            }
+
             var sqlCommand = $@"DELETE FROM {RedirectsTable}
                                     WHERE Id = @id";
 
             ExecuteNonQuery(() =>
-                CreateCommand(
-                    sqlCommand,
-                    CreateGuidParameter("id", entity.Id.ExternalId)),
-                    "An error occurred while deleting a redirect.");
+                                CreateCommand(
+                                    sqlCommand,
+                                    CreateGuidParameter("id", entity.Id.Value)),
+                            "An error occurred while deleting a redirect.");
         }
 
         public CustomRedirect GetByOldUrl(string oldUrl)
@@ -96,9 +107,9 @@ namespace Geta.NotFoundHandler.Data
                                     WHERE OldUrl = @oldurl";
 
             return ExecuteQuery(() =>
-                CreateCommand(
-                    sqlCommand,
-                    CreateStringParameter("oldurl", oldUrl)))
+                                    CreateCommand(
+                                        sqlCommand,
+                                        CreateStringParameter("oldurl", oldUrl)))
                 .FirstOrDefault();
         }
 
@@ -115,9 +126,9 @@ namespace Geta.NotFoundHandler.Data
                                     WHERE State = @state";
 
             return ExecuteQuery(() =>
-                CreateCommand(
-                    sqlCommand,
-                    CreateIntParameter("state", (int)state)));
+                                    CreateCommand(
+                                        sqlCommand,
+                                        CreateIntParameter("state", (int)state)));
         }
 
         public IEnumerable<CustomRedirect> Find(string searchText)
@@ -127,9 +138,9 @@ namespace Geta.NotFoundHandler.Data
                                     OR NewUrl like '%' + @searchText + '%'";
 
             return ExecuteQuery(() =>
-                CreateCommand(
-                    sqlCommand,
-                    CreateStringParameter("searchText", searchText)));
+                                    CreateCommand(
+                                        sqlCommand,
+                                        CreateStringParameter("searchText", searchText)));
         }
 
         private static CustomRedirect ToCustomRedirect(DataRow x)
@@ -138,11 +149,7 @@ namespace Geta.NotFoundHandler.Data
                 x.Field<string>("OldUrl"),
                 x.Field<string>("NewUrl"),
                 x.Field<bool>("WildCardSkipAppend"),
-                x.Field<RedirectType>("RedirectType"))
-            {
-                Id = Identity.NewIdentity(x.Field<Guid>("Id")),
-                State = x.Field<int>("State")
-            };
+                x.Field<RedirectType>("RedirectType")) { Id = x.Field<Guid>("Id"), State = x.Field<int>("State") };
         }
 
         private DbParameter CreateGuidParameter(string name, Guid value)
@@ -175,6 +182,7 @@ namespace Geta.NotFoundHandler.Data
             {
                 command.Parameters.Add(parameter);
             }
+
             command.CommandText = sqlCommand;
             command.CommandType = CommandType.Text;
             return command;

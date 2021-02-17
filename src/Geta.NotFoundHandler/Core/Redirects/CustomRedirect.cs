@@ -1,7 +1,7 @@
 // Copyright (c) Geta Digital. All rights reserved.
 // Licensed under Apache-2.0. See the LICENSE file in the project root for more information
 
-using EPiServer.Data;
+using System;
 
 namespace Geta.NotFoundHandler.Core.Redirects
 {
@@ -54,7 +54,7 @@ namespace Geta.NotFoundHandler.Core.Redirects
             return OldUrl != null ? OldUrl.GetHashCode() : 0;
         }
 
-        public Identity Id { get; set; }
+        public Guid? Id { get; set; }
 
         public CustomRedirect()
         {
