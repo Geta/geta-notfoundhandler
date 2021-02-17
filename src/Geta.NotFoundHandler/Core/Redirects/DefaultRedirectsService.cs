@@ -95,5 +95,14 @@ namespace Geta.NotFoundHandler.Core.Redirects
             }
             return ignoredRedirects.Count;
         }
+
+        public void Delete(Guid id)
+        {
+            var match = _redirectLoader.Get(id);
+            if (match != null)
+            {
+                _repository.Delete(match);
+            }
+        }
     }
 }

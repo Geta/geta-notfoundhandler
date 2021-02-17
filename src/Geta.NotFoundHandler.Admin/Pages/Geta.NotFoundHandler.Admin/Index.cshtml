@@ -1,44 +1,64 @@
 ﻿@page
+@using Geta.NotFoundHandler.Core.Redirects
 @model Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin.IndexModel
 
 <vc:card message="@Model.Message"></vc:card>
 
-<div class="table-responsive mt-3">
-    <table class="table table-hover table-sm">
-        <thead>
-        <tr>
-            <th>Old URL</th>
-            <th>New URL</th>
-            <th class="col-1">Wildcard</th>
-            <th class="col-1">Redirect Type</th>
-            <th class="col-1"></th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr>
-            <td>1,001</td>
-            <td>random</td>
-            <td>data</td>
-            <td>placeholder</td>
-            <td>text</td>
-        </tr>
-        @foreach (var item in Model.Items)
-        {
+
+<form method="post">
+    <div class="table-responsive mt-3">
+        <table class="table table-hover table-sm">
+            <thead>
             <tr>
-                <td>@item.OldUrl</td>
-                <td>@item.NewUrl</td>
+                <th>Old URL</th>
+                <th>New URL</th>
+                <th class="col-1 text-center">Wildcard</th>
+                <th class="col-1">Redirect Type</th>
+                <th class="col-1"></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
                 <td>
-                    <vc:checkbox-readonly isChecked="@item.WildCardSkipAppend"></vc:checkbox-readonly>
+                    <input type="text" class="form-control" asp-for="CustomRedirect.OldUrl">
                 </td>
-                <td>@item.RedirectType</td>
                 <td>
-                    <button type="submit" class="btn btn-danger"
-                            asp-page-handler="delete" asp-route-id="@item.Id">
-                        <span data-feather="trash-2"></span> delete
+                    <input type="text" class="form-control" asp-for="CustomRedirect.NewUrl">
+                </td>
+                <td class="text-center align-middle">
+                    <input type="checkbox" class="form-check-input" asp-for="CustomRedirect.WildCardSkipAppend">
+                </td>
+                <td>
+                    <select class="form-select" asp-for="CustomRedirect.RedirectType">
+                        <option selected value="@RedirectType.Permanent">@RedirectType.Permanent</option>
+                        <option value="@RedirectType.Temporary">@RedirectType.Temporary</option>
+                    </select>
+                </td>
+                <td class="d-grid gap-2">
+                    <button type="submit" class="btn btn-primary"
+                            asp-page-handler="create">
+                        <span data-feather="plus"></span> add
                     </button>
                 </td>
             </tr>
-        }
-        </tbody>
-    </table>
-</div>
+            @foreach (var item in Model.Items)
+            {
+                <tr>
+                    <td>@item.OldUrl</td>
+                    <td>@item.NewUrl</td>
+                    <td class="text-center align-middle">
+                        <vc:checkbox-readonly isChecked="@item.WildCardSkipAppend"></vc:checkbox-readonly>
+                    </td>
+                    <td>@item.RedirectType</td>
+                    <td class="d-grid gap-2">
+                        <button type="submit" class="btn btn-danger"
+                                asp-page-handler="delete" asp-route-id="@item.Id">
+                            <span data-feather="trash-2"></span> delete
+                        </button>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</form>

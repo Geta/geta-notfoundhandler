@@ -143,6 +143,18 @@ namespace Geta.NotFoundHandler.Data
                                         CreateStringParameter("searchText", searchText)));
         }
 
+        public CustomRedirect Get(Guid id)
+        {
+            var sqlCommand = $@"SELECT {AllFields} FROM {RedirectsTable}
+                                    WHERE Id = @id";
+
+            return ExecuteQuery(() =>
+                                    CreateCommand(
+                                        sqlCommand,
+                                        CreateGuidParameter("id", id)))
+                .FirstOrDefault();
+        }
+
         private static CustomRedirect ToCustomRedirect(DataRow x)
         {
             return new CustomRedirect(
