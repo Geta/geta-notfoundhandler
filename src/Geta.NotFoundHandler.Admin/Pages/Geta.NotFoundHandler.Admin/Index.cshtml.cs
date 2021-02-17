@@ -1,11 +1,8 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin.Models;
 using Geta.NotFoundHandler.Core.Redirects;
-using Geta.NotFoundHandler.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
@@ -28,15 +25,16 @@ namespace Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin
 
         public void OnGet()
         {
-            var redirects = _redirectService.GetSaved().ToList();
-
-            Message = $"There are currently stored {redirects.Count} custom redirects.";
-            Items = redirects;
+            Load();
         }
 
         public IActionResult OnPostCreate()
         {
-            if (!ModelState.IsValid) return RedirectToPage();
+            if (!ModelState.IsValid)
+            {
+                Load();
+                return Page();
+            }
 
             var customRedirect = new CustomRedirect(CustomRedirect.OldUrl,
                                                     CustomRedirect.NewUrl,
@@ -52,6 +50,13 @@ namespace Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin
         {
             _redirectService.Delete(id);
             return RedirectToPage();
+        }
+
+        private void Load()
+        {
+            var redirects = _redirectService.GetSaved().ToList();
+            Message = $"There are currently stored {redirects.Count} custom redirects.";
+            Items = redirects;
         }
     }
 }
