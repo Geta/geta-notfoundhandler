@@ -2,8 +2,7 @@
 @using Geta.NotFoundHandler.Core.Redirects
 @model Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin.IndexModel
 
-<vc:card message="@Model.Message"></vc:card>
-
+@await Component.InvokeAsync("Card", new { message = Model.Message })
 
 <form method="post">
     <div class="table-responsive mt-3">
@@ -51,7 +50,7 @@
                     <td>@item.OldUrl</td>
                     <td>@item.NewUrl</td>
                     <td class="text-center align-middle">
-                        <vc:checkbox-readonly isChecked="@item.WildCardSkipAppend"></vc:checkbox-readonly>
+                        @await Component.InvokeAsync("CheckboxReadonly", new { isChecked = item.WildCardSkipAppend })
                     </td>
                     <td>@item.RedirectType</td>
                     <td>
