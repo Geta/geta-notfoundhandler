@@ -5,6 +5,7 @@ using Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin.Models;
 using Geta.NotFoundHandler.Core.Redirects;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using X.PagedList;
 
 namespace Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin
 {
@@ -18,10 +19,17 @@ namespace Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin
         }
 
         public string Message { get; set; }
-        public IEnumerable<CustomRedirect> Items { get; set; } = new List<CustomRedirect>();
+
+        public IPagedList<CustomRedirect> Items { get; set; } = Enumerable.Empty<CustomRedirect>().ToPagedList();
 
         [BindProperty]
         public CustomRedirectModel CustomRedirect { get; set; }
+
+        [FromQuery(Name = "page")]
+        public int PageNumber { get; set; } = 1;
+
+        [FromQuery(Name = "page-size")]
+        public int PageSize { get; set; } = 50;
 
         public void OnGet()
         {
@@ -55,8 +63,9 @@ namespace Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin
         private void Load()
         {
             var redirects = _redirectService.GetSaved().ToList();
+            var paged = redirects.ToPagedList(PageNumber, PageSize);
             Message = $"There are currently stored {redirects.Count} custom redirects.";
-            Items = redirects;
+            Items = paged;
         }
     }
 }

@@ -1,0 +1,21 @@
+﻿@model Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin.Components.Pager.PagerViewModel
+
+<nav aria-label="Table pagination">
+    <ul class="pagination">
+        <li class="page-item @(Model.HasPreviousPage ? string.Empty : "disabled")">
+            <a class="page-link" href="?page=@Model.PageUrl(Model.PageNumber-1)" aria-label="Previous">
+                <span aria-hidden="true">&laquo;</span>
+            </a>
+        </li>
+
+        @for (int i = 1; i <= Model.PageCount; i++)
+        {
+            <li class="page-item"><a class="page-link" href="@Model.PageUrl(i)">@i</a></li>
+        }
+        <li class="page-item @(Model.HasNextPage ? string.Empty : "disabled")">
+            <a class="page-link" href="?page=@Model.PageUrl(Model.PageNumber+1)" aria-label="Next">
+                <span aria-hidden="true">&raquo;</span>
+            </a>
+        </li>
+    </ul>
+</nav>
