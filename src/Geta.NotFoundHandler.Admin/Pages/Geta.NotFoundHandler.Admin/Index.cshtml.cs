@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin.Models;
 using Geta.NotFoundHandler.Core.Redirects;
@@ -26,7 +27,12 @@ namespace Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin
 
         [BindProperty(SupportsGet = true)]
         public Paging Paging { get; set; }
-        
+
+        [BindProperty(SupportsGet = true, Name = "q")]
+        public string Query { get; set; }
+
+        public bool HasQuery => !string.IsNullOrEmpty(Query);
+
         public void OnGet()
         {
             Load();
@@ -58,9 +64,14 @@ namespace Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin
 
         private void Load()
         {
-            var items = _redirectsService.GetSaved().ToPagedList(Paging.PageNumber, Paging.PageSize);
+            var items = FindRedirects().ToPagedList(Paging.PageNumber, Paging.PageSize);
             Message = $"There are currently stored {items.TotalItemCount} custom redirects.";
             Items = items;
+        }
+
+        private IEnumerable<CustomRedirect> FindRedirects()
+        {
+            return HasQuery ? _redirectsService.Search(Query) : _redirectsService.GetSaved();
         }
     }
 }

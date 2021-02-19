@@ -5,9 +5,14 @@
 @await Component.InvokeAsync("Card", new { message = Model.Message })
 
 <form method="get">
-    <div class="search-container">
-        <input class="form-control w-100" type="text" placeholder="Search" aria-label="Search">
-        <button type="submit" class="btn btn-primary">
+    <div class="search-container input-group flex-nowrap">
+        <input class="form-control w-100 border-end-0" type="text" placeholder="Search" aria-label="Search" id="search" name="q" value="@Model.Query">
+        <span class="input-group-append">
+            <button class="btn btn-outline-secondary border-start-0 border" type="button" data-clear="#search">
+                <span data-feather="x"></span>
+            </button>
+        </span>
+        <button type="submit" class="btn btn-outline-secondary search-button">
             <span data-feather="search"></span> search
         </button>
     </div>

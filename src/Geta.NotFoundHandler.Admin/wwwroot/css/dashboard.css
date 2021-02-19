@@ -88,11 +88,9 @@ body {
  */
 
 .search-container {
-    display: flex;
-    flex-wrap: nowrap;
     margin-top: 15px;
 }
 
-.search-container .btn {
+.search-container .search-button {
     width: 120px;
 }
