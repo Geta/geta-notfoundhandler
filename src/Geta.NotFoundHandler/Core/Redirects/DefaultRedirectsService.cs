@@ -55,6 +55,8 @@ namespace Geta.NotFoundHandler.Core.Redirects
                 redirect.Id = match.Id;
             }
             _repository.Save(redirect);
+
+            CustomRedirectHandler.ClearCache();
         }
 
         public void AddOrUpdate(IEnumerable<CustomRedirect> redirects)
