@@ -4,7 +4,7 @@ using Geta.NotFoundHandler.Core.Redirects;
 
 namespace Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin.Models
 {
-    public class CustomRedirectModel
+    public class RedirectModel
     {
         public Guid? Id { get; set; }
         [Required]

@@ -61,6 +61,17 @@ namespace Geta.NotFoundHandler.Core.Redirects
             CustomRedirectHandler.ClearCache();
         }
 
+        public void AddDeletedRedirect(string oldUrl)
+        {
+            var redirect = new CustomRedirect
+            {
+                OldUrl = oldUrl,
+                NewUrl = string.Empty,
+                State = Convert.ToInt32(RedirectState.Deleted)
+            };
+            AddOrUpdate(redirect, clearCache: true);
+        }
+
         public void DeleteByOldUrl(string oldUrl)
         {
             var match = _redirectLoader.GetByOldUrl(oldUrl);

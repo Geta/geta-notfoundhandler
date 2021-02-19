@@ -15,6 +15,7 @@ namespace Geta.NotFoundHandler.Core.Redirects
         IEnumerable<CustomRedirect> Search(string searchText);
         void AddOrUpdate(CustomRedirect redirect);
         void AddOrUpdate(IEnumerable<CustomRedirect> redirects);
+        void AddDeletedRedirect(string oldUrl);
         void DeleteByOldUrl(string oldUrl);
         int DeleteAll();
         int DeleteAllIgnored();
