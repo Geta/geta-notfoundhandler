@@ -18,34 +18,46 @@
 <div class="container-fluid">
     <div class="row">
         <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
+            @{
+                var pageRoute = ViewContext.RouteData.Values["page"].ToString();
+
+                string Active(string pageName)
+                {
+                    if (pageRoute.Contains($"/{pageName}"))
+                    {
+                        return "active";
+                    }
+                    return string.Empty;
+                }
+            }
             <div class="position-sticky pt-3">
                 <ul class="nav flex-column">
                     <li class="nav-item">
-                        <a class="nav-link active" asp-page="./Index">
+                        <a class="nav-link @Active("Index")" asp-page="./Index">
                             <span data-feather="repeat"></span>
                             Redirects
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" asp-page="./Suggestions">
+                        <a class="nav-link @Active("Suggestions")" asp-page="./Suggestions">
                             <span data-feather="file-text"></span>
                             Suggestions
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" asp-page="./Ignored">
+                        <a class="nav-link @Active("Ignored")" asp-page="./Ignored">
                             <span data-feather="eye-off"></span>
                             Ignored
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" asp-page="./Deleted">
+                        <a class="nav-link @Active("Deleted")" asp-page="./Deleted">
                             <span data-feather="trash"></span>
                             Deleted
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" asp-page="./Administer">
+                        <a class="nav-link @Active("Administer")" asp-page="./Administer">
                             <span data-feather="settings"></span>
                             Administer
                         </a>
