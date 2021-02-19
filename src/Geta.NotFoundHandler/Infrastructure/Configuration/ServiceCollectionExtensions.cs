@@ -1,4 +1,4 @@
-﻿// Copyright (c) Geta Digital. All rights reserved.
+// Copyright (c) Geta Digital. All rights reserved.
 // Licensed under Apache-2.0. See the LICENSE file in the project root for more information
 
 using System;
@@ -30,6 +30,10 @@ namespace Geta.NotFoundHandler.Infrastructure.Configuration
             services.AddTransient<IRedirectsService, DefaultRedirectsService>();
             services.AddTransient<IRepository<CustomRedirect>, SqlRedirectRepository>();
             services.AddTransient<IRedirectLoader, SqlRedirectRepository>();
+
+            services.AddTransient<ISuggestionService, DefaultSuggestionService>();
+            services.AddTransient<IRepository<Suggestion>, SqlSuggestionRepository>();
+            services.AddTransient<ISuggestionLoader, SqlSuggestionRepository>();
 
             var providerOptions = new NotFoundHandlerOptions();
             setupAction(providerOptions);
