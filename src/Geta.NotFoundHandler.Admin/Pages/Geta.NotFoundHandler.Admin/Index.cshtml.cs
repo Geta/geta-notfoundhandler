@@ -10,11 +10,11 @@ namespace Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin
 {
     public class IndexModel : PageModel
     {
-        private readonly IRedirectsService _redirectService;
+        private readonly IRedirectsService _redirectsService;
 
-        public IndexModel(IRedirectsService redirectService)
+        public IndexModel(IRedirectsService redirectsService)
         {
-            _redirectService = redirectService;
+            _redirectsService = redirectsService;
         }
 
         public string Message { get; set; }
@@ -45,20 +45,20 @@ namespace Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin
                                                     CustomRedirect.WildCardSkipAppend,
                                                     CustomRedirect.RedirectType);
 
-            _redirectService.AddOrUpdate(customRedirect);
+            _redirectsService.AddOrUpdate(customRedirect);
 
             return RedirectToPage();
         }
 
         public IActionResult OnPostDelete(Guid id)
         {
-            _redirectService.Delete(id);
+            _redirectsService.Delete(id);
             return RedirectToPage();
         }
 
         private void Load()
         {
-            var items = _redirectService.GetSaved().ToPagedList(Paging.PageNumber, Paging.PageSize);
+            var items = _redirectsService.GetSaved().ToPagedList(Paging.PageNumber, Paging.PageSize);
             Message = $"There are currently stored {items.TotalItemCount} custom redirects.";
             Items = items;
         }
