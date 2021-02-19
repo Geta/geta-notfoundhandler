@@ -19,18 +19,18 @@
             <tbody>
             <tr>
                 <td>
-                    <input type="text" class="form-control" asp-for="CustomRedirect.OldUrl">
-                    <span asp-validation-for="CustomRedirect.OldUrl" class="text-danger"></span>
+                    <input type="text" class="form-control" asp-for="Redirect.OldUrl">
+                    <span asp-validation-for="Redirect.OldUrl" class="text-danger"></span>
                 </td>
                 <td>
-                    <input type="text" class="form-control" asp-for="CustomRedirect.NewUrl">
-                    <span asp-validation-for="CustomRedirect.NewUrl" class="text-danger"></span>
+                    <input type="text" class="form-control" asp-for="Redirect.NewUrl">
+                    <span asp-validation-for="Redirect.NewUrl" class="text-danger"></span>
                 </td>
                 <td class="text-center align-middle">
-                    <input type="checkbox" class="form-check-input" asp-for="CustomRedirect.WildCardSkipAppend">
+                    <input type="checkbox" class="form-check-input" asp-for="Redirect.WildCardSkipAppend">
                 </td>
                 <td>
-                    <select class="form-select" asp-for="CustomRedirect.RedirectType">
+                    <select class="form-select" asp-for="Redirect.RedirectType">
                         <option selected value="@RedirectType.Permanent">@RedirectType.Permanent</option>
                         <option value="@RedirectType.Temporary">@RedirectType.Temporary</option>
                     </select>
@@ -56,7 +56,7 @@
                     <td>
                         <div class="d-grid gap-2">
                             <button type="submit" class="btn btn-danger"
-                                    asp-page-handler="delete" asp-route-id="@item.Id">
+                                    asp-page-handler="delete" asp-route-oldurl="@item.OldUrl">
                                 <span data-feather="trash-2"></span> delete
                             </button>
                         </div>

@@ -22,7 +22,7 @@ namespace Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin
         public IPagedList<CustomRedirect> Items { get; set; } = Enumerable.Empty<CustomRedirect>().ToPagedList();
 
         [BindProperty]
-        public CustomRedirectModel CustomRedirect { get; set; }
+        public RedirectModel Redirect { get; set; }
 
         [BindProperty(SupportsGet = true)]
         public Paging Paging { get; set; }
@@ -40,19 +40,19 @@ namespace Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin
                 return Page();
             }
 
-            var customRedirect = new CustomRedirect(CustomRedirect.OldUrl,
-                                                    CustomRedirect.NewUrl,
-                                                    CustomRedirect.WildCardSkipAppend,
-                                                    CustomRedirect.RedirectType);
+            var customRedirect = new CustomRedirect(Redirect.OldUrl,
+                                                    Redirect.NewUrl,
+                                                    Redirect.WildCardSkipAppend,
+                                                    Redirect.RedirectType);
 
             _redirectsService.AddOrUpdate(customRedirect);
 
             return RedirectToPage();
         }
 
-        public IActionResult OnPostDelete(Guid id)
+        public IActionResult OnPostDelete(string oldUrl)
         {
-            _redirectsService.Delete(id);
+            _redirectsService.DeleteByOldUrl(oldUrl);
             return RedirectToPage();
         }
 
