@@ -23,7 +23,7 @@
                     <form method="post" id="@formId">
                         <input type="hidden" asp-for="Items[i].OldUrl" value="@item.OldUrl">
                     </form>
-                    @item.OldUrl
+                    @item.OldUrl (@item.Count errors)
                 </td>
                 <td>
                     <input type="text" class="form-control" form="@formId" asp-for="Items[i].NewUrl">
@@ -40,8 +40,8 @@
                 <td>
                     <div class="d-grid gap-2">
                         <button type="submit" class="btn btn-danger"
-                                asp-page-handler="delete" asp-route-old-url="@item.OldUrl">
-                            <span data-feather="trash-2"></span> delete
+                                asp-page-handler="ignore" asp-route-old-url="@item.OldUrl">
+                            <span data-feather="eye-off"></span> ignore
                         </button>
                     </div>
                 </td>
