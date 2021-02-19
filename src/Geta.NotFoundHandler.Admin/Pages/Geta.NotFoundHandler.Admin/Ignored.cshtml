@@ -1,0 +1,34 @@
+﻿@page
+@model Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin.IgnoredModel
+
+@await Component.InvokeAsync("Card", new { message = Model.Message })
+
+<form method="post">
+    <div class="table-responsive mt-3">
+        <table class="table table-hover table-sm">
+            <thead>
+            <tr>
+                <th>URL</th>
+                <th class="col-1"></th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (var item in Model.Items)
+            {
+                <tr class="align-middle">
+                    <td>@item.OldUrl</td>
+                    <td>
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-warning"
+                                    asp-page-handler="unignore" asp-route-oldurl="@item.OldUrl">
+                                <span data-feather="eye"></span> unignore
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+        @await Component.InvokeAsync("Pager", new { Model.Items })
+    </div>
+</form>

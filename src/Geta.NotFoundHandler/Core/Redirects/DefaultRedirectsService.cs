@@ -14,7 +14,8 @@ namespace Geta.NotFoundHandler.Core.Redirects
         private readonly IRedirectLoader _redirectLoader;
 
         public DefaultRedirectsService(
-            IRepository<CustomRedirect> repository, IRedirectLoader redirectLoader)
+            IRepository<CustomRedirect> repository,
+            IRedirectLoader redirectLoader)
         {
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
             _redirectLoader = redirectLoader ?? throw new ArgumentNullException(nameof(redirectLoader));
@@ -47,24 +48,17 @@ namespace Geta.NotFoundHandler.Core.Redirects
 
         public void AddOrUpdate(CustomRedirect redirect)
         {
-            var match = _redirectLoader.GetByOldUrl(redirect.OldUrl);
-
-            //if there is a match, replace the value.
-            if (match != null)
-            {
-                redirect.Id = match.Id;
-            }
-            _repository.Save(redirect);
-
-            CustomRedirectHandler.ClearCache();
+            AddOrUpdate(redirect, clearCache: true);
         }
 
         public void AddOrUpdate(IEnumerable<CustomRedirect> redirects)
         {
             foreach (var redirect in redirects)
             {
-                AddOrUpdate(redirect);
+                AddOrUpdate(redirect, clearCache: false);
             }
+
+            CustomRedirectHandler.ClearCache();
         }
 
         public void DeleteByOldUrl(string oldUrl)
@@ -73,6 +67,7 @@ namespace Geta.NotFoundHandler.Core.Redirects
             if (match != null)
             {
                 _repository.Delete(match);
+                CustomRedirectHandler.ClearCache();
             }
         }
 
@@ -84,6 +79,8 @@ namespace Geta.NotFoundHandler.Core.Redirects
             {
                 _repository.Delete(redirect);
             }
+
+            CustomRedirectHandler.ClearCache();
             return redirects.Count;
         }
 
@@ -95,6 +92,8 @@ namespace Geta.NotFoundHandler.Core.Redirects
             {
                 _repository.Delete(redirect);
             }
+
+            CustomRedirectHandler.ClearCache();
             return ignoredRedirects.Count;
         }
 
@@ -104,6 +103,25 @@ namespace Geta.NotFoundHandler.Core.Redirects
             if (match != null)
             {
                 _repository.Delete(match);
+                CustomRedirectHandler.ClearCache();
+            }
+        }
+
+        public void AddOrUpdate(CustomRedirect redirect, bool clearCache)
+        {
+            var match = _redirectLoader.GetByOldUrl(redirect.OldUrl);
+
+            //if there is a match, replace the value.
+            if (match != null)
+            {
+                redirect.Id = match.Id;
+            }
+
+            _repository.Save(redirect);
+
+            if (clearCache)
+            {
+                CustomRedirectHandler.ClearCache();
             }
         }
     }
