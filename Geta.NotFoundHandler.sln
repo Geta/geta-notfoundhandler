@@ -22,7 +22,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Geta.NotFoundHandler.Tests", "tests\Geta.NotFoundHandler.Tests\Geta.NotFoundHandler.Tests.csproj", "{80F6A409-357F-4EF2-BAAF-9603180BF1E1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Geta.NotFoundHandler.Admin", "src\Geta.NotFoundHandler.Admin\Geta.NotFoundHandler.Admin.csproj", "{2265ED23-C9E3-4B8D-B9C1-730FE90F0DED}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Geta.NotFoundHandler.Admin", "src\Geta.NotFoundHandler.Admin\Geta.NotFoundHandler.Admin.csproj", "{2265ED23-C9E3-4B8D-B9C1-730FE90F0DED}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
