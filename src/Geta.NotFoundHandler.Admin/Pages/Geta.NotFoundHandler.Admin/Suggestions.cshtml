@@ -11,6 +11,7 @@
             <th>New URL</th>
             <th class="col-1"></th>
             <th class="col-1"></th>
+            <th class="col-1"></th>
         </tr>
         </thead>
         <tbody>
@@ -18,7 +19,6 @@
         {
             var item = Model.Items[i];
             var formId = $"redirect{i}";
-            var ignoreFormId = $"ignore{i}";
             <tr class="align-middle">
                 <td>
                     <form method="post" id="@formId">
@@ -39,6 +39,50 @@
                     </div>
                 </td>
                 <td>
+                    @{
+                        var referersModalId = $"referers{i}";
+                        var modalTitleId = $"modalTitle{i}";
+                    }
+                    <div class="modal fade" id="@referersModalId" tabindex="-1" aria-labelledby="@modalTitleId" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="@modalTitleId">Referrers</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    @if (item.Referers.Any())
+                                    {
+                                        <ul>
+                                            @foreach (var referer in item.Referers)
+                                            {
+                                                <li class="list-group-item">
+                                                    <a href="@referer.Url" target="_blank">@referer.Url (@referer.Count)</a>
+                                                </li>
+                                            }
+                                        </ul>
+                                    }
+                                    else
+                                    {
+                                        <text>This suggestion does not have any referrers.</text>
+                                    }
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#@referersModalId">
+                            <span data-feather="file-text"></span> referrers (@item.Referers.Count)
+                        </button>
+                    </div>
+                </td>
+                <td>
+                    @{
+                        var ignoreFormId = $"ignore{i}";
+                    }
                     <div class="d-grid gap-2">
                         <form method="post" id="@ignoreFormId">
                             <button type="submit" class="btn btn-danger"

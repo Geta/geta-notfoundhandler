@@ -59,7 +59,8 @@ namespace Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin
             var items = _suggestionService.GetAllSummaries().Select(x => new SuggestionRedirectModel
             {
                 OldUrl = x.OldUrl,
-                Count = x.Count
+                Count = x.Count,
+                Referers = x.Referers
             }).ToPagedList(Paging.PageNumber, Paging.PageSize);
             Message = $"Based on the logged 404 errors, there are {items.TotalItemCount} custom redirect suggestions.";
             Items = items;

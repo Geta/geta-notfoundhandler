@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using Geta.NotFoundHandler.Core.Suggestions;
 
 namespace Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin.Models
 {
@@ -9,5 +11,6 @@ namespace Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin.Models
         [Required]
         public string NewUrl { get; set; }
         public int Count { get; set; }
+        public ICollection<RefererSummary> Referers { get; set; } = new List<RefererSummary>();
     }
 }
