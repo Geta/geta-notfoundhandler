@@ -57,7 +57,14 @@
                                             @foreach (var referer in item.Referers)
                                             {
                                                 <li class="list-group-item">
-                                                    <a href="@referer.Url" target="_blank">@referer.Url (@referer.Count)</a>
+                                                    @if (referer.Unknown)
+                                                    {
+                                                        <text>Unknown (@referer.Count)</text>
+                                                    }
+                                                    else
+                                                    {
+                                                        <a href="@referer.Url" target="_blank">@referer.Url (@referer.Count)</a>
+                                                    }
                                                 </li>
                                             }
                                         </ul>

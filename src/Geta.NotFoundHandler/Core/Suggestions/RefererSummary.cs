@@ -4,5 +4,6 @@ namespace Geta.NotFoundHandler.Core.Suggestions
     {
         public string Url { get; set; }
         public int Count { get; set; }
+        public bool Unknown { get; set; }
     }
 }

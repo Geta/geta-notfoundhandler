@@ -8,8 +8,6 @@ namespace Geta.NotFoundHandler.Data
 {
     public class SqlSuggestionRepository: IRepository<Suggestion>, ISuggestionLoader
     {
-        public static string UnknownReferer = "Unknown referers";
-
         public IEnumerable<SuggestionSummary> GetAllSummaries()
         {
             var summaries = new List<SuggestionSummary>();
@@ -81,7 +79,7 @@ namespace Geta.NotFoundHandler.Data
 
                     referers.Add(new RefererSummary
                     {
-                        Url = UnknownReferer,
+                        Unknown = true,
                         Count = unknownReferers
                     });
                 }
