@@ -4,6 +4,15 @@
 
 @await Component.InvokeAsync("Card", new { message = Model.Message })
 
+<form method="get">
+    <div class="search-container">
+        <input class="form-control w-100" type="text" placeholder="Search" aria-label="Search">
+        <button type="submit" class="btn btn-primary">
+            <span data-feather="search"></span> search
+        </button>
+    </div>
+</form>
+
 <form method="post">
     <div class="table-responsive mt-3">
         <table class="table table-hover table-sm">
