@@ -18,6 +18,7 @@
         {
             var item = Model.Items[i];
             var formId = $"redirect{i}";
+            var ignoreFormId = $"ignore{i}";
             <tr class="align-middle">
                 <td>
                     <form method="post" id="@formId">
@@ -39,10 +40,12 @@
                 </td>
                 <td>
                     <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-danger"
-                                asp-page-handler="ignore" asp-route-old-url="@item.OldUrl">
-                            <span data-feather="eye-off"></span> ignore
-                        </button>
+                        <form method="post" id="@ignoreFormId">
+                            <button type="submit" class="btn btn-danger"
+                                    asp-page-handler="ignore" asp-route-oldurl="@item.OldUrl">
+                                <span data-feather="eye-off"></span> ignore
+                            </button>
+                        </form>
                     </div>
                 </td>
             </tr>

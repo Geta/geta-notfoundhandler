@@ -67,6 +67,12 @@ namespace Geta.NotFoundHandler.Core.Redirects
             RedirectType = redirectType;
         }
 
+        public CustomRedirect(string oldUrl, RedirectState state)
+            :this(oldUrl, string.Empty)
+        {
+            State = Convert.ToInt32(state);
+        }
+
         public CustomRedirect(string oldUrl, string newUrl)
         {
             OldUrl = oldUrl;

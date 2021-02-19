@@ -7,16 +7,13 @@ namespace Geta.NotFoundHandler.Core.Suggestions
     public class DefaultSuggestionService : ISuggestionService
     {
         private readonly ISuggestionLoader _suggestionLoader;
-        private readonly IRepository<Suggestion> _repository;
         private readonly IRedirectsService _redirectsService;
 
         public DefaultSuggestionService(
             ISuggestionLoader suggestionLoader,
-            IRepository<Suggestion> repository,
             IRedirectsService redirectsService)
         {
             _suggestionLoader = suggestionLoader;
-            _repository = repository;
             _redirectsService = redirectsService;
         }
 
@@ -31,13 +28,21 @@ namespace Geta.NotFoundHandler.Core.Suggestions
             DeleteSuggestionsFor(suggestionRedirect.OldUrl);
         }
 
+        public void IgnoreSuggestion(string oldUrl)
+        {
+            SaveIgnoredRedirect(oldUrl);
+            DeleteSuggestionsFor(oldUrl);
+        }
+
+        private void SaveIgnoredRedirect(string oldUrl)
+        {
+            var customRedirect = new CustomRedirect(oldUrl, RedirectState.Ignored);
+            _redirectsService.AddOrUpdate(customRedirect);
+        }
+
         private void SaveRedirect(SuggestionRedirect suggestionRedirect)
         {
-            var customRedirect = new CustomRedirect(suggestionRedirect.OldUrl,
-                                                    suggestionRedirect.NewUrl,
-                                                    false,
-                                                    RedirectType.Permanent);
-
+            var customRedirect = new CustomRedirect(suggestionRedirect.OldUrl, suggestionRedirect.NewUrl);
             _redirectsService.AddOrUpdate(customRedirect);
         }
 

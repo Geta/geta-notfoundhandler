@@ -50,7 +50,7 @@ namespace Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin
             return RedirectToPage();
         }
 
-        public IActionResult OnPostDeleteAsync(Guid id)
+        public IActionResult OnPostDelete(Guid id)
         {
             _redirectService.Delete(id);
             return RedirectToPage();

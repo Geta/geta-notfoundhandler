@@ -6,5 +6,6 @@ namespace Geta.NotFoundHandler.Core.Suggestions
     {
         IEnumerable<SuggestionSummary> GetAllSummaries();
         void AddRedirect(SuggestionRedirect suggestionRedirect);
+        void IgnoreSuggestion(string oldUrl);
     }
 }

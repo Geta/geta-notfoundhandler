@@ -47,6 +47,13 @@ namespace Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin
             return RedirectToPage();
         }
 
+        public IActionResult OnPostIgnore(string oldUrl)
+        {
+            _suggestionService.IgnoreSuggestion(oldUrl);
+
+            return RedirectToPage();
+        }
+
         private void Load()
         {
             var items = _suggestionService.GetAllSummaries().Select(x => new SuggestionRedirectModel
