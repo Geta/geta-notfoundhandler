@@ -34,6 +34,18 @@ namespace Geta.NotFoundHandler.Core.Suggestions
             DeleteSuggestionsFor(oldUrl);
         }
 
+        public void DeleteAll()
+        {
+            var worker = DataAccessBaseEx.GetWorker();
+            worker.DeleteAllSuggestions();
+        }
+
+        public void Delete(int maxErrors, int minimumDays)
+        {
+            var worker = DataAccessBaseEx.GetWorker();
+            worker.DeleteSuggestions(maxErrors, minimumDays);
+        }
+
         private void SaveIgnoredRedirect(string oldUrl)
         {
             var customRedirect = new CustomRedirect(oldUrl, RedirectState.Ignored);

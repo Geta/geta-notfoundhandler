@@ -1,12 +1,14 @@
 ﻿@page
 @model Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin.AdministerModel
 
+@await Component.InvokeAsync("Card", new { message = Model.Message })
+
 <ul class="list-group list-group-flush">
     <li class="list-group-item">
         <form method="post">
             <div class="d-flex w-100 justify-content-between align-items-center">
                 <div>Permanently delete all ignored suggestions</div>
-                <button type="submit" class="btn btn-danger" data-confirm="Are you sure you wish to delete all ignored suggestions?"
+                <button type="submit" class="btn btn-danger administer-button" data-confirm="Are you sure you wish to delete all ignored suggestions?"
                         asp-page-handler="DeleteAllIgnoredSuggestions">
                     <span data-feather="trash-2"></span> delete
                 </button>
@@ -17,7 +19,7 @@
         <form method="post">
             <div class="d-flex w-100 justify-content-between align-items-center">
                 <div>Permanently delete all suggestions</div>
-                <button type="submit" class="btn btn-danger" data-confirm="Are you sure you wish to delete all suggestions?"
+                <button type="submit" class="btn btn-danger administer-button" data-confirm="Are you sure you wish to delete all suggestions?"
                         asp-page-handler="DeleteAllSuggestions">
                     <span data-feather="trash-2"></span> delete
                 </button>
@@ -28,7 +30,7 @@
         <form method="post">
             <div class="d-flex w-100 justify-content-between align-items-center">
                 <div>Permanently delete all custom redirects</div>
-                <button type="submit" class="btn btn-danger" data-confirm="Are you sure you wish to delete all custom redirects?"
+                <button type="submit" class="btn btn-danger administer-button" data-confirm="Are you sure you wish to delete all custom redirects?"
                         asp-page-handler="DeleteAllRedirects">
                     <span data-feather="trash-2"></span> delete
                 </button>
@@ -37,9 +39,19 @@
     </li>
     <li class="list-group-item">
         <form method="post">
-            <div class="d-flex w-100 justify-content-between align-items-center">
-                <div>Permanently delete all suggestions with less than {} error counts and older than {} days</div>
-                <button type="submit" class="btn btn-danger" data-confirm="Are you sure you wish to delete these suggestions?"
+            <div class="d-flex w-100 justify-content-between">
+                <div>
+                    <div class="d-flex w-100 align-items-center">
+                        Permanently delete all suggestions with less than
+                        <input type="text" class="form-control input-number input-inline" asp-for="DeleteSuggestions.MaxErrors" value="@Model.DeleteSuggestions.MaxErrors">
+                        <span asp-validation-for="DeleteSuggestions.MaxErrors" class="text-danger"></span>
+                        error counts and older than
+                        <input type="text" class="form-control input-number input-inline" asp-for="DeleteSuggestions.MinimumDays" value="@Model.DeleteSuggestions.MinimumDays">
+                        <span asp-validation-for="DeleteSuggestions.MinimumDays" class="text-danger"></span>
+                        days
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-danger administer-button" data-confirm="Are you sure you wish to delete these suggestions?"
                         asp-page-handler="DeleteSuggestions">
                     <span data-feather="trash-2"></span> delete
                 </button>
@@ -50,9 +62,9 @@
         <form method="post">
             <div class="d-flex w-100 justify-content-between align-items-center">
                 <div>Import redirects from an XML-file</div>
-                <button type="submit" class="btn btn-danger"
+                <button type="submit" class="btn btn-primary administer-button"
                         asp-page-handler="ImportRedirects">
-                    <span data-feather="trash-2"></span> import
+                    <span data-feather="upload"></span> import
                 </button>
             </div>
         </form>
@@ -61,9 +73,9 @@
         <form method="post">
             <div class="d-flex w-100 justify-content-between align-items-center">
                 <div>Import Deleted(410) urls from a text file</div>
-                <button type="submit" class="btn btn-danger"
+                <button type="submit" class="btn btn-primary administer-button"
                         asp-page-handler="ImportDeletedRedirects">
-                    <span data-feather="trash-2"></span> import
+                    <span data-feather="upload"></span> import
                 </button>
             </div>
         </form>
@@ -72,9 +84,9 @@
         <form method="post">
             <div class="d-flex w-100 justify-content-between align-items-center">
                 <div>Export redirects to an XML-file</div>
-                <button type="submit" class="btn btn-danger"
+                <button type="submit" class="btn btn-primary administer-button"
                         asp-page-handler="ExportRedirects">
-                    <span data-feather="trash-2"></span> export
+                    <span data-feather="download"></span> export
                 </button>
             </div>
         </form>

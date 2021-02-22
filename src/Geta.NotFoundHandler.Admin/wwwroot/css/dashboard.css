@@ -94,3 +94,19 @@ body {
 .search-container .search-button {
     width: 120px;
 }
+
+/*
+ * Form
+ */
+
+.input-number {
+    width: 50px;
+}
+
+.input-inline {
+    margin: 0 5px 0 5px;
+}
+
+.administer-button {
+    width: 120px;
+}
