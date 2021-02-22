@@ -29,6 +29,7 @@
 
                     var message = initiator.getAttribute('data-confirm');
                     if (confirm(message)) {
+                        form.action = initiator.formAction;
                         form.submit();
                     }
                 });

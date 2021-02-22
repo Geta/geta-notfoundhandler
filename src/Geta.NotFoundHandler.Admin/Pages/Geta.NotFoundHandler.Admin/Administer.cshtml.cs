@@ -12,5 +12,40 @@ namespace Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin
         public void OnGet()
         {
         }
+
+        public void OnPostDeleteAllIgnoredSuggestions()
+        {
+            
+        }
+
+        public void OnPostDeleteAllSuggestions()
+        {
+
+        }
+
+        public void OnPostDeleteAllRedirects()
+        {
+
+        }
+
+        public void OnPostDeleteSuggestions()
+        {
+
+        }
+
+        public void OnPostImportRedirects()
+        {
+
+        }
+
+        public void OnPostImportDeletedRedirects()
+        {
+
+        }
+
+        public void OnPostExportRedirects()
+        {
+
+        }
     }
 }
