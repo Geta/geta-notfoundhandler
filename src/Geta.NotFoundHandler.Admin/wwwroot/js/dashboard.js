@@ -19,5 +19,22 @@
         });
     }
 
+    function confirmSubmit() {
+        var initiators = document.querySelectorAll('[data-confirm]');
+        initiators.forEach(function(initiator) {
+            var form = initiator.form;
+            form.addEventListener('submit',
+                function (e) {
+                    e.preventDefault();
+
+                    var message = initiator.getAttribute('data-confirm');
+                    if (confirm(message)) {
+                        form.submit();
+                    }
+                });
+        });
+    }
+
     clearInput();
+    confirmSubmit();
 })()

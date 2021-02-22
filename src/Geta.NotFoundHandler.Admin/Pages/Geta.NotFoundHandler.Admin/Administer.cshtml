@@ -1,4 +1,75 @@
 ﻿@page
 @model Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin.AdministerModel
-@{
-}
+
+<ul class="list-group list-group-flush">
+    <li class="list-group-item">
+        <form method="post">
+            <div class="d-flex w-100 justify-content-between align-items-center">
+                <div>Permanently delete all ignored suggestions</div>
+                <button type="submit" class="btn btn-danger" data-confirm="Are you sure you wish to delete all ignored suggestions?">
+                    <span data-feather="trash-2"></span> delete
+                </button>
+            </div>
+        </form>
+    </li>
+    <li class="list-group-item">
+        <form method="post">
+            <div class="d-flex w-100 justify-content-between align-items-center">
+                <div>Permanently delete all suggestions</div>
+                <button type="submit" class="btn btn-danger" data-confirm="Are you sure you wish to delete all suggestions?">
+                    <span data-feather="trash-2"></span> delete
+                </button>
+            </div>
+        </form>
+    </li>
+    <li class="list-group-item">
+        <form method="post">
+            <div class="d-flex w-100 justify-content-between align-items-center">
+                <div>Permanently delete all custom redirects</div>
+                <button type="submit" class="btn btn-danger" data-confirm="Are you sure you wish to delete all custom redirects?">
+                    <span data-feather="trash-2"></span> delete
+                </button>
+            </div>
+        </form>
+    </li>
+    <li class="list-group-item">
+        <form method="post">
+            <div class="d-flex w-100 justify-content-between align-items-center">
+                <div>Permanently delete all suggestions with less than {} error counts and older than {} days</div>
+                <button type="submit" class="btn btn-danger" data-confirm="Are you sure you wish to delete these suggestions?">
+                    <span data-feather="trash-2"></span> delete
+                </button>
+            </div>
+        </form>
+    </li>
+    <li class="list-group-item">
+        <form method="post">
+            <div class="d-flex w-100 justify-content-between align-items-center">
+                <div>Import redirects from an XML-file</div>
+                <button type="submit" class="btn btn-danger">
+                    <span data-feather="trash-2"></span> import
+                </button>
+            </div>
+        </form>
+    </li>
+    <li class="list-group-item">
+        <form method="post">
+            <div class="d-flex w-100 justify-content-between align-items-center">
+                <div>Import Deleted(410) urls from a text file</div>
+                <button type="submit" class="btn btn-danger">
+                    <span data-feather="trash-2"></span> import
+                </button>
+            </div>
+        </form>
+    </li>
+    <li class="list-group-item">
+        <form method="post">
+            <div class="d-flex w-100 justify-content-between align-items-center">
+                <div>Export redirects to an XML-file</div>
+                <button type="submit" class="btn btn-danger">
+                    <span data-feather="trash-2"></span> export
+                </button>
+            </div>
+        </form>
+    </li>
+</ul>
