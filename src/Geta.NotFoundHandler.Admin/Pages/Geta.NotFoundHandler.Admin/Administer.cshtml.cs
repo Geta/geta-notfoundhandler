@@ -1,3 +1,7 @@
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Xml;
 using Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin.Components.Card;
 using Geta.NotFoundHandler.Core.Redirects;
 using Geta.NotFoundHandler.Core.Suggestions;
@@ -93,9 +97,21 @@ namespace Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin
 
         }
 
-        public void OnPostExportRedirects()
+        public IActionResult OnPostExportRedirects()
         {
+            var redirects = _redirectsService.GetSaved().ToList();
+            var document = new RedirectsXmlParser().Export(redirects);
 
+            var memoryStream = new MemoryStream();
+            var writer = new XmlTextWriter(memoryStream, Encoding.UTF8)
+            {
+                Formatting = Formatting.Indented
+            };
+            document.WriteTo(writer);
+            writer.Flush();
+            memoryStream.Seek(0, SeekOrigin.Begin);
+
+            return File(memoryStream, "text/xml", "customRedirects.xml");
         }
     }
 
