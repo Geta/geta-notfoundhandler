@@ -4,9 +4,9 @@ namespace Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin.Components
 {
     public class CardViewComponent : ViewComponent
     {
-        public IViewComponentResult Invoke(string message)
+        public IViewComponentResult Invoke(string message, CardType cardType)
         {
-            return View(new CardViewModel { Message = message });
+            return View(new CardViewModel { Message = message, CardType = cardType });
         }
     }
 }

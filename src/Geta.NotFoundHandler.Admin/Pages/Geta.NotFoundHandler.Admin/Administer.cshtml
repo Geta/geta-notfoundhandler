@@ -1,7 +1,7 @@
 ﻿@page
 @model Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin.AdministerModel
 
-@await Component.InvokeAsync("Card", new { message = Model.Message })
+@await Component.InvokeAsync("Card", new { message = Model.Message, cardType = Model.CardType })
 
 <ul class="list-group list-group-flush">
     <li class="list-group-item">

@@ -1,3 +1,4 @@
+using Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin.Components.Card;
 using Geta.NotFoundHandler.Core.Redirects;
 using Geta.NotFoundHandler.Core.Suggestions;
 using Microsoft.AspNetCore.Mvc;
@@ -16,7 +17,11 @@ namespace Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin
             _suggestionService = suggestionService;
         }
 
+        [BindProperty(SupportsGet = true)]
         public string Message { get; set; }
+
+        [BindProperty(SupportsGet = true)]
+        public CardType CardType { get; set; }
 
         [BindProperty]
         public DeleteSuggestionsModel DeleteSuggestions { get; set; } = new DeleteSuggestionsModel();
@@ -29,21 +34,38 @@ namespace Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin
         {
             var count = _redirectsService.DeleteAllIgnored();
             Message = $"All {count} ignored suggestions permanently removed";
-            return RedirectToPage();
+            CardType = CardType.Success;
+
+            return RedirectToPage(new {
+                Message,
+                CardType
+            });
         }
 
         public IActionResult OnPostDeleteAllSuggestions()
         {
             _suggestionService.DeleteAll();
             Message = "Suggestions successfully deleted";
-            return RedirectToPage();
+            CardType = CardType.Success;
+
+            return RedirectToPage(new
+            {
+                Message,
+                CardType
+            });
         }
 
         public IActionResult OnPostDeleteAllRedirects()
         {
             _redirectsService.DeleteAll();
             Message = "Redirects successfully deleted";
-            return RedirectToPage();
+            CardType = CardType.Success;
+
+            return RedirectToPage(new
+            {
+                Message,
+                CardType
+            });
         }
 
         public IActionResult OnPostDeleteSuggestions()
@@ -52,8 +74,13 @@ namespace Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin
 
             _suggestionService.Delete(DeleteSuggestions.MaxErrors, DeleteSuggestions.MinimumDays);
             Message = "Suggestions successfully deleted";
+            CardType = CardType.Success;
 
-            return RedirectToPage();
+            return RedirectToPage(new
+            {
+                Message,
+                CardType
+            });
         }
 
         public void OnPostImportRedirects()

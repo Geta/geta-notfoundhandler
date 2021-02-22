@@ -1,7 +1,12 @@
-﻿@model Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin.Components.Card.CardViewModel
+﻿@using Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin.Components.Card
+@model Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin.Components.Card.CardViewModel
 
-<div class="card">
-    <div class="card-body">
-        @Model.Message
+
+@if (Model.HasMessage)
+{
+    <div class="card @Model.CardType.GetCssClass()">
+        <div class="card-body">
+            @Model.Message
+        </div>
     </div>
-</div>
+}
