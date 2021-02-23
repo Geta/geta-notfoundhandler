@@ -59,9 +59,14 @@
         </form>
     </li>
     <li class="list-group-item">
-        <form method="post">
-            <div class="d-flex w-100 justify-content-between align-items-center">
-                <div>Import redirects from an XML-file</div>
+        <form method="post" enctype="multipart/form-data">
+            <div class="d-flex w-100 justify-content-between">
+                <div class="flex-fill">
+                    <div class="d-flex w-100 align-items-center">
+                        Import redirects from an XML-file
+                        <input class="form-control ms-4 input-file" type="file" asp-for="ImportFile" accept=".xml">
+                    </div>
+                </div>
                 <button type="submit" class="btn btn-primary administer-button"
                         asp-page-handler="ImportRedirects">
                     <span data-feather="upload"></span> import
@@ -70,9 +75,14 @@
         </form>
     </li>
     <li class="list-group-item">
-        <form method="post">
-            <div class="d-flex w-100 justify-content-between align-items-center">
-                <div>Import Deleted(410) urls from a text file</div>
+        <form method="post" enctype="multipart/form-data">
+            <div class="d-flex w-100 justify-content-between">
+                <div class="flex-fill">
+                    <div class="d-flex w-100 align-items-center">
+                        Import Deleted(410) urls from a text file
+                        <input class="form-control ms-4 input-file" type="file" asp-for="ImportFile" accept=".txt">
+                    </div>
+                </div>
                 <button type="submit" class="btn btn-primary administer-button"
                         asp-page-handler="ImportDeletedRedirects">
                     <span data-feather="upload"></span> import

@@ -110,3 +110,7 @@ body {
 .administer-button {
     width: 120px;
 }
+
+.input-file {
+    width: 450px;
+}

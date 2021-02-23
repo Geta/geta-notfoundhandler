@@ -5,6 +5,7 @@ namespace Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin.Components
     public enum CardType
     {
         Default,
-        Success
+        Success,
+        Warning
     }
 }
