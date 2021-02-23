@@ -72,9 +72,22 @@ As an alternative or in addition, the configuration can be read from the `appset
 
 The configuration from the `appsettings.json` will override any configuration set in the Startup. Note that you cannot add providers in the `appsetings.json`. All other settings are supported.
 
-You can turn off the redirects by setting `handlerMode` to `Off`.
+Next, initialize NotFound handler in the `Configure` method as the first registration. It will make sure that NotFound handler will catch all 404 errors.
 
-## Logging
+```
+public void Configure(IApplicationBuilder app)
+{
+	app.UseNotFoundHandler();
+
+...
+}
+```
+
+## Settings
+
+**HandlerMode** You can turn off the redirects by setting `HandlerMode` to `Off`. Default is `On`.
+
+### Logging
 Suggestions for NotFound rules require 404 requests to be logged to the database.
 
 Logging of 404 requests is buffered to shield your application from Denial of Service attacks. By default, logging will happen for every 30'th error. You can change this setting in the configuration and set `bufferSize` to `0` to log the errors immediately. This is not recommended as you will be vulnerable to massive logging to your database. You can control how much you would like to log by specifying a threshold value. This value determines how frequently 404 errors are allowed to be logged.
@@ -83,11 +96,11 @@ Logging of 404 requests is buffered to shield your application from Denial of Se
 
 ![](https://raw.githubusercontent.com/Geta/geta-notfoundhandler/master/doc/img/Administer.png)
 
-**logging**: Turn logging `On` or `Off`. Default is `On`
+**Logging**: Turn logging `On` or `Off`. Default is `On`
 
-**bufferSize**: Size of memory buffer to hold 404 requests. Default is 30
+**BufferSize**: Size of memory buffer to hold 404 requests. Default is 30
 
-**threshold**: Average maximum allowed requests per second. Default is 5
+**Threshold**: Average maximum allowed requests per second. Default is 5
 
  * Example 1:
    * bufferSize is set to 100, threshold is set to 10
@@ -100,12 +113,15 @@ Logging of 404 requests is buffered to shield your application from Denial of Se
    
 If the `bufferSize` is set to `0`, the `threshold` value will be ignored, and every request will be logged immediately.
 
-**logWithHostname**: Set to `true` to include hostname in the log. Useful in a multisite environment with several hostnames/domains. Default is `false` 
+**LogWithHostname**: Set to `true` to include hostname in the log. Useful in a multisite environment with several hostnames/domains. Default is `false` 
 
-## Specifying ignored resources
+### Specifying ignored resources
+
+**IgnoredResourceExtensions** 
+
 By default, requests to files with the following extensions will be ignored by the redirect module: `jpg,gif,png,css,js,ico,swf,woff`
 
-If you want to specify this yourself, add `ignoredResourceExtensions` to the configuration.
+If you want to specify this yourself, add `IgnoredResourceExtensions` to the configuration.
 
 ## Restricting access to the Admin UI
 
@@ -124,6 +140,13 @@ If you need more advanced or custom logic to create redirects, you can implement
 1. Create a class that implements `Geta.NotFoundHandler.Core`
 2. In the `public string RewriteUrl(string url)` method, add your custom logic
 3. Register the handler in the configuration.
+
+```
+services.AddNotFoundHandler(o =>
+{
+        o.AddProvider<CustomProductRedirectHandler>();
+});
+```
 
 This is especially useful for rewrites that follow some kind of logic, like checking the querystring for and id or some other value you can use to look up the page.
 
