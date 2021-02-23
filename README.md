@@ -38,9 +38,41 @@ The package can be found in the [EPiServer Nuget Feed](https://nuget.episerver.c
 
 # Configuration
 
+Add the NotFound handler in the Startup.cs in the `ConfigureServices` method. Below is an example with all available configuration you can set.
+
+```
+public void ConfigureServices(IServiceCollection services)
+{
+	services.AddNotFoundHandler(o =>
+	{
+		o.BufferSize = 30;
+		o.ThreshHold = 5;
+		o.HandlerMode = FileNotFoundMode.On;
+		o.IgnoredResourceExtensions = new[] { "jpg", "gif", "png", "css", "js", "ico", "swf", "woff" };
+		o.Logging = LoggerMode.On;
+		o.LogWithHostname = false;
+		o.AddProvider<NullNotFoundHandlerProvider>();
+	});
+
+...
+}
+```
+
+You can call the `AddNotFoundHandler` method without configuration and it will use default settings.
+
+As an alternative or in addition, the configuration can be read from the `appsettings.json`:
+
+```
+"Geta": {
+	"NotFoundHandler": {
+		"BufferSize":  40
+	} 
+}
+```
+
+The configuration from the `appsettings.json` will override any configuration set in the Startup. Note that you cannot add providers in the `appsetings.json`. All other settings are supported.
 
 You can turn off the redirects by setting `handlerMode` to `Off`.
-
 
 ## Logging
 Suggestions for NotFound rules require 404 requests to be logged to the database.
