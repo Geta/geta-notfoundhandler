@@ -3,17 +3,17 @@
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
     <PackageId>Geta.NotFoundHandler</PackageId>
-    <Title>404 Handler for EPiServer</Title>
+    <Title>NotFound Handler for ASP.NET Core and EPiServer</Title>
     <PackageVersion>1.0.0</PackageVersion>
     <Authors>Geta Digital</Authors>
     <Company>Geta Digital</Company>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/Geta/404handler</PackageProjectUrl>
+    <PackageProjectUrl>https://github.com/Geta/geta-notfoundhandler</PackageProjectUrl>
     <PackageIcon>icon.png</PackageIcon>
     <PackageIconUrl>https://cdn.geta.no/opensource/icons/Geta-logo-3.png</PackageIconUrl>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
-    <Description>This library contains a custom 404 handler for your EPiServer project. It will replace the default 404 handler with one that you can change, in order for it to have a more consistent look with the rest of your site. It will also handle more 404 cases than the built-in handler. It also includes a custom redirects feature for editors to add redirects. The 404 handler logs all 404 errors as suggestions and present them in a list in the custom redirect feature, which will allow editors to easily add redirects based on the logged suggestions.</Description>
-    <PackageReleaseNotes>https://github.com/Geta/404handler/blob/master/CHANGELOG.md</PackageReleaseNotes>
+    <Description>This library contains a custom NotFound handler for your ASP.NET Core or EPiServer project. It will replace the default NotFound handler with one that you can change, in order for it to handle more NotFound cases than the built-in handler. It also includes a custom redirects feature for editors to add redirects. The NotFound handler logs all 404 errors as suggestions and present them in a list in the custom redirect feature, which will allow editors to easily add redirects based on the logged suggestions.</Description>
+    <PackageReleaseNotes>https://github.com/Geta/geta-notfoundhandler/blob/master/CHANGELOG.md</PackageReleaseNotes>
     <PackageTags>404 NotFound 404Error Handler Geta Redirect</PackageTags>
     <RepositoryUrl>https://github.com/Geta/geta-notfoundhandler</RepositoryUrl>
   </PropertyGroup>
