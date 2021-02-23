@@ -92,9 +92,40 @@ namespace Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin
             });
         }
 
-        public void OnPostImportRedirects()
+        public IActionResult OnPostImportRedirects()
         {
+            if (ImportFile == null || !ImportFile.IsXml())
+            {
+                Message = "The uploaded file is not a valid XML file. Please upload a valid XML file.";
+                CardType = CardType.Warning;
 
+                return RedirectToPage(new
+                {
+                    Message,
+                    CardType
+                });
+            }
+
+            var parser = new RedirectsXmlParser(ImportFile.OpenReadStream());
+            var redirects = parser.Load();
+
+            if (redirects.Any())
+            {
+                _redirectsService.AddOrUpdate(redirects);
+                Message = $"{redirects.Count()} urls successfully imported.";
+                CardType = CardType.Success;
+            }
+            else
+            {
+                Message = "No redirects could be imported";
+                CardType = CardType.Warning;
+            }
+
+            return RedirectToPage(new
+            {
+                Message,
+                CardType
+            });
         }
 
         public IActionResult OnPostImportDeletedRedirects()
