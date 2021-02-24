@@ -21,7 +21,6 @@ The perfect companion if you're transitioning to your site from another system a
 * Handles partial and "full" URLs and can redirect out of the site by using fully qualified URLs for the "New url" field.
 * Supports wildcard redirects.
 * By using fully qualified URLs in the "Old url" field, they will only apply for that specific site. Editing redirects is done for all sites in the same UI.
-* You need to be authorized to work with the gadget.
 
 # Installation
 
@@ -149,6 +148,35 @@ For details see [Import redirects for 404 handler](https://getadigital.com/blog/
 
 # Custom 404 Page
 
+To setup 404 page, you can use any method ASP.NET Core provides.
+
+One of the simplest solutions is adding a controller and a view for it that would display an error page:
+
+```
+[Route("error")]
+public class ErrorController : Controller
+{
+	[Route("404")]
+	public IActionResult PageNotFound()
+	{
+		return View();
+	}
+}
+```
+
+Then register status code pages in the Startup's `Configure` method before NotFound handler registration:
+
+```
+public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+{
+	app.UseStatusCodePagesWithReExecute("/error/{0}");
+	app.UseNotFoundHandler();
+
+...
+}
+```
+
+Registering before the NotFound handler will make sure that a NotFound handler already checked the error and only those errors that were not handled by NotFound handler will be redirected to the error page.
 
 # Custom Handlers
 If you need more advanced or custom logic to create redirects, you can implement an INotFoundHandler.
