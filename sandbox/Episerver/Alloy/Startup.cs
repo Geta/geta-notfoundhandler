@@ -77,6 +77,7 @@ namespace EPiServer.Templates.Alloy.Mvc
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            app.UseStatusCodePagesWithReExecute("/error/{0}");
             app.UseNotFoundHandler();
 
             if (env.IsDevelopment())
