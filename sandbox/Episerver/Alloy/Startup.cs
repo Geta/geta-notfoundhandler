@@ -13,6 +13,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System.IO;
 using AlloyMvcTemplates;
+using EPiServer.Authorization;
 using Geta.NotFoundHandler.Episerver;
 using Geta.NotFoundHandler.Infrastructure.Configuration;
 using Geta.NotFoundHandler.Infrastructure.Initialization;
@@ -32,7 +33,13 @@ namespace EPiServer.Templates.Alloy.Mvc
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddNotFoundHandler(o => { o.AddProvider<NullNotFoundHandlerProvider>(); });
+            services.AddNotFoundHandler(o =>
+            {
+                o.AddProvider<NullNotFoundHandlerProvider>();
+            }, policy =>
+            {
+                policy.RequireRole(Roles.CmsAdmins);
+            });
             services.AddEpiserverNotFoundHandler();
 
             var dbPath = Path.Combine(_webHostingEnvironment.ContentRootPath, "App_Data\\Alloy.mdf");

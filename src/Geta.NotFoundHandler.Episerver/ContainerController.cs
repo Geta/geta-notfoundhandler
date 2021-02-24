@@ -5,7 +5,7 @@ namespace Geta.NotFoundHandler.Episerver
 {
     public class ContainerController : Controller
     {
-        [Authorize(Policy = Constants.PolicyName)]
+        [Authorize(Policy = Infrastructure.Constants.PolicyName)]
         [HttpGet]
         public IActionResult Index()
         {

@@ -6,6 +6,7 @@ using Geta.NotFoundHandler.Core;
 using Geta.NotFoundHandler.Core.Redirects;
 using Geta.NotFoundHandler.Core.Suggestions;
 using Geta.NotFoundHandler.Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -13,18 +14,29 @@ namespace Geta.NotFoundHandler.Infrastructure.Configuration
 {
     public static class ServiceCollectionExtensions
     {
+        private static readonly Action<AuthorizationPolicyBuilder> DefaultPolicy = p => p.RequireRole("Administrators");
+
         public static IServiceCollection AddNotFoundHandler(this IServiceCollection services)
         {
-            return AddNotFoundHandler(services, o => { });
+            return AddNotFoundHandler(services, o => { }, DefaultPolicy);
         }
 
         public static IServiceCollection AddNotFoundHandler(
             this IServiceCollection services,
             Action<NotFoundHandlerOptions> setupAction)
         {
+            return AddNotFoundHandler(services, o => { }, DefaultPolicy);
+        }
+
+        public static IServiceCollection AddNotFoundHandler(
+            this IServiceCollection services,
+            Action<NotFoundHandlerOptions> setupAction,
+            Action<AuthorizationPolicyBuilder> configurePolicy)
+        {
             services.AddTransient<DataAccessBaseEx>();
             services.AddSingleton<IRequestLogger>(RequestLogger.Instance);
-            services.AddTransient<IRedirectHandler>(_ => CustomRedirectHandler.Current); // Load per-request as it is read from the cache
+            services.AddTransient<IRedirectHandler>(_ => CustomRedirectHandler
+                                                        .Current); // Load per-request as it is read from the cache
             services.AddTransient<RequestHandler>();
 
             services.AddTransient<IRedirectsService, DefaultRedirectsService>();
@@ -46,6 +58,11 @@ namespace Geta.NotFoundHandler.Infrastructure.Configuration
             {
                 setupAction(options);
                 configuration.GetSection("Geta:NotFoundHandler").Bind(options);
+            });
+
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy(Constants.PolicyName, configurePolicy);
             });
 
             return services;
