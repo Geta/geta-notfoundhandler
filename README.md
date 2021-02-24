@@ -11,7 +11,7 @@ The popular NotFound handler for ASP.NET Core and EPiServer, enabling better con
 
 The perfect companion if you're transitioning to your site from another system and cannot keep the URL structure, or plan to do major re-structuring of your content.
 
-![](https://raw.githubusercontent.com/Geta/geta-notfoundhandler/master/images/redirects.png)
+![](images/redirects.png)
 
 ## Features
 
