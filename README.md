@@ -11,7 +11,7 @@ The popular NotFound handler for ASP.NET Core and EPiServer, enabling better con
 
 The perfect companion if you're transitioning to your site from another system and cannot keep the URL structure, or plan to do major re-structuring of your content.
 
-![](https://raw.githubusercontent.com/Geta/geta-notfoundhandler/master/doc/img/Redirects.png)
+![](https://raw.githubusercontent.com/Geta/geta-notfoundhandler/master/images/redirects.png)
 
 ## Features
 
@@ -42,7 +42,7 @@ The package can be found in the [EPiServer Nuget Feed](https://nuget.episerver.c
 # Configuration
 
 Add the NotFound handler in the Startup.cs in the `ConfigureServices` method. Below is an example with all available configuration you can set.
-For Episerver project, also call `AddEpiserverNotFoundHandler`.
+For Episerver project, also call `AddEpiserverNotFoundHandler` - it will add Admin UI in the Episerver admin UI.
 
 ```
 public void ConfigureServices(IServiceCollection services)
