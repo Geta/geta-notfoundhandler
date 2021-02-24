@@ -125,7 +125,17 @@ If you want to specify this yourself, add `IgnoredResourceExtensions` to the con
 
 ## Restricting access to the Admin UI
 
+By default, only users of `Administrators` role can access Admin UI. But you can configure you authorization policy when registrating the NotFound handler.
 
+```
+ services.AddNotFoundHandler(o => { },
+            policy =>
+            {
+                policy.RequireRole("MyRole");
+            });
+```
+
+You can setup any policy rules you want.
 
 ## Import
 
