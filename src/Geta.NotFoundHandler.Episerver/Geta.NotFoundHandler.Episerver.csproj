@@ -3,6 +3,20 @@
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
     <AddRazorSupportForMvc>true</AddRazorSupportForMvc>
+    <PackageId>Geta.NotFoundHandler.Episerver</PackageId>
+    <Title>NotFound handler Admin UI integration EPiServer</Title>
+    <PackageVersion>1.0.0</PackageVersion>
+    <Authors>Geta Digital</Authors>
+    <Company>Geta Digital</Company>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/Geta/geta-notfoundhandler</PackageProjectUrl>
+    <PackageIcon>icon.png</PackageIcon>
+    <PackageIconUrl>https://cdn.geta.no/opensource/icons/Geta-logo-3.png</PackageIconUrl>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <Description>This library contains a NotFound handler Admin user interface integration in an EPiServer project.</Description>
+    <PackageReleaseNotes>https://github.com/Geta/geta-notfoundhandler/blob/master/CHANGELOG.md</PackageReleaseNotes>
+    <PackageTags>404 NotFound 404Error Handler Geta Redirect</PackageTags>
+    <RepositoryUrl>https://github.com/Geta/geta-notfoundhandler</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>
@@ -16,7 +30,9 @@
   <ItemGroup>
     <ProjectReference Include="..\Geta.NotFoundHandler.Admin\Geta.NotFoundHandler.Admin.csproj" />
   </ItemGroup>
-  
 
+  <ItemGroup>
+    <None Include="..\..\images\icon.png" Pack="true" PackagePath="\" />
+  </ItemGroup>
 
 </Project>

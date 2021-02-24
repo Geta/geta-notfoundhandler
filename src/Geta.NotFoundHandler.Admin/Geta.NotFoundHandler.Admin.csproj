@@ -31,4 +31,8 @@
     <ProjectReference Include="..\Geta.NotFoundHandler\Geta.NotFoundHandler.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="..\..\images\icon.png" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
 </Project>
