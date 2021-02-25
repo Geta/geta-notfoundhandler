@@ -16,11 +16,16 @@ namespace Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin
     {
         private readonly IRedirectsService _redirectsService;
         private readonly ISuggestionService _suggestionService;
+        private readonly RedirectsXmlParser _redirectsXmlParser;
 
-        public AdministerModel(IRedirectsService redirectsService, ISuggestionService suggestionService)
+        public AdministerModel(
+            IRedirectsService redirectsService,
+            ISuggestionService suggestionService,
+            RedirectsXmlParser redirectsXmlParser)
         {
             _redirectsService = redirectsService;
             _suggestionService = suggestionService;
+            _redirectsXmlParser = redirectsXmlParser;
         }
 
         [BindProperty(SupportsGet = true)]
@@ -106,8 +111,7 @@ namespace Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin
                 });
             }
 
-            var parser = new RedirectsXmlParser(ImportFile.OpenReadStream());
-            var redirects = parser.Load();
+            var redirects = _redirectsXmlParser.LoadFromStream(ImportFile.OpenReadStream());
 
             if (redirects.Any())
             {
@@ -166,7 +170,7 @@ namespace Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin
         public IActionResult OnPostExportRedirects()
         {
             var redirects = _redirectsService.GetSaved().ToList();
-            var document = new RedirectsXmlParser().Export(redirects);
+            var document = _redirectsXmlParser.Export(redirects);
 
             var memoryStream = new MemoryStream();
             var writer = new XmlTextWriter(memoryStream, Encoding.UTF8)

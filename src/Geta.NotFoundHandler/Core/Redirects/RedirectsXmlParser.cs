@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Xml;
-using EPiServer.Logging;
+using Microsoft.Extensions.Logging;
 
 namespace Geta.NotFoundHandler.Core.Redirects
 {
@@ -14,18 +14,23 @@ namespace Geta.NotFoundHandler.Core.Redirects
     /// </summary>
     public class RedirectsXmlParser
     {
-        private static readonly ILogger Logger = LogManager.GetLogger();
-        private readonly XmlDocument _customRedirectsXmlFile;
+        private readonly ILogger<RedirectsXmlParser> _logger;
+        private XmlDocument _customRedirectsXmlFile;
 
-        private const string Newurl = "new";
-        private const string Oldurl = "old";
-        private const string Skipwildcard = "onWildCardMatchSkipAppend";
+        private const string NewUrl = "new";
+        private const string OldUrl = "old";
+        private const string SkipWildcard = "onWildCardMatchSkipAppend";
         private const string RedirectType = "redirectType";
+
+        public RedirectsXmlParser(ILogger<RedirectsXmlParser> logger)
+        {
+            _logger = logger;
+        }
 
         /// <summary>
         /// Reads the custom redirects information from the specified xml file
         /// </summary>
-        public RedirectsXmlParser(Stream xmlContent)
+        public CustomRedirectCollection LoadFromStream(Stream xmlContent)
         {
             _customRedirectsXmlFile = new XmlDocument();
             if (xmlContent != null)
@@ -39,37 +44,41 @@ namespace Geta.NotFoundHandler.Core.Redirects
                 {
                     InnerXml = "<redirects><urls></urls></redirects>"
                 };
-                Logger.Error("NotFoundHandler: The Custom Redirects file does not exist.");
+                _logger.LogError("NotFoundHandler: The Custom Redirects file does not exist.");
             }
-        }
 
-        public RedirectsXmlParser()
-        {
+            return Load();
         }
 
         /// <summary>
         /// Parses the xml file and reads all redirects.
         /// </summary>
         /// <returns>A collection of CustomRedirect objects</returns>
-        public CustomRedirectCollection Load()
+        private CustomRedirectCollection Load()
         {
-            const string urlpath = "/redirects/urls/url";
+            const string urlPath = "/redirects/urls/url";
 
             var redirects = new CustomRedirectCollection();
 
             // Parse all url nodes
-            var nodes = _customRedirectsXmlFile.SelectNodes(urlpath);
+            var nodes = _customRedirectsXmlFile.SelectNodes(urlPath);
+
+            if (nodes == null) throw new Exception($"Can't find nodes under '{urlPath}'.");
+
             foreach (XmlNode node in nodes)
             {
                 // Each url new url can have several old values
                 // we need to create a redirect object for each pair
-                var newNode = node.SelectSingleNode(Newurl);
+                var newNode = node.SelectSingleNode(NewUrl);
+                var oldNodes = node.SelectNodes(OldUrl);
 
-                var oldNodes = node.SelectNodes(Oldurl);
+                if (newNode == null) throw new Exception($"Can't find node under '{urlPath}/{NewUrl}'.");
+                if (oldNodes == null) throw new Exception($"Can't find nodes under '{urlPath}/{OldUrl}'.");
+
                 foreach (XmlNode oldNode in oldNodes)
                 {
                     var skipWildCardAppend = false;
-                    var skipWildCardAttr = oldNode.Attributes[Skipwildcard];
+                    var skipWildCardAttr = oldNode.Attributes?[SkipWildcard];
                     if (skipWildCardAttr != null)
                     {
                         // If value parsing fails, it will be false by default. We do
@@ -79,7 +88,7 @@ namespace Geta.NotFoundHandler.Core.Redirects
                     }
 
                     var redirectType = Redirects.RedirectType.Permanent;
-                    var redirectTypeAttr = oldNode.Attributes[RedirectType];
+                    var redirectTypeAttr = oldNode.Attributes?[RedirectType];
                     if (redirectTypeAttr != null)
                     {
                         Enum.TryParse(redirectTypeAttr.Value, out redirectType);
@@ -116,11 +125,11 @@ namespace Geta.NotFoundHandler.Core.Redirects
 
                 var urlElement = document.CreateElement(string.Empty, "url", string.Empty);
 
-                var oldElement = document.CreateElement(string.Empty, Oldurl, string.Empty);
+                var oldElement = document.CreateElement(string.Empty, OldUrl, string.Empty);
                 oldElement.AppendChild(document.CreateTextNode(redirect.OldUrl.Trim()));
                 if (redirect.WildCardSkipAppend)
                 {
-                    var wildCardAttribute = document.CreateAttribute(string.Empty, Skipwildcard, string.Empty);
+                    var wildCardAttribute = document.CreateAttribute(string.Empty, SkipWildcard, string.Empty);
                     wildCardAttribute.Value = "true";
                     oldElement.Attributes.Append(wildCardAttribute);
                 }
@@ -129,7 +138,7 @@ namespace Geta.NotFoundHandler.Core.Redirects
                 redirectTypeAttribute.Value = redirect.RedirectType.ToString();
                 oldElement.Attributes.Append(redirectTypeAttribute);
 
-                var newElement = document.CreateElement(string.Empty, Newurl, string.Empty);
+                var newElement = document.CreateElement(string.Empty, NewUrl, string.Empty);
                 newElement.AppendChild(document.CreateTextNode(redirect.NewUrl.Trim()));
 
                 urlElement.AppendChild(oldElement);
