@@ -7,6 +7,7 @@ using Geta.NotFoundHandler.Core.Suggestions;
 using Geta.NotFoundHandler.Infrastructure.Configuration;
 using Geta.NotFoundHandler.Tests.Base;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Xunit;
 
@@ -28,8 +29,9 @@ namespace Geta.NotFoundHandler.Tests
             var options = A.Fake<IOptions<NotFoundHandlerOptions>>();
             _configuration = new NotFoundHandlerOptions();
             A.CallTo(() => options.Value).Returns(_configuration);
+            var logger = A.Fake<ILogger<RequestHandler>>();
             _sut = A.Fake<RequestHandler>(
-                o => o.WithArgumentsForConstructor(new object[] { _redirectHandler, _requestLogger, options })
+                o => o.WithArgumentsForConstructor(new object[] { _redirectHandler, _requestLogger, options, logger })
                     .CallsBaseMethods());
 
             _httpContext = new DefaultHttpContext();
