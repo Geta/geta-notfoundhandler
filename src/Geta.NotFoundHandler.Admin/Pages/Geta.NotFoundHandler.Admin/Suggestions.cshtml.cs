@@ -12,12 +12,10 @@ namespace Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin
     public class SuggestionsModel : PageModel
     {
         private readonly ISuggestionService _suggestionService;
-        private readonly IRedirectsService _redirectsService;
 
-        public SuggestionsModel(ISuggestionService suggestionService, IRedirectsService redirectsService)
+        public SuggestionsModel(ISuggestionService suggestionService)
         {
             _suggestionService = suggestionService;
-            _redirectsService = redirectsService;
         }
 
         public string Message { get; set; }
