@@ -34,15 +34,19 @@ namespace Geta.NotFoundHandler.Infrastructure.Configuration
             Action<AuthorizationPolicyBuilder> configurePolicy)
         {
             services.AddTransient<DataAccessBaseEx>();
-            services.AddSingleton<IRequestLogger>(RequestLogger.Instance);
-            services.AddTransient<IRedirectHandler>(_ => CustomRedirectHandler
-                                                        .Current); // Load per-request as it is read from the cache
+
+            services.AddSingleton<RedirectsInitializer>();
+            services.AddSingleton<CustomRedirectHandler>();
+            services.AddSingleton<IRedirectHandler, CustomRedirectHandler>(s => s.GetRequiredService<CustomRedirectHandler>());
+            services.AddSingleton<RedirectsEvents>();
             services.AddTransient<RequestHandler>();
 
+            services.AddSingleton<Func<IRedirectsService>>(x => x.GetService<IRedirectsService>);
             services.AddTransient<IRedirectsService, DefaultRedirectsService>();
             services.AddTransient<IRepository<CustomRedirect>, SqlRedirectRepository>();
             services.AddTransient<IRedirectLoader, SqlRedirectRepository>();
 
+            services.AddSingleton<IRequestLogger>(RequestLogger.Instance);
             services.AddTransient<ISuggestionService, DefaultSuggestionService>();
             services.AddTransient<IRepository<Suggestion>, SqlSuggestionRepository>();
             services.AddTransient<ISuggestionLoader, SqlSuggestionRepository>();

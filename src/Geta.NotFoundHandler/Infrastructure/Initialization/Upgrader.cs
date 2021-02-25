@@ -1,4 +1,4 @@
-﻿// Copyright (c) Geta Digital. All rights reserved.
+// Copyright (c) Geta Digital. All rights reserved.
 // Licensed under Apache-2.0. See the LICENSE file in the project root for more information
 
 using EPiServer.Logging;
@@ -12,8 +12,6 @@ namespace Geta.NotFoundHandler.Infrastructure.Initialization
         private static readonly ILogger Logger = LogManager.GetLogger();
         private const string SuggestionsTable = "[dbo].[NotFoundHandler.Suggestions]";
         private const string RedirectsTable = "[dbo].[NotFoundHandler.Redirects]";
-
-        public static bool Valid { get; set; }
 
         public static void Start(int version)
         {
@@ -42,10 +40,8 @@ namespace Geta.NotFoundHandler.Infrastructure.Initialization
 
             if (created)
             {
-                created = CreateVersionNumberSp(dba);
+                CreateVersionNumberSp(dba);
             }
-
-            Valid = created;
         }
 
         private static bool CreateRedirectsTable(DataAccessBaseEx dba)
@@ -105,11 +101,7 @@ namespace Geta.NotFoundHandler.Infrastructure.Initialization
         private static void Upgrade()
         {
             var dba = DataAccessBaseEx.GetWorker();
-
-            if (Valid)
-            {
-                UpdateVersionNumber(dba);
-            }
+            UpdateVersionNumber(dba);
         }
 
         private static bool CreateVersionNumberSp(DataAccessBaseEx dba)
@@ -133,7 +125,7 @@ namespace Geta.NotFoundHandler.Infrastructure.Initialization
         {
             var versionSp =
                 $@"ALTER PROCEDURE [dbo].[notfoundhandler_version] AS RETURN {NotFoundHandlerOptions.CurrentDbVersion}";
-            Valid = dba.ExecuteNonQuery(versionSp);
+            dba.ExecuteNonQuery(versionSp);
         }
 
         private static bool TableExists(string tableName, DataAccessBaseEx dba)

@@ -12,13 +12,16 @@ namespace Geta.NotFoundHandler.Core.Redirects
     {
         private readonly IRepository<CustomRedirect> _repository;
         private readonly IRedirectLoader _redirectLoader;
+        private readonly RedirectsEvents _redirectsEvents;
 
         public DefaultRedirectsService(
             IRepository<CustomRedirect> repository,
-            IRedirectLoader redirectLoader)
+            IRedirectLoader redirectLoader,
+            RedirectsEvents redirectsEvents)
         {
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
             _redirectLoader = redirectLoader ?? throw new ArgumentNullException(nameof(redirectLoader));
+            _redirectsEvents = redirectsEvents;
         }
 
         public IEnumerable<CustomRedirect> GetAll()
@@ -48,28 +51,26 @@ namespace Geta.NotFoundHandler.Core.Redirects
 
         public void AddOrUpdate(CustomRedirect redirect)
         {
-            AddOrUpdate(redirect, clearCache: true);
+            AddOrUpdate(redirect, notifyUpdated: true);
         }
 
         public void AddOrUpdate(IEnumerable<CustomRedirect> redirects)
         {
             foreach (var redirect in redirects)
             {
-                AddOrUpdate(redirect, clearCache: false);
+                AddOrUpdate(redirect, notifyUpdated: false);
             }
 
-            CustomRedirectHandler.ClearCache();
+            _redirectsEvents.RedirectsUpdated();
         }
 
         public void AddDeletedRedirect(string oldUrl)
         {
             var redirect = new CustomRedirect
             {
-                OldUrl = oldUrl,
-                NewUrl = string.Empty,
-                State = Convert.ToInt32(RedirectState.Deleted)
+                OldUrl = oldUrl, NewUrl = string.Empty, State = Convert.ToInt32(RedirectState.Deleted)
             };
-            AddOrUpdate(redirect, clearCache: true);
+            AddOrUpdate(redirect, notifyUpdated: true);
         }
 
         public void DeleteByOldUrl(string oldUrl)
@@ -78,7 +79,7 @@ namespace Geta.NotFoundHandler.Core.Redirects
             if (match != null)
             {
                 _repository.Delete(match);
-                CustomRedirectHandler.ClearCache();
+                _redirectsEvents.RedirectsUpdated();
             }
         }
 
@@ -91,7 +92,7 @@ namespace Geta.NotFoundHandler.Core.Redirects
                 _repository.Delete(redirect);
             }
 
-            CustomRedirectHandler.ClearCache();
+            _redirectsEvents.RedirectsUpdated();
             return redirects.Count;
         }
 
@@ -104,7 +105,7 @@ namespace Geta.NotFoundHandler.Core.Redirects
                 _repository.Delete(redirect);
             }
 
-            CustomRedirectHandler.ClearCache();
+            _redirectsEvents.RedirectsUpdated();
             return ignoredRedirects.Count;
         }
 
@@ -114,11 +115,11 @@ namespace Geta.NotFoundHandler.Core.Redirects
             if (match != null)
             {
                 _repository.Delete(match);
-                CustomRedirectHandler.ClearCache();
+                _redirectsEvents.RedirectsUpdated();
             }
         }
 
-        public void AddOrUpdate(CustomRedirect redirect, bool clearCache)
+        public void AddOrUpdate(CustomRedirect redirect, bool notifyUpdated)
         {
             var match = _redirectLoader.GetByOldUrl(redirect.OldUrl);
 
@@ -130,9 +131,9 @@ namespace Geta.NotFoundHandler.Core.Redirects
 
             _repository.Save(redirect);
 
-            if (clearCache)
+            if (notifyUpdated)
             {
-                CustomRedirectHandler.ClearCache();
+                _redirectsEvents.RedirectsUpdated();
             }
         }
     }

@@ -1,8 +1,9 @@
-﻿using EPiServer.Logging;
+using EPiServer.Logging;
 using Geta.NotFoundHandler.Core.Redirects;
 using Geta.NotFoundHandler.Data;
 using Geta.NotFoundHandler.Infrastructure.Configuration;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Geta.NotFoundHandler.Infrastructure.Initialization
 {
@@ -20,14 +21,12 @@ namespace Geta.NotFoundHandler.Infrastructure.Initialization
                 Logger.Debug("Older version found. Version nr. :" + version);
                 Upgrader.Start(version);
             }
-            else
-            {
-                Upgrader.Valid = true;
-            }
-
+            
             // Load all custom redirects into memory
-            // TODO: create better load of the cache (init in a hosted service) https://andrewlock.net/running-async-tasks-on-app-startup-in-asp-net-core-3/
-            var handler = CustomRedirectHandler.Current;
+            var services = app.ApplicationServices;
+
+            var initializer = services.GetRequiredService<RedirectsInitializer>();
+            initializer.Initialize();
 
             app.UseMiddleware<NotFoundHandlerMiddleware>();
 
