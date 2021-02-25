@@ -1,4 +1,4 @@
-﻿// Copyright (c) Geta Digital. All rights reserved.
+// Copyright (c) Geta Digital. All rights reserved.
 // Licensed under Apache-2.0. See the LICENSE file in the project root for more information
 
 using System;
@@ -19,6 +19,7 @@ namespace Geta.NotFoundHandler.Infrastructure.Configuration
 
         public LoggerMode Logging { get; set; } = LoggerMode.On;
         public bool LogWithHostname { get; set; } = false;
+        public string ConnectionString { get; private set; }
 
         private readonly List<Type> _providers = new List<Type>();
         public IEnumerable<Type> Providers => _providers;
@@ -28,6 +29,12 @@ namespace Geta.NotFoundHandler.Infrastructure.Configuration
         {
             var t = typeof(T);
             _providers.Add(t);
+            return this;
+        }
+
+        public NotFoundHandlerOptions UseSqlServer(string connectionString)
+        {
+            ConnectionString = connectionString;
             return this;
         }
     }
