@@ -1,10 +1,7 @@
 // Copyright (c) Geta Digital. All rights reserved.
 // Licensed under Apache-2.0. See the LICENSE file in the project root for more information
 
-using EPiServer.Logging;
 using Geta.NotFoundHandler.Core.Redirects;
-using Geta.NotFoundHandler.Data;
-using Geta.NotFoundHandler.Infrastructure.Configuration;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -12,22 +9,14 @@ namespace Geta.NotFoundHandler.Infrastructure.Initialization
 {
     public static class ApplicationBuilderExtensions
     {
-        private static readonly ILogger Logger = LogManager.GetLogger();
 
         public static IApplicationBuilder UseNotFoundHandler(this IApplicationBuilder app)
         {
-            Logger.Debug("Initializing NotFoundHandler version check");
-            var dba = DataAccessBaseEx.GetWorker();
-            var version = dba.CheckNotFoundHandlerVersion();
-            if (version != NotFoundHandlerOptions.CurrentDbVersion)
-            {
-                Logger.Debug("Older version found. Version nr. :" + version);
-                Upgrader.Start(version);
-            }
-            
-            // Load all custom redirects into memory
             var services = app.ApplicationServices;
 
+            var upgrader = services.GetRequiredService<Upgrader>();
+            upgrader.Start();
+            
             var initializer = services.GetRequiredService<RedirectsInitializer>();
             initializer.Initialize();
 

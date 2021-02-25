@@ -6,6 +6,7 @@ using Geta.NotFoundHandler.Core;
 using Geta.NotFoundHandler.Core.Redirects;
 using Geta.NotFoundHandler.Core.Suggestions;
 using Geta.NotFoundHandler.Data;
+using Geta.NotFoundHandler.Infrastructure.Initialization;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -34,6 +35,8 @@ namespace Geta.NotFoundHandler.Infrastructure.Configuration
             Action<AuthorizationPolicyBuilder> configurePolicy)
         {
             services.AddTransient<DataAccessBaseEx>();
+
+            services.AddTransient<Upgrader>();
 
             services.AddSingleton<RedirectsInitializer>();
             services.AddSingleton<CustomRedirectHandler>();
