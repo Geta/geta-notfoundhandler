@@ -48,7 +48,6 @@ namespace Geta.NotFoundHandler.Infrastructure.Configuration
 
             services.AddSingleton<IRequestLogger>(RequestLogger.Instance);
             services.AddTransient<ISuggestionService, DefaultSuggestionService>();
-            services.AddTransient<IRepository<Suggestion>, SqlSuggestionRepository>();
             services.AddTransient<ISuggestionLoader, SqlSuggestionRepository>();
 
             var providerOptions = new NotFoundHandlerOptions();
