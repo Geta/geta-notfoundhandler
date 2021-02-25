@@ -34,7 +34,7 @@ namespace Geta.NotFoundHandler.Infrastructure.Configuration
             Action<NotFoundHandlerOptions> setupAction,
             Action<AuthorizationPolicyBuilder> configurePolicy)
         {
-            services.AddTransient<DataAccessBaseEx>();
+            services.AddTransient<IDataExecutor, SqlDataExecutor>();
 
             services.AddTransient<Upgrader>();
 

@@ -10,20 +10,23 @@ namespace Geta.NotFoundHandler.Infrastructure.Initialization
     public class Upgrader
     {
         private readonly ILogger<Upgrader> _logger;
+        private readonly IDataExecutor _dataExecutor;
 
         private const string SuggestionsTable = "[dbo].[NotFoundHandler.Suggestions]";
         private const string RedirectsTable = "[dbo].[NotFoundHandler.Redirects]";
 
-        public Upgrader(ILogger<Upgrader> logger)
+        public Upgrader(
+            ILogger<Upgrader> logger,
+            IDataExecutor dataExecutor)
         {
             _logger = logger;
+            _dataExecutor = dataExecutor;
         }
 
         public void Start()
         {
             _logger.LogDebug("Initializing NotFoundHandler version check");
-            var dba = DataAccessBaseEx.GetWorker();
-            var version = dba.CheckNotFoundHandlerVersion();
+            var version = GetVersionNumber();
             if (version == NotFoundHandlerOptions.CurrentDbVersion)
             {
                 return;
@@ -40,27 +43,26 @@ namespace Geta.NotFoundHandler.Infrastructure.Initialization
                 Upgrade();
             }
         }
+
         /// <summary>
         /// Create redirects and suggestions tables and SP for version number
         /// </summary>
         private void Create()
         {
-            var dba = DataAccessBaseEx.GetWorker();
-
-            var created = CreateRedirectsTable(dba);
+            var created = CreateRedirectsTable();
 
             if (created)
             {
-                created = CreateSuggestionsTable(dba);
+                created = CreateSuggestionsTable();
             }
 
             if (created)
             {
-                CreateVersionNumberSp(dba);
+                CreateVersionNumberSp();
             }
         }
 
-        private bool CreateRedirectsTable(DataAccessBaseEx dba)
+        private bool CreateRedirectsTable()
         {
             _logger.LogInformation("Create NotFoundHandler redirects table START");
             var createTableScript = @$"CREATE TABLE {RedirectsTable} (
@@ -72,13 +74,13 @@ namespace Geta.NotFoundHandler.Infrastructure.Initialization
                                         [RedirectType] [int] NOT NULL,
                                         CONSTRAINT [PK_NotFoundHandlerRedirects] PRIMARY KEY CLUSTERED ([Id] ASC) ON [PRIMARY]
                                         ) ON [PRIMARY]";
-            var created = dba.ExecuteNonQuery(createTableScript);
+            var created = _dataExecutor.ExecuteNonQuery(createTableScript);
             _logger.LogInformation("Create NotFoundHandler redirects table END");
 
             return created;
         }
 
-        private bool CreateSuggestionsTable(DataAccessBaseEx dba)
+        private bool CreateSuggestionsTable()
         {
             _logger.LogInformation("Create NotFoundHandler suggestions table START");
             var createTableScript = @$"CREATE TABLE {SuggestionsTable} (
@@ -87,27 +89,28 @@ namespace Geta.NotFoundHandler.Infrastructure.Initialization
                                         [Requested] [datetime] NULL,
                                         [Referer] [nvarchar](2000) NULL
                                         ) ON [PRIMARY]";
-            var created = dba.ExecuteNonQuery(createTableScript);
+            var created = _dataExecutor.ExecuteNonQuery(createTableScript);
             _logger.LogInformation("Create NotFoundHandler suggestions table END");
 
             if (created)
             {
-                created = CreateSuggestionsTableIndex(dba);
+                created = CreateSuggestionsTableIndex();
             }
 
             return created;
         }
 
-        private bool CreateSuggestionsTableIndex(DataAccessBaseEx dba)
+        private bool CreateSuggestionsTableIndex()
         {
             _logger.LogInformation("Create suggestions table clustered index START");
             var clusteredIndex =
                 $"CREATE CLUSTERED INDEX NotFoundHandlerSuggestions_ID ON {SuggestionsTable} (ID)";
 
-            var created = dba.ExecuteNonQuery(clusteredIndex);
+            var created = _dataExecutor.ExecuteNonQuery(clusteredIndex);
             if (!created)
             {
-                _logger.LogError("An error occurred during the creation of the NotFoundHandler redirects clustered index. Canceling.");
+                _logger.LogError(
+                    "An error occurred during the creation of the NotFoundHandler redirects clustered index. Canceling.");
             }
 
             _logger.LogInformation("Create suggestions table clustered index END");
@@ -116,50 +119,56 @@ namespace Geta.NotFoundHandler.Infrastructure.Initialization
 
         private void Upgrade()
         {
-            var dba = DataAccessBaseEx.GetWorker();
-            UpdateVersionNumber(dba);
+            UpdateVersionNumber();
         }
 
-        private void CreateVersionNumberSp(DataAccessBaseEx dba)
+        private void CreateVersionNumberSp()
         {
             _logger.LogInformation("Create NotFoundHandler version SP START");
             var versionSp =
                 $@"CREATE PROCEDURE [dbo].[notfoundhandler_version] AS RETURN {NotFoundHandlerOptions.CurrentDbVersion}";
 
-            var created = dba.ExecuteNonQuery(versionSp);
+            var created = _dataExecutor.ExecuteNonQuery(versionSp);
 
             if (!created)
             {
-                _logger.LogError("An error occurred during the creation of the NotFoundHandler version stored procedure. Canceling.");
+                _logger.LogError(
+                    "An error occurred during the creation of the NotFoundHandler version stored procedure. Canceling.");
             }
 
             _logger.LogInformation("Create NotFoundHandler version SP END");
         }
 
-        private void UpdateVersionNumber(DataAccessBaseEx dba)
+        private int GetVersionNumber()
+        {
+            var sqlCommand = "dbo.notfoundhandler_version";
+            return _dataExecutor.ExecuteStoredProcedure(sqlCommand);
+        }
+
+        private void UpdateVersionNumber()
         {
             var versionSp =
                 $@"ALTER PROCEDURE [dbo].[notfoundhandler_version] AS RETURN {NotFoundHandlerOptions.CurrentDbVersion}";
-            dba.ExecuteNonQuery(versionSp);
+            _dataExecutor.ExecuteNonQuery(versionSp);
         }
 
-        private bool TableExists(string tableName, DataAccessBaseEx dba)
+        private bool TableExists(string tableName)
         {
             var cmd = $@"SELECT *
                  FROM INFORMATION_SCHEMA.TABLES
                  WHERE TABLE_SCHEMA = 'dbo'
                  AND  TABLE_NAME = '{tableName}'";
-            var num = dba.ExecuteScalar(cmd);
+            var num = _dataExecutor.ExecuteScalar(cmd);
             return num != 0;
         }
 
-        private bool ColumnExists(string tableName, string columnName, DataAccessBaseEx dba)
+        private bool ColumnExists(string tableName, string columnName)
         {
             var cmd = $@"SELECT 1
                         FROM sys.columns
                         WHERE Name = '{columnName}'
                         AND  Object_ID = Object_ID(N'dbo.[{tableName}]')";
-            var num = dba.ExecuteScalar(cmd);
+            var num = _dataExecutor.ExecuteScalar(cmd);
             return num != 0;
         }
     }

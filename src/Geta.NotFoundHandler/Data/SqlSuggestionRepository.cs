@@ -9,24 +9,30 @@ using Geta.NotFoundHandler.Core.Suggestions;
 
 namespace Geta.NotFoundHandler.Data
 {
-    public class SqlSuggestionRepository: ISuggestionLoader, ISuggestionRepository
+    public class SqlSuggestionRepository : ISuggestionLoader, ISuggestionRepository
     {
+        private const string SuggestionsTable = "[dbo].[NotFoundHandler.Suggestions]";
+
+        private readonly IDataExecutor _dataExecutor;
+
+        public SqlSuggestionRepository(IDataExecutor dataExecutor)
+        {
+            _dataExecutor = dataExecutor;
+        }
+
         public IEnumerable<SuggestionSummary> GetAllSummaries()
         {
             var summaries = new List<SuggestionSummary>();
-            var dabe = DataAccessBaseEx.GetWorker();
-            using (var allkeys = dabe.GetAllSuggestionCount())
+            using (var allKeys = GetAllSuggestionCount())
             {
-                foreach (DataTable table in allkeys.Tables)
+                foreach (DataTable table in allKeys.Tables)
                 {
                     foreach (DataRow row in table.Rows)
                     {
                         var oldUrl = row[0].ToString();
                         var summary = new SuggestionSummary
                         {
-                            OldUrl = oldUrl,
-                            Count = Convert.ToInt32(row[1]),
-                            Referers = GetReferers(oldUrl).ToList()
+                            OldUrl = oldUrl, Count = Convert.ToInt32(row[1]), Referers = GetReferers(oldUrl).ToList()
                         };
                         summaries.Add(summary);
                     }
@@ -36,12 +42,11 @@ namespace Geta.NotFoundHandler.Data
             return summaries;
         }
 
-        private static IEnumerable<RefererSummary> GetReferers(string url)
+        private IEnumerable<RefererSummary> GetReferers(string url)
         {
-            var dataAccess = DataAccessBaseEx.GetWorker();
             var referers = new List<RefererSummary>();
 
-            using (var referersDs = dataAccess.GetSuggestionReferers(url))
+            using (var referersDs = GetSuggestionReferers(url))
             {
                 var table = referersDs.Tables[0];
                 if (table == null) return referers;
@@ -55,26 +60,17 @@ namespace Geta.NotFoundHandler.Data
                         && !referer.Contains("(null)"))
                     {
                         if (!referer.Contains("://")) referer = referer.Insert(0, "/");
-                        referers.Add(new RefererSummary
-                        {
-                            Url = referer,
-                            Count = count
-                        });
+                        referers.Add(new RefererSummary { Url = referer, Count = count });
                     }
                     else
                     {
                         unknownReferers += count;
                     }
-
                 }
+
                 if (unknownReferers > 0)
                 {
-
-                    referers.Add(new RefererSummary
-                    {
-                        Unknown = true,
-                        Count = unknownReferers
-                    });
+                    referers.Add(new RefererSummary { Unknown = true, Count = unknownReferers });
                 }
             }
 
@@ -83,26 +79,69 @@ namespace Geta.NotFoundHandler.Data
 
         public void DeleteAll()
         {
-            var worker = DataAccessBaseEx.GetWorker();
-            worker.DeleteAllSuggestions();
+            var sqlCommand = $@"delete from {SuggestionsTable}";
+            _dataExecutor.ExecuteNonQuery(sqlCommand);
         }
 
         public void Delete(int maxErrors, int minimumDays)
         {
-            var worker = DataAccessBaseEx.GetWorker();
-            worker.DeleteSuggestions(maxErrors, minimumDays);
+            var sqlCommand = $@"delete from {SuggestionsTable}
+                                                where [OldUrl] in (
+                                                select [OldUrl]
+                                                  from (
+                                                      select [OldUrl]
+                                                      from {SuggestionsTable}
+                                                      Where DATEDIFF(day, [Requested], getdate()) >= {minimumDays}
+                                                      group by [OldUrl]
+                                                      having count(*) <= {maxErrors}
+                                                      ) t
+                                                )";
+            _dataExecutor.ExecuteNonQuery(sqlCommand);
         }
 
         public void DeleteForRequest(string oldUrl)
         {
-            var worker = DataAccessBaseEx.GetWorker();
-            worker.DeleteSuggestionsForRequest(oldUrl);
+            var sqlCommand = $"DELETE FROM {SuggestionsTable} WHERE [OldUrl] = @oldurl";
+            var oldUrlParam = _dataExecutor.CreateParameter("oldurl", DbType.String, 2000);
+            oldUrlParam.Value = oldUrl;
+
+            _dataExecutor.ExecuteNonQuery(sqlCommand, oldUrlParam);
         }
 
         public void Save(string oldUrl, string referer, DateTime requestedOn)
         {
-            var worker = DataAccessBaseEx.GetWorker();
-            worker.LogSuggestionToDb(oldUrl, referer, requestedOn);
+            var sqlCommand = @$"INSERT INTO {SuggestionsTable}
+                                    (Requested, OldUrl, Referer)
+                                    VALUES
+                                    (@requested, @oldurl, @referer)";
+
+            var requestedParam = _dataExecutor.CreateParameter("requested", DbType.DateTime, 0);
+            requestedParam.Value = requestedOn;
+
+            var refererParam = _dataExecutor.CreateParameter("referer", DbType.String, 2000);
+            refererParam.Value = referer ?? string.Empty;
+
+            var oldUrlParam = _dataExecutor.CreateParameter("oldurl", DbType.String, 2000);
+            oldUrlParam.Value = oldUrl;
+
+            _dataExecutor.ExecuteNonQuery(sqlCommand, refererParam, refererParam, oldUrlParam);
+        }
+
+        private DataSet GetAllSuggestionCount()
+        {
+            var sqlCommand =
+                $"SELECT [OldUrl], COUNT(*) as Requests FROM {SuggestionsTable} GROUP BY [OldUrl] order by Requests desc";
+            return _dataExecutor.ExecuteSql(sqlCommand);
+        }
+
+        public DataSet GetSuggestionReferers(string url)
+        {
+            var sqlCommand =
+                $"SELECT [Referer], COUNT(*) as Requests FROM {SuggestionsTable} where [OldUrl] = @oldUrl  GROUP BY [Referer] order by Requests desc";
+            var oldUrlParam = _dataExecutor.CreateParameter("oldUrl", DbType.String, 2000);
+            oldUrlParam.Value = url;
+
+            return _dataExecutor.ExecuteSql(sqlCommand, oldUrlParam);
         }
     }
 }

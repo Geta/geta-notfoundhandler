@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
     <PackageId>Geta.NotFoundHandler</PackageId>
-    <Title>NotFound Handler for ASP.NET Core and EPiServer</Title>
+    <Title>NotFound Handler for ASP.NET Core</Title>
     <PackageVersion>1.0.0</PackageVersion>
     <Authors>Geta Digital</Authors>
     <Company>Geta Digital</Company>
@@ -12,7 +12,7 @@
     <PackageIcon>icon.png</PackageIcon>
     <PackageIconUrl>https://cdn.geta.no/opensource/icons/Geta-logo-3.png</PackageIconUrl>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
-    <Description>This library contains a custom NotFound handler for your ASP.NET Core or EPiServer project. It will replace the default NotFound handler with one that you can change, in order for it to handle more NotFound cases than the built-in handler. It also includes a custom redirects feature for editors to add redirects. The NotFound handler logs all 404 errors as suggestions and present them in a list in the custom redirect feature, which will allow editors to easily add redirects based on the logged suggestions.</Description>
+    <Description>This library contains a custom NotFound handler for your ASP.NET Core project. It will replace the default NotFound handler with one that you can change, in order for it to handle more NotFound cases than the built-in handler. It also includes a custom redirects feature for editors to add redirects. The NotFound handler logs all 404 errors as suggestions and present them in a list in the custom redirect feature, which will allow editors to easily add redirects based on the logged suggestions.</Description>
     <PackageReleaseNotes>https://github.com/Geta/geta-notfoundhandler/blob/master/CHANGELOG.md</PackageReleaseNotes>
     <PackageTags>404 NotFound 404Error Handler Geta Redirect</PackageTags>
     <RepositoryUrl>https://github.com/Geta/geta-notfoundhandler</RepositoryUrl>
