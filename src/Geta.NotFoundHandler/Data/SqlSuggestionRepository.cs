@@ -9,7 +9,7 @@ using Geta.NotFoundHandler.Core.Suggestions;
 
 namespace Geta.NotFoundHandler.Data
 {
-    public class SqlSuggestionRepository: ISuggestionLoader
+    public class SqlSuggestionRepository: ISuggestionLoader, ISuggestionRepository
     {
         public IEnumerable<SuggestionSummary> GetAllSummaries()
         {
@@ -79,6 +79,30 @@ namespace Geta.NotFoundHandler.Data
             }
 
             return referers;
+        }
+
+        public void DeleteAll()
+        {
+            var worker = DataAccessBaseEx.GetWorker();
+            worker.DeleteAllSuggestions();
+        }
+
+        public void Delete(int maxErrors, int minimumDays)
+        {
+            var worker = DataAccessBaseEx.GetWorker();
+            worker.DeleteSuggestions(maxErrors, minimumDays);
+        }
+
+        public void DeleteForRequest(string oldUrl)
+        {
+            var worker = DataAccessBaseEx.GetWorker();
+            worker.DeleteSuggestionsForRequest(oldUrl);
+        }
+
+        public void Save(string oldUrl, string referer, DateTime requestedOn)
+        {
+            var worker = DataAccessBaseEx.GetWorker();
+            worker.LogSuggestionToDb(oldUrl, referer, requestedOn);
         }
     }
 }

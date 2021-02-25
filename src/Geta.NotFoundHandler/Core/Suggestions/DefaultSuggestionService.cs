@@ -11,13 +11,16 @@ namespace Geta.NotFoundHandler.Core.Suggestions
     {
         private readonly ISuggestionLoader _suggestionLoader;
         private readonly IRedirectsService _redirectsService;
+        private readonly ISuggestionRepository _suggestionRepository;
 
         public DefaultSuggestionService(
             ISuggestionLoader suggestionLoader,
-            IRedirectsService redirectsService)
+            IRedirectsService redirectsService,
+            ISuggestionRepository suggestionRepository)
         {
             _suggestionLoader = suggestionLoader;
             _redirectsService = redirectsService;
+            _suggestionRepository = suggestionRepository;
         }
 
         public IEnumerable<SuggestionSummary> GetAllSummaries()
@@ -39,14 +42,12 @@ namespace Geta.NotFoundHandler.Core.Suggestions
 
         public void DeleteAll()
         {
-            var worker = DataAccessBaseEx.GetWorker();
-            worker.DeleteAllSuggestions();
+            _suggestionRepository.DeleteAll();
         }
 
         public void Delete(int maxErrors, int minimumDays)
         {
-            var worker = DataAccessBaseEx.GetWorker();
-            worker.DeleteSuggestions(maxErrors, minimumDays);
+            _suggestionRepository.Delete(maxErrors, minimumDays);
         }
 
         private void SaveIgnoredRedirect(string oldUrl)
@@ -63,8 +64,7 @@ namespace Geta.NotFoundHandler.Core.Suggestions
 
         private void DeleteSuggestionsFor(string oldUrl)
         {
-            var worker = DataAccessBaseEx.GetWorker();
-            worker.DeleteSuggestionsForRequest(oldUrl);
+            _suggestionRepository.DeleteForRequest(oldUrl);
         }
     }
 }

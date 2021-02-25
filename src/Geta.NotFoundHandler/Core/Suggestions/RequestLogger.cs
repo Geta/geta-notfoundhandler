@@ -14,13 +14,16 @@ namespace Geta.NotFoundHandler.Core.Suggestions
     public class RequestLogger : IRequestLogger
     {
         private readonly ILogger<RequestLogger> _logger;
+        private readonly ISuggestionRepository _suggestionRepository;
         private readonly NotFoundHandlerOptions _configuration;
 
         public RequestLogger(
             IOptions<NotFoundHandlerOptions> options,
-            ILogger<RequestLogger> logger)
+            ILogger<RequestLogger> logger,
+            ISuggestionRepository suggestionRepository)
         {
             _logger = logger;
+            _suggestionRepository = suggestionRepository;
             _configuration = options.Value;
         }
 
@@ -60,12 +63,11 @@ namespace Geta.NotFoundHandler.Core.Suggestions
             if ((diff != 0 && bufferSize / diff <= threshold)
                 || bufferSize == 0)
             {
-                var dba = DataAccessBaseEx.GetWorker();
                 while (logEvents.Count > 0)
                 {
                     if (logEvents.TryDequeue(out var logEvent))
                     {
-                        dba.LogSuggestionToDb(logEvent.OldUrl, logEvent.Referer, logEvent.Requested);
+                        _suggestionRepository.Save(logEvent.OldUrl, logEvent.Referer, logEvent.Requested);
                     }
                 }
 
