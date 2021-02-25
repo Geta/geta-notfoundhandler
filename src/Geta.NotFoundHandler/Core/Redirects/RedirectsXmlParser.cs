@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Xml;
 using EPiServer.Logging;
-using EPiServer.ServiceLocation;
 
 namespace Geta.NotFoundHandler.Core.Redirects
 {
@@ -22,10 +21,6 @@ namespace Geta.NotFoundHandler.Core.Redirects
         private const string Oldurl = "old";
         private const string Skipwildcard = "onWildCardMatchSkipAppend";
         private const string RedirectType = "redirectType";
-
-        private IEnumerable<INotFoundHandler> _providers;
-        private IEnumerable<INotFoundHandler> Providers =>
-            _providers ??= ServiceLocator.Current.GetAllInstances<INotFoundHandler>();
 
         /// <summary>
         /// Reads the custom redirects information from the specified xml file
@@ -60,7 +55,7 @@ namespace Geta.NotFoundHandler.Core.Redirects
         {
             const string urlpath = "/redirects/urls/url";
 
-            var redirects = new CustomRedirectCollection(Providers);
+            var redirects = new CustomRedirectCollection();
 
             // Parse all url nodes
             var nodes = _customRedirectsXmlFile.SelectNodes(urlpath);
