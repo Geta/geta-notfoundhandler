@@ -109,16 +109,6 @@ namespace Geta.NotFoundHandler.Core.Redirects
             return ignoredRedirects.Count;
         }
 
-        public void Delete(Guid id)
-        {
-            var match = _redirectLoader.Get(id);
-            if (match != null)
-            {
-                _repository.Delete(match);
-                _redirectsEvents.RedirectsUpdated();
-            }
-        }
-
         public void AddOrUpdate(CustomRedirect redirect, bool notifyUpdated)
         {
             var match = _redirectLoader.GetByOldUrl(redirect.OldUrl);
