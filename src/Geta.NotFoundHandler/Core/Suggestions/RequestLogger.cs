@@ -1,34 +1,32 @@
-﻿// Copyright (c) Geta Digital. All rights reserved.
+// Copyright (c) Geta Digital. All rights reserved.
 // Licensed under Apache-2.0. See the LICENSE file in the project root for more information
 
 using System;
 using System.Collections.Concurrent;
 using System.Linq;
-using EPiServer.Logging;
-using EPiServer.ServiceLocation;
 using Geta.NotFoundHandler.Data;
 using Geta.NotFoundHandler.Infrastructure.Configuration;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Geta.NotFoundHandler.Core.Suggestions
 {
     public class RequestLogger : IRequestLogger
     {
-        public static RequestLogger Instance => InternalInstance;
+        private readonly ILogger<RequestLogger> _logger;
+        private readonly NotFoundHandlerOptions _configuration;
 
-        internal static RequestLogger InternalInstance { get; } = new RequestLogger();
-
-        private NotFoundHandlerOptions _configuration;
-        private NotFoundHandlerOptions Configuration =>
-            _configuration ??= ServiceLocator.Current.GetInstance<IOptions<NotFoundHandlerOptions>>().Value;
-
-        private RequestLogger() { }
-
-        private static readonly ILogger Logger = LogManager.GetLogger();
+        public RequestLogger(
+            IOptions<NotFoundHandlerOptions> options,
+            ILogger<RequestLogger> logger)
+        {
+            _logger = logger;
+            _configuration = options.Value;
+        }
 
         public void LogRequest(string oldUrl, string referer)
         {
-            var bufferSize = Configuration.BufferSize;
+            var bufferSize = _configuration.BufferSize;
             if (LogQueue.Count > 0 && LogQueue.Count >= bufferSize)
             {
                 lock (LogQueue)
@@ -42,18 +40,19 @@ namespace Geta.NotFoundHandler.Core.Suggestions
                     }
                     catch (Exception ex)
                     {
-                        Logger.Error("An error occurred while trying to log 404 errors. ", ex);
+                        _logger.LogError("An error occurred while trying to log 404 errors. ", ex);
                     }
                 }
             }
+
             LogQueue.Enqueue(new LogEvent(oldUrl, DateTime.UtcNow, referer));
         }
 
         private void LogRequests(ConcurrentQueue<LogEvent> logEvents)
         {
-            Logger.Debug("Logging 404 errors to database");
-            var bufferSize = Configuration.BufferSize;
-            var threshold = Configuration.ThreshHold;
+            _logger.LogDebug("Logging 404 errors to database");
+            var bufferSize = _configuration.BufferSize;
+            var threshold = _configuration.ThreshHold;
             var start = logEvents.First().Requested;
             var end = logEvents.Last().Requested;
             var diff = (end - start).Seconds;
@@ -69,11 +68,13 @@ namespace Geta.NotFoundHandler.Core.Suggestions
                         dba.LogSuggestionToDb(logEvent.OldUrl, logEvent.Referer, logEvent.Requested);
                     }
                 }
-                Logger.Debug($"{bufferSize} 404 request(s) has been stored to the database.");
+
+                _logger.LogDebug($"{bufferSize} 404 request(s) has been stored to the database.");
             }
             else
             {
-                Logger.Warning("404 requests have been made too frequents (exceeded the threshold). Requests not logged to database.");
+                _logger.LogWarning(
+                    "404 requests have been made too frequents (exceeded the threshold). Requests not logged to database.");
             }
         }
 

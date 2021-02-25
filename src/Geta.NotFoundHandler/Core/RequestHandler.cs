@@ -3,13 +3,13 @@
 
 using System;
 using System.Linq;
-using EPiServer.Logging;
 using Geta.NotFoundHandler.Core.Redirects;
 using Geta.NotFoundHandler.Core.Suggestions;
 using Geta.NotFoundHandler.Infrastructure.Configuration;
 using Geta.NotFoundHandler.Infrastructure.Web;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Geta.NotFoundHandler.Core
@@ -18,18 +18,19 @@ namespace Geta.NotFoundHandler.Core
     {
         private readonly IRedirectHandler _redirectHandler;
         private readonly IRequestLogger _requestLogger;
+        private readonly ILogger<RequestHandler> _logger;
         private readonly NotFoundHandlerOptions _configuration;
         private const string HandledRequestItemKey = "NotFoundHandler:handled";
-
-        private static readonly ILogger Logger = LogManager.GetLogger();
 
         public RequestHandler(
             IRedirectHandler redirectHandler,
             IRequestLogger requestLogger,
-            IOptions<NotFoundHandlerOptions> options)
+            IOptions<NotFoundHandlerOptions> options,
+            ILogger<RequestHandler> logger)
         {
             _configuration = options.Value;
             _requestLogger = requestLogger ?? throw new ArgumentNullException(nameof(requestLogger));
+            _logger = logger;
             _redirectHandler = redirectHandler ?? throw new ArgumentNullException(nameof(redirectHandler));
         }
 
@@ -184,7 +185,7 @@ namespace Geta.NotFoundHandler.Core
             if (_configuration.IgnoredResourceExtensions.Any(x => x == extension))
             {
                 // Ignoring 404 rewrite of known resource extension
-                Logger.Debug("Ignoring rewrite of '{0}'. '{1}' is a known resource extension", notFoundUri.ToString(), extension);
+                _logger.LogDebug("Ignoring rewrite of '{0}'. '{1}' is a known resource extension", notFoundUri.ToString(), extension);
                 return true;
             }
             return false;
@@ -192,7 +193,7 @@ namespace Geta.NotFoundHandler.Core
 
         private void LogDebug(string message, HttpContext context)
         {
-            Logger.Debug(
+            _logger.LogDebug(
                 $"{{0}}{Environment.NewLine}Request URL: {{1}}{Environment.NewLine}Response status code: {{2}}",
                 message, context?.Request.Path, context?.Response.StatusCode);
         }
