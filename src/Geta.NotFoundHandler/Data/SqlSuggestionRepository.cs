@@ -1,3 +1,6 @@
+// Copyright (c) Geta Digital. All rights reserved.
+// Licensed under Apache-2.0. See the LICENSE file in the project root for more information
+
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -6,7 +9,7 @@ using Geta.NotFoundHandler.Core.Suggestions;
 
 namespace Geta.NotFoundHandler.Data
 {
-    public class SqlSuggestionRepository: IRepository<Suggestion>, ISuggestionLoader
+    public class SqlSuggestionRepository: ISuggestionLoader
     {
         public IEnumerable<SuggestionSummary> GetAllSummaries()
         {
@@ -31,16 +34,6 @@ namespace Geta.NotFoundHandler.Data
             }
 
             return summaries;
-        }
-
-        public void Save(Suggestion entity)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public void Delete(Suggestion entity)
-        {
-            throw new System.NotImplementedException();
         }
 
         private static IEnumerable<RefererSummary> GetReferers(string url)
