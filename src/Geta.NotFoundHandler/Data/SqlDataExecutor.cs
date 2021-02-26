@@ -22,7 +22,7 @@ namespace Geta.NotFoundHandler.Data
             _logger = logger;
         }
 
-        public DataSet ExecuteSql(string sqlCommand, params IDbDataParameter[] parameters)
+        public DataTable ExecuteQuery(string sqlCommand, params IDbDataParameter[] parameters)
         {
             var ds = new DataSet();
             try
@@ -41,7 +41,7 @@ namespace Geta.NotFoundHandler.Data
                     ex);
             }
 
-            return ds;
+            return ds.Tables[0];
         }
 
         public bool ExecuteNonQuery(string sqlCommand, params IDbDataParameter[] parameters)
@@ -115,6 +115,17 @@ namespace Geta.NotFoundHandler.Data
             return value;
         }
 
+        public DbParameter CreateParameter(string parameterName, DbType dbType)
+        {
+            var parameter = new SqlParameter
+            {
+                ParameterName = parameterName,
+                DbType = dbType,
+                Direction = ParameterDirection.Input
+            };
+            return parameter;
+        }
+
         public DbParameter CreateParameter(string parameterName, DbType dbType, int size)
         {
             var parameter = new SqlParameter
@@ -165,10 +176,11 @@ namespace Geta.NotFoundHandler.Data
 
     public interface IDataExecutor
     {
-        DataSet ExecuteSql(string sqlCommand, params IDbDataParameter[] parameters);
+        DataTable ExecuteQuery(string sqlCommand, params IDbDataParameter[] parameters);
         bool ExecuteNonQuery(string sqlCommand, params IDbDataParameter[] parameters);
         int ExecuteScalar(string sqlCommand);
         int ExecuteStoredProcedure(string sqlCommand, int defaultReturnValue = -1);
+        DbParameter CreateParameter(string parameterName, DbType dbType);
         DbParameter CreateParameter(string parameterName, DbType dbType, int size);
     }
 

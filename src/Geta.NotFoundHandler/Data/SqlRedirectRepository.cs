@@ -6,25 +6,21 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Linq;
-using EPiServer.Data;
-using EPiServer.Logging;
 using Geta.NotFoundHandler.Core.Redirects;
 
 namespace Geta.NotFoundHandler.Data
 {
     public class SqlRedirectRepository : IRepository<CustomRedirect>, IRedirectLoader
     {
-        private static readonly ILogger Logger = LogManager.GetLogger();
-
-        private readonly IDatabaseExecutor _executor;
+        private readonly IDataExecutor _dataExecutor;
 
         private const string RedirectsTable = "[dbo].[NotFoundHandler.Redirects]";
 
         private const string AllFields = "Id, OldUrl, NewUrl, State, WildCardSkipAppend, RedirectType";
 
-        public SqlRedirectRepository(IDatabaseExecutor executor)
+        public SqlRedirectRepository(IDataExecutor dataExecutor)
         {
-            _executor = executor ?? throw new ArgumentNullException(nameof(executor));
+            _dataExecutor = dataExecutor;
         }
 
         public void Save(CustomRedirect entity)
@@ -45,16 +41,14 @@ namespace Geta.NotFoundHandler.Data
                                     VALUES
                                     (@id, @oldurl, @newurl, @state, @wildcardskipappend, @redirectType)";
 
-            ExecuteNonQuery(() =>
-                                CreateCommand(
-                                    sqlCommand,
-                                    CreateGuidParameter("id", Guid.NewGuid()),
-                                    CreateStringParameter("oldurl", entity.OldUrl),
-                                    CreateStringParameter("newurl", entity.NewUrl),
-                                    CreateIntParameter("state", entity.State),
-                                    CreateBoolParameter("wildcardskipappend", entity.WildCardSkipAppend),
-                                    CreateIntParameter("redirectType", (int)entity.RedirectType)),
-                            "An error occurred while creating a redirect.");
+            _dataExecutor.ExecuteNonQuery(
+                sqlCommand,
+                CreateGuidParameter("id", Guid.NewGuid()),
+                CreateStringParameter("oldurl", entity.OldUrl),
+                CreateStringParameter("newurl", entity.NewUrl),
+                CreateIntParameter("state", entity.State),
+                CreateBoolParameter("wildcardskipappend", entity.WildCardSkipAppend),
+                CreateIntParameter("redirectType", (int)entity.RedirectType));
         }
 
         private void Update(CustomRedirect entity)
@@ -72,16 +66,14 @@ namespace Geta.NotFoundHandler.Data
                                         ,RedirectType = @redirectType
                                     WHERE Id = @id";
 
-            ExecuteNonQuery(() =>
-                                CreateCommand(
-                                    sqlCommand,
-                                    CreateGuidParameter("id", entity.Id.Value),
-                                    CreateStringParameter("oldurl", entity.OldUrl),
-                                    CreateStringParameter("newurl", entity.NewUrl),
-                                    CreateIntParameter("state", entity.State),
-                                    CreateBoolParameter("wildcardskipappend", entity.WildCardSkipAppend),
-                                    CreateIntParameter("redirectType", (int)entity.RedirectType)),
-                            "An error occurred while updating a redirect.");
+            _dataExecutor.ExecuteNonQuery(
+                sqlCommand,
+                CreateGuidParameter("id", entity.Id.Value),
+                CreateStringParameter("oldurl", entity.OldUrl),
+                CreateStringParameter("newurl", entity.NewUrl),
+                CreateIntParameter("state", entity.State),
+                CreateBoolParameter("wildcardskipappend", entity.WildCardSkipAppend),
+                CreateIntParameter("redirectType", (int)entity.RedirectType));
         }
 
         public void Delete(CustomRedirect entity)
@@ -94,11 +86,9 @@ namespace Geta.NotFoundHandler.Data
             var sqlCommand = $@"DELETE FROM {RedirectsTable}
                                     WHERE Id = @id";
 
-            ExecuteNonQuery(() =>
-                                CreateCommand(
-                                    sqlCommand,
-                                    CreateGuidParameter("id", entity.Id.Value)),
-                            "An error occurred while deleting a redirect.");
+            _dataExecutor.ExecuteNonQuery(
+                sqlCommand,
+                CreateGuidParameter("id", entity.Id.Value));
         }
 
         public CustomRedirect GetByOldUrl(string oldUrl)
@@ -106,18 +96,20 @@ namespace Geta.NotFoundHandler.Data
             var sqlCommand = $@"SELECT {AllFields} FROM {RedirectsTable}
                                     WHERE OldUrl = @oldurl";
 
-            return ExecuteQuery(() =>
-                                    CreateCommand(
-                                        sqlCommand,
-                                        CreateStringParameter("oldurl", oldUrl)))
-                .FirstOrDefault();
+            var dataTable = _dataExecutor.ExecuteQuery(
+                sqlCommand,
+                CreateStringParameter("oldurl", oldUrl));
+
+            return ToCustomRedirects(dataTable).FirstOrDefault();
         }
 
         public IEnumerable<CustomRedirect> GetAll()
         {
             var sqlCommand = $@"SELECT {AllFields} FROM {RedirectsTable}";
 
-            return ExecuteQuery(() => CreateCommand(sqlCommand));
+            var dataTable = _dataExecutor.ExecuteQuery(sqlCommand);
+
+            return ToCustomRedirects(dataTable);
         }
 
         public IEnumerable<CustomRedirect> GetByState(RedirectState state)
@@ -125,10 +117,11 @@ namespace Geta.NotFoundHandler.Data
             var sqlCommand = $@"SELECT {AllFields} FROM {RedirectsTable}
                                     WHERE State = @state";
 
-            return ExecuteQuery(() =>
-                                    CreateCommand(
-                                        sqlCommand,
-                                        CreateIntParameter("state", (int)state)));
+            var dataTable = _dataExecutor.ExecuteQuery(
+                sqlCommand,
+                CreateIntParameter("state", (int)state));
+
+            return ToCustomRedirects(dataTable);
         }
 
         public IEnumerable<CustomRedirect> Find(string searchText)
@@ -137,10 +130,11 @@ namespace Geta.NotFoundHandler.Data
                                     WHERE OldUrl like '%' + @searchText + '%'
                                     OR NewUrl like '%' + @searchText + '%'";
 
-            return ExecuteQuery(() =>
-                                    CreateCommand(
-                                        sqlCommand,
-                                        CreateStringParameter("searchText", searchText)));
+            var dataTable = _dataExecutor.ExecuteQuery(
+                sqlCommand,
+                CreateStringParameter("searchText", searchText));
+
+            return ToCustomRedirects(dataTable);
         }
 
         public CustomRedirect Get(Guid id)
@@ -148,11 +142,16 @@ namespace Geta.NotFoundHandler.Data
             var sqlCommand = $@"SELECT {AllFields} FROM {RedirectsTable}
                                     WHERE Id = @id";
 
-            return ExecuteQuery(() =>
-                                    CreateCommand(
-                                        sqlCommand,
-                                        CreateGuidParameter("id", id)))
-                .FirstOrDefault();
+            var dataTable = _dataExecutor.ExecuteQuery(
+                sqlCommand,
+                CreateGuidParameter("id", id));
+
+            return ToCustomRedirects(dataTable).FirstOrDefault();
+        }
+
+        private static IEnumerable<CustomRedirect> ToCustomRedirects(DataTable table)
+        {
+            return table.AsEnumerable().Select(ToCustomRedirect);
         }
 
         private static CustomRedirect ToCustomRedirect(DataRow x)
@@ -166,90 +165,30 @@ namespace Geta.NotFoundHandler.Data
 
         private DbParameter CreateGuidParameter(string name, Guid value)
         {
-            return _executor.CreateParameter(name, DbType.Guid, ParameterDirection.Input, value);
+            var parameter = _dataExecutor.CreateParameter(name, DbType.Guid);
+            parameter.Value = value;
+            return parameter;
         }
 
         private DbParameter CreateStringParameter(string name, string value)
         {
-            var param = _executor.CreateParameter(name, DbType.String, ParameterDirection.Input, value);
-            param.Size = 2000;
-            return param;
+            var parameter = _dataExecutor.CreateParameter(name, DbType.String, 2000);
+            parameter.Value = value;
+            return parameter;
         }
 
         private DbParameter CreateIntParameter(string name, int value)
         {
-            return _executor.CreateParameter(name, DbType.Int32, ParameterDirection.Input, value);
+            var parameter = _dataExecutor.CreateParameter(name, DbType.Int32);
+            parameter.Value = value;
+            return parameter;
         }
 
         private DbParameter CreateBoolParameter(string name, bool value)
         {
-            return _executor.CreateParameter(name, DbType.Boolean, ParameterDirection.Input, value);
-        }
-
-        private DbCommand CreateCommand(string sqlCommand, params DbParameter[] parameters)
-        {
-            var command = _executor.CreateCommand();
-
-            foreach (var parameter in parameters)
-            {
-                command.Parameters.Add(parameter);
-            }
-
-            command.CommandText = sqlCommand;
-            command.CommandType = CommandType.Text;
-            return command;
-        }
-
-        private void ExecuteNonQuery(Func<DbCommand> createCommand, string errorMessage)
-        {
-            _executor.Execute(() =>
-            {
-                try
-                {
-                    createCommand().ExecuteNonQuery();
-                }
-                catch (Exception ex)
-                {
-                    Logger.Error(errorMessage, ex);
-                    throw;
-                }
-            });
-        }
-
-        private IEnumerable<CustomRedirect> ExecuteQuery(Func<DbCommand> createCommand)
-        {
-            return _executor.Execute(() =>
-            {
-                try
-                {
-                    return ExecuteEnumerableQuery(createCommand());
-                }
-                catch (Exception ex)
-                {
-                    Logger.Error("An error occurred while retrieving redirects.", ex);
-                    throw;
-                }
-            });
-        }
-
-        private IEnumerable<CustomRedirect> ExecuteEnumerableQuery(DbCommand command)
-        {
-            var table = ExecuteDataTableQuery(command);
-
-            return table
-                .AsEnumerable()
-                .Select(ToCustomRedirect);
-        }
-
-        private DataTable ExecuteDataTableQuery(DbCommand command)
-        {
-            var adapter = _executor.DbFactory.CreateDataAdapter();
-            if (adapter == null) throw new Exception("Unable to create DbDataAdapter");
-
-            adapter.SelectCommand = command;
-            var ds = new DataSet();
-            adapter.Fill(ds);
-            return ds.Tables[0];
+            var parameter = _dataExecutor.CreateParameter(name, DbType.Boolean);
+            parameter.Value = value;
+            return parameter;
         }
     }
 }
