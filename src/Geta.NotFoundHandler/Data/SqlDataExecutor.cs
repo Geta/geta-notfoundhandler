@@ -106,11 +106,11 @@ namespace Geta.NotFoundHandler.Data
             }
             catch (SqlException)
             {
-                _logger.LogInformation("Stored procedure not found. Creating it.");
+                _logger.LogInformation("Stored procedure not found.");
             }
             catch (Exception ex)
             {
-                _logger.LogError("Error during NotFoundHandler version check", ex);
+                _logger.LogError("Error while running stored procedure.", ex);
             }
             return value;
         }
