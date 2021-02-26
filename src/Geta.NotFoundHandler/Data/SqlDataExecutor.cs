@@ -157,7 +157,8 @@ namespace Geta.NotFoundHandler.Data
 
         private SqlCommand CreateCommand(SqlConnection connection, string sqlCommand, params IDbDataParameter[] parameters)
         {
-            var command = connection.CreateCommand(sqlCommand);
+            var command = connection.CreateCommand();
+            command.CommandText = sqlCommand;
 
             if (parameters != null)
             {
@@ -170,26 +171,6 @@ namespace Geta.NotFoundHandler.Data
 
             command.CommandType = CommandType.Text;
 
-            return command;
-        }
-    }
-
-    public interface IDataExecutor
-    {
-        DataTable ExecuteQuery(string sqlCommand, params IDbDataParameter[] parameters);
-        bool ExecuteNonQuery(string sqlCommand, params IDbDataParameter[] parameters);
-        int ExecuteScalar(string sqlCommand);
-        int ExecuteStoredProcedure(string sqlCommand, int defaultReturnValue = -1);
-        DbParameter CreateParameter(string parameterName, DbType dbType);
-        DbParameter CreateParameter(string parameterName, DbType dbType, int size);
-    }
-
-    public static class SqlConnectionExtensions
-    {
-        public static SqlCommand CreateCommand(this SqlConnection connection, string cmdText)
-        {
-            var command = connection.CreateCommand();
-            command.CommandText = cmdText;
             return command;
         }
     }
