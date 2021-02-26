@@ -17,11 +17,6 @@ namespace Geta.NotFoundHandler.Infrastructure.Configuration
     {
         private static readonly Action<AuthorizationPolicyBuilder> DefaultPolicy = p => p.RequireRole("Administrators");
 
-        public static IServiceCollection AddNotFoundHandler(this IServiceCollection services)
-        {
-            return AddNotFoundHandler(services, o => { }, DefaultPolicy);
-        }
-
         public static IServiceCollection AddNotFoundHandler(
             this IServiceCollection services,
             Action<NotFoundHandlerOptions> setupAction)
