@@ -46,16 +46,18 @@ For Episerver project, also call `AddEpiserverNotFoundHandler` - it will add Adm
 ```
 public void ConfigureServices(IServiceCollection services)
 {
-	services.AddNotFoundHandler(o =>
-	{
-		o.BufferSize = 30;
-		o.ThreshHold = 5;
-		o.HandlerMode = FileNotFoundMode.On;
-		o.IgnoredResourceExtensions = new[] { "jpg", "gif", "png", "css", "js", "ico", "swf", "woff" };
-		o.Logging = LoggerMode.On;
-		o.LogWithHostname = false;
-		o.AddProvider<NullNotFoundHandlerProvider>();
-	});
+    var connectionString = ... // Retrieve connection string here
+    services.AddNotFoundHandler(o =>
+    {
+        o.UseSqlServer(connectionstring);
+        o.BufferSize = 30;
+        o.ThreshHold = 5;
+        o.HandlerMode = FileNotFoundMode.On;
+        o.IgnoredResourceExtensions = new[] { "jpg", "gif", "png", "css", "js", "ico", "swf", "woff" };
+        o.Logging = LoggerMode.On;
+        o.LogWithHostname = false;
+        o.AddProvider<NullNotFoundHandlerProvider>();
+    });
 
 services.AddEpiserverNotFoundHandler();
 
@@ -63,26 +65,26 @@ services.AddEpiserverNotFoundHandler();
 }
 ```
 
-You can call the `AddNotFoundHandler` method without configuration and it will use default settings.
+The first and the mandatory configuration is a connection string. Use `UseSqlServer` method to set up the database connection string.
 
-As an alternative or in addition, the configuration can be read from the `appsettings.json`:
+In addition, the configuration can be read from the `appsettings.json`:
 
 ```
 "Geta": {
-	"NotFoundHandler": {
-		"BufferSize":  40
-	} 
+    "NotFoundHandler": {
+        "BufferSize":  40
+    } 
 }
 ```
 
-The configuration from the `appsettings.json` will override any configuration set in the Startup. Note that you cannot add providers in the `appsetings.json`. All other settings are supported.
+The configuration from the `appsettings.json` will override any configuration set in the Startup. Note that you cannot provide a connection string or add providers in the `appsetings.json`. All other settings are supported.
 
 Next, initialize NotFound handler in the `Configure` method as the first registration. It will make sure that NotFound handler will catch all 404 errors.
 
 ```
 public void Configure(IApplicationBuilder app)
 {
-	app.UseNotFoundHandler();
+    app.UseNotFoundHandler();
 
 ...
 }
@@ -156,11 +158,11 @@ One of the simplest solutions is adding a controller and a view for it that woul
 [Route("error")]
 public class ErrorController : Controller
 {
-	[Route("404")]
-	public IActionResult PageNotFound()
-	{
-		return View();
-	}
+    [Route("404")]
+    public IActionResult PageNotFound()
+    {
+        return View();
+    }
 }
 ```
 
@@ -169,8 +171,8 @@ Then register status code pages in the Startup's `Configure` method before NotFo
 ```
 public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
 {
-	app.UseStatusCodePagesWithReExecute("/error/{0}");
-	app.UseNotFoundHandler();
+    app.UseStatusCodePagesWithReExecute("/error/{0}");
+    app.UseNotFoundHandler();
 
 ...
 }
