@@ -1,13 +1,14 @@
 
-# NotFound Handler for ASP.NET Core and EPiServer
+# NotFound Handler for ASP.NET Core and Optimizely
 
 ## Description
 
 ![](http://tc.geta.no/app/rest/builds/buildType:(id:GetaPackages_GetaNotFoundHandler_00ci),branch:master/statusIcon)
-[![Platform](https://img.shields.io/badge/Platform-.NET%204.6.1-blue.svg?style=flat)](https://msdn.microsoft.com/en-us/library/w0x726c2%28v=vs.110%29.aspx)
-[![Platform](https://img.shields.io/badge/Episerver%20-%2011-orange.svg?style=flat)](https://world.episerver.com/cms/)
+[![Platform](https://img.shields.io/badge/Platform-.NET%205-blue.svg?style=flat)](https://docs.microsoft.com/en-us/dotnet/)
+[![Platform](https://img.shields.io/badge/
+ver-%2012-orange.svg?style=flat)](http://world.episerver.com/cms/)
 
-The popular NotFound handler for ASP.NET Core and EPiServer, enabling better control over your 404 page in addition to allowing redirects for old URLs that no longer works.
+The popular NotFound handler for ASP.NET Core and Optimizely, enabling better control over your 404 page in addition to allowing redirects for old URLs that no longer works.
 
 The perfect companion if you're transitioning to your site from another system and cannot keep the URL structure, or plan to do major re-structuring of your content.
 
@@ -32,16 +33,16 @@ If you need only the handler, then you can install it by the command below.
 
 `Install-Package Geta.NotFoundHandler`
 
-For the Episerver project, you would want to install Admin UI integration package.
+For the Optimizely project, you would want to install Admin UI integration package.
 
-`Install-Package Geta.NotFoundHandler.Episerver`
+`Install-Package Geta.NotFoundHandler.Optimizely`
 
-The package can be found in the [EPiServer Nuget Feed](https://nuget.episerver.com/package/?id=Geta.NotFoundHandler).
+The package can be found in the [Optimizely Nuget Feed](https://nuget.episerver.com/package/?id=Geta.NotFoundHandler).
 
 # Configuration
 
 Add the NotFound handler in the Startup.cs in the `ConfigureServices` method. Below is an example with all available configuration you can set.
-For Episerver project, also call `AddEpiserverNotFoundHandler` - it will add Admin UI in the Episerver admin UI.
+For Optimizely project, also call `AddOptimizelyNotFoundHandler` - it will add Admin UI in the Optimizely admin UI.
 
 ```
 public void ConfigureServices(IServiceCollection services)
@@ -59,7 +60,7 @@ public void ConfigureServices(IServiceCollection services)
         o.AddProvider<NullNotFoundHandlerProvider>();
     });
 
-services.AddEpiserverNotFoundHandler();
+services.AddOptimizelyNotFoundHandler();
 
 ...
 }
@@ -196,7 +197,7 @@ services.AddNotFoundHandler(o =>
 
 This is especially useful for rewrites that follow some kind of logic, like checking the querystring for and id or some other value you can use to look up the page.
 
-Here is an example using EPiServer Find to look up a product by code:
+Here is an example using Optimizely Find to look up a product by code:
 
 ```csharp
 public class CustomProductRedirectHandler : INotFoundHandler
