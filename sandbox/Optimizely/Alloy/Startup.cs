@@ -14,9 +14,9 @@ using Microsoft.Extensions.Hosting;
 using System.IO;
 using AlloyMvcTemplates;
 using EPiServer.Authorization;
-using Geta.NotFoundHandler.Episerver;
 using Geta.NotFoundHandler.Infrastructure.Configuration;
 using Geta.NotFoundHandler.Infrastructure.Initialization;
+using Geta.NotFoundHandler.Optimizely;
 
 namespace EPiServer.Templates.Alloy.Mvc
 {
@@ -44,7 +44,7 @@ namespace EPiServer.Templates.Alloy.Mvc
             {
                 policy.RequireRole(Roles.CmsAdmins);
             });
-            services.AddEpiserverNotFoundHandler();
+            services.AddOptimizelyNotFoundHandler();
 
             services.Configure<DataAccessOptions>(o =>
             {

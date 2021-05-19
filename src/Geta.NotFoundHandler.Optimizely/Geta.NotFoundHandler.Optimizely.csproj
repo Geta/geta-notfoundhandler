@@ -3,8 +3,8 @@
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
     <AddRazorSupportForMvc>true</AddRazorSupportForMvc>
-    <PackageId>Geta.NotFoundHandler.Episerver</PackageId>
-    <Title>NotFound handler Admin UI integration EPiServer</Title>
+    <PackageId>Geta.NotFoundHandler.Optimizely</PackageId>
+    <Title>NotFound handler Admin UI integration Optimizely</Title>
     <PackageVersion>1.0.0</PackageVersion>
     <Authors>Geta Digital</Authors>
     <Company>Geta Digital</Company>
@@ -13,7 +13,7 @@
     <PackageIcon>icon.png</PackageIcon>
     <PackageIconUrl>https://cdn.geta.no/opensource/icons/Geta-logo-3.png</PackageIconUrl>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
-    <Description>This library contains a NotFound handler Admin user interface integration in an EPiServer project.</Description>
+    <Description>This library contains a NotFound handler Admin user interface integration in an Optimizely project.</Description>
     <PackageReleaseNotes>https://github.com/Geta/geta-notfoundhandler/blob/master/CHANGELOG.md</PackageReleaseNotes>
     <PackageTags>404 NotFound 404Error Handler Geta Redirect</PackageTags>
     <RepositoryUrl>https://github.com/Geta/geta-notfoundhandler</RepositoryUrl>

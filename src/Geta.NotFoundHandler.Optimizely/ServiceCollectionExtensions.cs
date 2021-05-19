@@ -4,11 +4,11 @@ using EPiServer.DependencyInjection;
 using EPiServer.Shell.Modules;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Geta.NotFoundHandler.Episerver
+namespace Geta.NotFoundHandler.Optimizely
 {
     public static class ServiceCollectionExtensions
     {
-        public static IServiceCollection AddEpiserverNotFoundHandler(this IServiceCollection services)
+        public static IServiceCollection AddOptimizelyNotFoundHandler(this IServiceCollection services)
         {
             services.AddCmsUI();
             services.Configure<ProtectedModuleOptions>(

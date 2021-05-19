@@ -17,6 +17,6 @@
     <None Include="wwwroot\**\*.*" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\src\Geta.NotFoundHandler.Episerver\Geta.NotFoundHandler.Episerver.csproj" />
+    <ProjectReference Include="..\..\..\src\Geta.NotFoundHandler.Optimizely\Geta.NotFoundHandler.Optimizely.csproj" />
   </ItemGroup>
 </Project>

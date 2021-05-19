@@ -9,14 +9,13 @@ namespace Geta.NotFoundHandler.Infrastructure.Initialization
 {
     public static class ApplicationBuilderExtensions
     {
-
         public static IApplicationBuilder UseNotFoundHandler(this IApplicationBuilder app)
         {
             var services = app.ApplicationServices;
 
             var upgrader = services.GetRequiredService<Upgrader>();
             upgrader.Start();
-            
+
             var initializer = services.GetRequiredService<RedirectsInitializer>();
             initializer.Initialize();
 

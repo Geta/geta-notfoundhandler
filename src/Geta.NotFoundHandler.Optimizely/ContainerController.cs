@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Geta.NotFoundHandler.Episerver
+namespace Geta.NotFoundHandler.Optimizely
 {
     public class ContainerController : Controller
     {

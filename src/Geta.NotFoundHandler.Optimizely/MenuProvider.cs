@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using EPiServer.Shell;
 using EPiServer.Shell.Navigation;
 
-namespace Geta.NotFoundHandler.Episerver
+namespace Geta.NotFoundHandler.Optimizely
 {
     [MenuProvider]
     public class MenuProvider : IMenuProvider
@@ -17,7 +17,7 @@ namespace Geta.NotFoundHandler.Episerver
                 url)
             {
                 SortIndex = 100,
-                AuthorizationPolicy = Infrastructure.Constants.PolicyName 
+                AuthorizationPolicy = Infrastructure.Constants.PolicyName
             };
 
             return new List<MenuItem>

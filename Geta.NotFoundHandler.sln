@@ -22,9 +22,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Geta.NotFoundHandler.Tests"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Geta.NotFoundHandler.Admin", "src\Geta.NotFoundHandler.Admin\Geta.NotFoundHandler.Admin.csproj", "{2265ED23-C9E3-4B8D-B9C1-730FE90F0DED}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AlloyMvcTemplates", "sandbox\Episerver\Alloy\AlloyMvcTemplates.csproj", "{70BEE855-F32D-493E-8803-DA8AA49D4C9A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AlloyMvcTemplates", "sandbox\Optimizely\Alloy\AlloyMvcTemplates.csproj", "{70BEE855-F32D-493E-8803-DA8AA49D4C9A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Geta.NotFoundHandler.Episerver", "src\Geta.NotFoundHandler.Episerver\Geta.NotFoundHandler.Episerver.csproj", "{1356CAA1-8364-4147-A068-641A06EEE5FD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Geta.NotFoundHandler.Optimizely", "src\Geta.NotFoundHandler.Optimizely\Geta.NotFoundHandler.Optimizely.csproj", "{1356CAA1-8364-4147-A068-641A06EEE5FD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
