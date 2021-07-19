@@ -26,15 +26,21 @@ The perfect companion if you're transitioning to your site from another system a
 
 The command below will install Admin UI and NotFound handler into your ASP.NET Core project.
 
-`Install-Package Geta.NotFoundHandler.Admin`
+```
+Install-Package Geta.NotFoundHandler.Admin
+```
 
 If you need only the handler, then you can install it by the command below.
 
-`Install-Package Geta.NotFoundHandler`
+```
+Install-Package Geta.NotFoundHandler
+```
 
 For the Optimizely project, you would want to install Admin UI integration package.
 
-`Install-Package Geta.NotFoundHandler.Optimizely`
+```
+Install-Package Geta.NotFoundHandler.Optimizely
+```
 
 The package can be found in the [Optimizely Nuget Feed](https://nuget.episerver.com/package/?id=Geta.NotFoundHandler).
 
