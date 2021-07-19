@@ -250,9 +250,9 @@ For example, if we have a redirect: `/a` to `/b`, then:
 # Sandbox App
 Sandbox application is testing poligon for pacakge new features and bug fixes.
 
-CMS username: epiadmin
+CMS username: admin@example.com
 
-Password: 3p!Pass
+Password: Episerver123!
 
 # Contributing
 If you can help please do so by contributing to the package!
