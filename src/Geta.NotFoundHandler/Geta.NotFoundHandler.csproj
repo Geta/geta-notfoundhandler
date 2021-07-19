@@ -15,7 +15,7 @@
     <Description>This library contains a custom NotFound handler for your ASP.NET Core project. It will replace the default NotFound handler with one that you can change, in order for it to handle more NotFound cases than the built-in handler. It also includes a custom redirects feature for editors to add redirects. The NotFound handler logs all 404 errors as suggestions and present them in a list in the custom redirect feature, which will allow editors to easily add redirects based on the logged suggestions.</Description>
     <PackageReleaseNotes>https://github.com/Geta/geta-notfoundhandler/blob/master/CHANGELOG.md</PackageReleaseNotes>
     <PackageTags>404 NotFound 404Error Handler Geta Redirect</PackageTags>
-    <RepositoryUrl>URL</RepositoryUrl>
+    <RepositoryUrl>https://github.com/Geta/geta-notfoundhandler.git</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>

@@ -16,7 +16,7 @@
     <Description>This library contains a NotFound handler Admin user interface integration in an Optimizely project.</Description>
     <PackageReleaseNotes>https://github.com/Geta/geta-notfoundhandler/blob/master/CHANGELOG.md</PackageReleaseNotes>
     <PackageTags>404 NotFound 404Error Handler Geta Redirect</PackageTags>
-    <RepositoryUrl>https://github.com/Geta/geta-notfoundhandler</RepositoryUrl>
+    <RepositoryUrl>https://github.com/Geta/geta-notfoundhandler.git</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>
