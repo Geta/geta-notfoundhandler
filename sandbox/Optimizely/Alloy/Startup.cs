@@ -14,6 +14,7 @@ using Microsoft.Extensions.Hosting;
 using System.IO;
 using AlloyMvcTemplates;
 using EPiServer.Authorization;
+using EPiServer.Web;
 using Geta.NotFoundHandler.Infrastructure.Configuration;
 using Geta.NotFoundHandler.Infrastructure.Initialization;
 using Geta.NotFoundHandler.Optimizely;
