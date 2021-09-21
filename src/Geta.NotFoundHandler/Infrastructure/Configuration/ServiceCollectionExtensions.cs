@@ -21,7 +21,7 @@ namespace Geta.NotFoundHandler.Infrastructure.Configuration
             this IServiceCollection services,
             Action<NotFoundHandlerOptions> setupAction)
         {
-            return AddNotFoundHandler(services, o => { }, DefaultPolicy);
+            return AddNotFoundHandler(services, setupAction, DefaultPolicy);
         }
 
         public static IServiceCollection AddNotFoundHandler(
