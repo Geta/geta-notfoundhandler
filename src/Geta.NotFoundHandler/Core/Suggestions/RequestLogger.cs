@@ -43,7 +43,7 @@ namespace Geta.NotFoundHandler.Core.Suggestions
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogError("An error occurred while trying to log 404 errors. ", ex);
+                        _logger.LogError(ex, "An error occurred while trying to log 404 errors. ");
                     }
                 }
             }
