@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Razor">
+﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
@@ -33,6 +33,11 @@
 
   <ItemGroup>
     <None Include="..\..\images\icon.png" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Remove="module.config" />
+    <None Include="module.config" Pack="true" PackagePath="content\modules\_protected\Geta.NotFoundHandler.Optimizely\;contentFiles\any\any\modules\_protected\Geta.NotFoundHandler.Optimizely\" />
   </ItemGroup>
 
 </Project>
