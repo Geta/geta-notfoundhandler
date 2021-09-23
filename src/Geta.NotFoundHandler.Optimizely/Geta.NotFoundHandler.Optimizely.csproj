@@ -24,7 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="EPiServer.CMS.UI.Core" Version="12.0.0-pre-021814" />
+    <PackageReference Include="EPiServer.CMS.UI.Core" Version="12.0.2" />
   </ItemGroup>
 
   <ItemGroup>
@@ -37,7 +37,17 @@
 
   <ItemGroup>
     <Content Remove="module.config" />
-    <None Include="module.config" Pack="true" PackagePath="content\modules\_protected\Geta.NotFoundHandler.Optimizely\;contentFiles\any\any\modules\_protected\Geta.NotFoundHandler.Optimizely\" />
+    <None Include="module.config">
+      <Pack>true</Pack>
+      <PackagePath>contentFiles\any\any\modules\_protected\Geta.NotFoundHandler.Optimizely</PackagePath>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include=".\msbuild\CopyModule.targets" >
+      <Pack>true</Pack>
+      <PackagePath>build\net5.0\$(MSBuildProjectName).targets</PackagePath>
+    </Content>
   </ItemGroup>
 
 </Project>

@@ -1,0 +1,12 @@
+{
+    "profiles": {
+        "AlloyMvcTemplates": {
+            "commandName": "Project",
+            "launchBrowser": true,
+            "applicationUrl": "http://localhost:57728/",
+            "environmentVariables": {
+                "ASPNETCORE_ENVIRONMENT": "Development"
+            }
+        }
+    }
+}
