@@ -96,6 +96,15 @@ public void Configure(IApplicationBuilder app)
 }
 ```
 
+Also, you have to add Razor pages routing support.
+
+```
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapRazorPages();
+});
+```
+
 ## Settings
 
 **HandlerMode** You can turn off the redirects by setting `HandlerMode` to `Off`. Default is `On`.
