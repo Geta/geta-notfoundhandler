@@ -117,7 +117,7 @@ namespace Geta.NotFoundHandler.Data
             var oldUrlParam = _dataExecutor.CreateParameter("oldurl", DbType.String, 2000);
             oldUrlParam.Value = oldUrl;
 
-            _dataExecutor.ExecuteNonQuery(sqlCommand, refererParam, refererParam, oldUrlParam);
+            _dataExecutor.ExecuteNonQuery(sqlCommand, requestedParam, refererParam, oldUrlParam);
         }
 
         private DataTable GetAllSuggestionCount()
