@@ -39,6 +39,8 @@
     <Content Remove="module.config" />
     <None Include="module.config">
       <Pack>true</Pack>
+      <PackageCopyToOutput>true</PackageCopyToOutput>
+      <BuildAction>None</BuildAction>
       <PackagePath>contentFiles\any\any\modules\_protected\Geta.NotFoundHandler.Optimizely</PackagePath>
     </None>
   </ItemGroup>
@@ -46,6 +48,8 @@
   <ItemGroup>
     <Content Include=".\msbuild\CopyModule.targets" >
       <Pack>true</Pack>
+      <PackageCopyToOutput>true</PackageCopyToOutput>
+      <BuildAction>None</BuildAction>
       <PackagePath>build\net5.0\$(MSBuildProjectName).targets</PackagePath>
     </Content>
   </ItemGroup>
