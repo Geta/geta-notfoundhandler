@@ -63,6 +63,7 @@ namespace Geta.NotFoundHandler.Core
                     LogDebug("Determined to be localhost, returning.", context);
                     return;
                 }
+
                 LogDebug("Not a localhost, handling error.", context);
             }
 
@@ -79,7 +80,7 @@ namespace Geta.NotFoundHandler.Core
             var query = context.Request.QueryString.ToString();
 
             // avoid duplicate log entries
-            if (query != null && query.StartsWith("404;"))
+            if (query.StartsWith("404;"))
             {
                 LogDebug("Skipping request with 404; in the query string.", context);
                 return;
@@ -113,7 +114,7 @@ namespace Geta.NotFoundHandler.Core
         public bool IsHandled(HttpContext context)
         {
             return context.Items.Keys.Contains(HandledRequestItemKey)
-                && (bool)context.Items[HandledRequestItemKey];
+                   && (bool)context.Items[HandledRequestItemKey];
         }
 
         private void MarkHandled(HttpContext context)
@@ -136,16 +137,13 @@ namespace Geta.NotFoundHandler.Core
                     return true;
                 }
 
-                if (redirect.State.Equals((int)RedirectState.Saved))
+                if (redirect.State.Equals((int)RedirectState.Saved)
+                    && string.Compare(redirect.NewUrl, urlNotFound.PathAndQuery, StringComparison.InvariantCultureIgnoreCase) != 0)
                 {
                     // Found it, however, we need to make sure we're not running in an
                     // infinite loop. The new url must not be the referer to this page
-                    if (string.Compare(redirect.NewUrl, urlNotFound.PathAndQuery, StringComparison.InvariantCultureIgnoreCase) != 0)
-                    {
-
-                        foundRedirect = redirect;
-                        return true;
-                    }
+                    foundRedirect = redirect;
+                    return true;
                 }
             }
             else
@@ -158,6 +156,7 @@ namespace Geta.NotFoundHandler.Core
                     _requestLogger.LogRequest(logUrl, referer?.ToString());
                 }
             }
+
             return false;
         }
 
@@ -185,17 +184,22 @@ namespace Geta.NotFoundHandler.Core
             if (_configuration.IgnoredResourceExtensions.Any(x => x == extension))
             {
                 // Ignoring 404 rewrite of known resource extension
-                _logger.LogDebug("Ignoring rewrite of '{0}'. '{1}' is a known resource extension", notFoundUri.ToString(), extension);
+                _logger.LogDebug("Ignoring rewrite of '{NotFoundUrl}'. '{Extension}' is a known resource extension",
+                                 notFoundUri.ToString(),
+                                 extension);
                 return true;
             }
+
             return false;
         }
 
         private void LogDebug(string message, HttpContext context)
         {
             _logger.LogDebug(
-                $"{{0}}{Environment.NewLine}Request URL: {{1}}{Environment.NewLine}Response status code: {{2}}",
-                message, context?.Request.Path, context?.Response.StatusCode);
+                "{Message} Request URL: {RequestUrl} Response status code: {StatusCode}",
+                message,
+                context?.Request.Path,
+                context?.Response.StatusCode);
         }
     }
 }

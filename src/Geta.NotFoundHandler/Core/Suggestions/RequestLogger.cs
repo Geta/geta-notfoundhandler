@@ -43,7 +43,7 @@ namespace Geta.NotFoundHandler.Core.Suggestions
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogError(ex, "An error occurred while trying to log 404 errors. ");
+                        _logger.LogError(ex, "An error occurred while trying to log 404 errors");
                     }
                 }
             }
@@ -71,12 +71,12 @@ namespace Geta.NotFoundHandler.Core.Suggestions
                     }
                 }
 
-                _logger.LogDebug($"{bufferSize} 404 request(s) has been stored to the database.");
+                _logger.LogDebug("{BufferSize} 404 request(s) has been stored to the database", bufferSize);
             }
             else
             {
                 _logger.LogWarning(
-                    "404 requests have been made too frequents (exceeded the threshold). Requests not logged to database.");
+                    "404 requests have been made too frequents (exceeded the threshold). Requests not logged to database");
             }
         }
 

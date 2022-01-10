@@ -44,7 +44,7 @@ namespace Geta.NotFoundHandler.Core.Redirects
                 {
                     InnerXml = "<redirects><urls></urls></redirects>"
                 };
-                _logger.LogError("NotFoundHandler: The Custom Redirects file does not exist.");
+                _logger.LogError("NotFoundHandler: The Custom Redirects file does not exist");
             }
 
             return Load();

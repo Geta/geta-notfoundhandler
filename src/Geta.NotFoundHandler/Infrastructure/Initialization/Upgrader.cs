@@ -32,7 +32,7 @@ namespace Geta.NotFoundHandler.Infrastructure.Initialization
                 return;
             }
 
-            _logger.LogDebug("Older version found. Version nr. :" + version);
+            _logger.LogDebug("Older version found. Version nr. : {Version}", version);
 
             if (version == -1)
             {
@@ -110,7 +110,7 @@ namespace Geta.NotFoundHandler.Infrastructure.Initialization
             if (!created)
             {
                 _logger.LogError(
-                    "An error occurred during the creation of the NotFoundHandler redirects clustered index. Canceling.");
+                    "An error occurred during the creation of the NotFoundHandler redirects clustered index. Canceling");
             }
 
             _logger.LogInformation("Create suggestions table clustered index END");
@@ -133,7 +133,7 @@ namespace Geta.NotFoundHandler.Infrastructure.Initialization
             if (!created)
             {
                 _logger.LogError(
-                    "An error occurred during the creation of the NotFoundHandler version stored procedure. Canceling.");
+                    "An error occurred during the creation of the NotFoundHandler version stored procedure. Canceling");
             }
 
             _logger.LogInformation("Create NotFoundHandler version SP END");

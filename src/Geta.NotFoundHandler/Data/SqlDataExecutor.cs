@@ -37,7 +37,7 @@ namespace Geta.NotFoundHandler.Data
             catch (Exception ex)
             {
                 _logger.LogError(ex,
-                    $"An error occurred in the ExecuteSQL method with the following sql: {sqlCommand}");
+                    "An error occurred in the ExecuteSQL method with the following sql: {SqlCommand}", sqlCommand);
             }
 
             return ds.Tables[0];
@@ -59,7 +59,7 @@ namespace Geta.NotFoundHandler.Data
             {
                 success = false;
                 _logger.LogError(ex,
-                    $"An error occurred in the ExecuteSQL method with the following sql: {sqlCommand}");
+                    "An error occurred in the ExecuteSQL method with the following sql: {SqlCommand}", sqlCommand);
             }
 
             return success;
@@ -80,7 +80,7 @@ namespace Geta.NotFoundHandler.Data
             {
                 result = 0;
                 _logger.LogError(ex,
-                    $"An error occurred in the ExecuteScalar method with the following sql: {sqlCommand}");
+                    "An error occurred in the ExecuteScalar method with the following sql: {SqlCommand}", sqlCommand);
             }
 
             return result;
@@ -103,11 +103,11 @@ namespace Geta.NotFoundHandler.Data
             }
             catch (SqlException)
             {
-                _logger.LogInformation("Stored procedure not found.");
+                _logger.LogInformation("Stored procedure not found");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error while running stored procedure.");
+                _logger.LogError(ex, "Error while running stored procedure");
             }
             return value;
         }
