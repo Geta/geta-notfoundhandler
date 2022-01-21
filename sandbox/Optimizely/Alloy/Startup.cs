@@ -52,6 +52,11 @@ namespace EPiServer.Templates.Alloy.Mvc
                 });
             }
 
+            services.AddCmsAspNetIdentity<ApplicationUser>();
+            services.AddMvc();
+            services.AddAlloy();
+            services.AddCms();
+
             services.AddNotFoundHandler(o =>
             {
                 o.UseSqlServer(connectionString);
@@ -61,11 +66,6 @@ namespace EPiServer.Templates.Alloy.Mvc
                 policy.RequireRole(Roles.CmsAdmins);
             });
             services.AddOptimizelyNotFoundHandler();
-
-            services.AddCmsAspNetIdentity<ApplicationUser>();
-            services.AddMvc();
-            services.AddAlloy();
-            services.AddCms();
 
             services.AddEmbeddedLocalization<Startup>();
         }

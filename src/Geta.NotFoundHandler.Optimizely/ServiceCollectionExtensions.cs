@@ -10,7 +10,6 @@ namespace Geta.NotFoundHandler.Optimizely
     {
         public static IServiceCollection AddOptimizelyNotFoundHandler(this IServiceCollection services)
         {
-            services.AddCmsUI();
             services.Configure<ProtectedModuleOptions>(
                 pm =>
                 {
