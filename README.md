@@ -79,19 +79,20 @@ In addition, the configuration can be read from the `appsettings.json`:
 "Geta": {
     "NotFoundHandler": {
         "BufferSize":  40
-    } 
+    }
 }
 ```
 
 The configuration from the `appsettings.json` will override any configuration set in the Startup. Note that you cannot provide a connection string or add providers in the `appsetings.json`. All other settings are supported.
 
 Next, initialize NotFound handler in the `Configure` method as the first registration. It will make sure that NotFound handler will catch all 404 errors.
+For Optimizely project, also call `UseOptimizelyNotFoundHandler`. This will make sure that any updates are synchronized between servers (on DXP, for example).
 
 ```
 public void Configure(IApplicationBuilder app)
 {
     app.UseNotFoundHandler();
-
+    app.UseOptimizelyNotFoundHandler();
 ...
 }
 ```
@@ -132,14 +133,14 @@ Logging of 404 requests is buffered to shield your application from Denial of Se
    * bufferSize is 100, threshold is 10
    * Case: 100 errors in 15 seconds
    * 100 / 15 = 6. Error frequency is within threshold value. Buffered requests will get logged.
-   
+
 If the `bufferSize` is set to `0`, the `threshold` value will be ignored, and every request will be logged immediately.
 
-**LogWithHostname**: Set to `true` to include hostname in the log. Useful in a multisite environment with several hostnames/domains. Default is `false` 
+**LogWithHostname**: Set to `true` to include hostname in the log. Useful in a multisite environment with several hostnames/domains. Default is `false`
 
 ### Specifying ignored resources
 
-**IgnoredResourceExtensions** 
+**IgnoredResourceExtensions**
 
 By default, requests to files with the following extensions will be ignored by the redirect module: `jpg,gif,png,css,js,ico,swf,woff`
 
