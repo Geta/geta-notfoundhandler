@@ -73,6 +73,7 @@ namespace EPiServer.Templates.Alloy.Mvc
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             app.UseNotFoundHandler();
+            app.UseOptimizelyNotFoundHandler();
 
             if (env.IsDevelopment())
             {
