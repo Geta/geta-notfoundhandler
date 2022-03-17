@@ -4,9 +4,10 @@
 using System;
 using System.Linq;
 using EPiServer.Shell.Modules;
+using Geta.NotFoundHandler.Optimizely.Core.Events;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Geta.NotFoundHandler.Optimizely
+namespace Geta.NotFoundHandler.Optimizely.Infrastructure.Configuration
 {
     public static class ServiceCollectionExtensions
     {

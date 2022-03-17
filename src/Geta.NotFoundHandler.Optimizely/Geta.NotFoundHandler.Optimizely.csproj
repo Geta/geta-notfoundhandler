@@ -46,7 +46,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include=".\msbuild\CopyModule.targets" >
+    <Content Include=".\msbuild\CopyModule.targets">
       <Pack>true</Pack>
       <PackageCopyToOutput>true</PackageCopyToOutput>
       <BuildAction>None</BuildAction>

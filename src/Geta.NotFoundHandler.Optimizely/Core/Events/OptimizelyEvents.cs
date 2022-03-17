@@ -5,7 +5,7 @@ using System;
 using EPiServer.Events.Clients;
 using Geta.NotFoundHandler.Core.Redirects;
 
-namespace Geta.NotFoundHandler.Optimizely
+namespace Geta.NotFoundHandler.Optimizely.Core.Events
 {
     public class OptimizelyEvents
     {
