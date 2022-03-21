@@ -16,7 +16,6 @@ using AlloyMvcTemplates;
 using EPiServer.Authorization;
 using Geta.NotFoundHandler.Infrastructure.Configuration;
 using Geta.NotFoundHandler.Infrastructure.Initialization;
-using Geta.NotFoundHandler.Optimizely;
 using Geta.NotFoundHandler.Optimizely.Infrastructure.Configuration;
 using Geta.NotFoundHandler.Optimizely.Infrastructure.Initialization;
 

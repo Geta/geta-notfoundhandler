@@ -4,7 +4,11 @@
 using System;
 using System.Linq;
 using EPiServer.Shell.Modules;
+using Geta.NotFoundHandler.Data;
+using Geta.NotFoundHandler.Optimizely.Core.AutomaticRedirects;
 using Geta.NotFoundHandler.Optimizely.Core.Events;
+using Geta.NotFoundHandler.Optimizely.Data;
+using Geta.NotFoundHandler.Optimizely.Infrastructure.Initialization;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Geta.NotFoundHandler.Optimizely.Infrastructure.Configuration
@@ -14,6 +18,14 @@ namespace Geta.NotFoundHandler.Optimizely.Infrastructure.Configuration
         public static IServiceCollection AddOptimizelyNotFoundHandler(this IServiceCollection services)
         {
             services.AddSingleton<OptimizelyEvents>();
+            services.AddTransient<Upgrader>();
+            services.AddTransient<ContentLinkLoader>();
+            services.AddTransient<ContentKeyGenerator>();
+            services.AddTransient<ContentUrlLoader>();
+            services.AddTransient<IContentKeyProvider, CmsContentKeyProvider>();
+            services.AddTransient<IContentLinkProvider, CmsContentLinkProvider>();
+            services.AddTransient<IContentUrlProvider, CmsContentUrlProvider>();
+            services.AddTransient<IRepository<ContentUrlHistory>, SqlContentUrlHistoryRepository>();
 
             services.Configure<ProtectedModuleOptions>(
                 pm =>
