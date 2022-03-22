@@ -16,7 +16,7 @@ namespace Geta.NotFoundHandler.Optimizely.Infrastructure.Initialization
             var upgrader = services.GetRequiredService<Upgrader>();
             upgrader.Start();
 
-            var initializer = services.GetRequiredService<OptimizelyEvents>();
+            var initializer = services.GetRequiredService<OptimizelySyncEvents>();
             initializer.Initialize();
 
             return app;

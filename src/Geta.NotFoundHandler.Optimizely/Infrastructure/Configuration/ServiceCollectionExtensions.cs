@@ -17,7 +17,7 @@ namespace Geta.NotFoundHandler.Optimizely.Infrastructure.Configuration
     {
         public static IServiceCollection AddOptimizelyNotFoundHandler(this IServiceCollection services)
         {
-            services.AddSingleton<OptimizelyEvents>();
+            services.AddSingleton<OptimizelySyncEvents>();
             services.AddTransient<Upgrader>();
             services.AddTransient<ContentLinkLoader>();
             services.AddTransient<ContentKeyGenerator>();

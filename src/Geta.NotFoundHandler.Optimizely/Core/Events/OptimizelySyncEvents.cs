@@ -7,7 +7,7 @@ using Geta.NotFoundHandler.Core.Redirects;
 
 namespace Geta.NotFoundHandler.Optimizely.Core.Events
 {
-    public class OptimizelyEvents
+    public class OptimizelySyncEvents
     {
         private readonly RedirectsEvents _redirectsEvents;
         private readonly IEventRegistry _eventRegistry;
@@ -16,7 +16,7 @@ namespace Geta.NotFoundHandler.Optimizely.Core.Events
         private static readonly Guid EventId = new("{AC263F88-6C17-45A5-81E0-DCC28DF26AEF}");
         private static readonly Guid RaiserId = Guid.NewGuid();
 
-        public OptimizelyEvents(
+        public OptimizelySyncEvents(
             RedirectsEvents redirectsEvents,
             IEventRegistry eventRegistry,
             RedirectsInitializer redirectsInitializer)
