@@ -34,7 +34,9 @@ namespace Geta.NotFoundHandler.Optimizely.Infrastructure.Configuration
             services.AddTransient<IContentKeyProvider, CmsContentKeyProvider>();
             services.AddTransient<IContentLinkProvider, CmsContentLinkProvider>();
             services.AddTransient<IContentUrlProvider, CmsContentUrlProvider>();
-            services.AddTransient<IRepository<ContentUrlHistory>, SqlContentUrlHistoryRepository>();
+            services.AddTransient<SqlContentUrlHistoryRepository>();
+            services.AddTransient<IRepository<ContentUrlHistory>>(x => x.GetRequiredService<SqlContentUrlHistoryRepository>());
+            services.AddTransient<IContentUrlHistoryLoader>(x => x.GetRequiredService<SqlContentUrlHistoryRepository>());
             services.AddSingleton<Func<ContentUrlIndexer>>(x => x.GetService<ContentUrlIndexer>);
             services.AddTransient<ContentUrlIndexer>();
 

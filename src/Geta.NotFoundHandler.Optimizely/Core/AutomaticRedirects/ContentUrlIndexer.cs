@@ -9,15 +9,18 @@ namespace Geta.NotFoundHandler.Optimizely.Core.AutomaticRedirects
         private readonly ContentKeyGenerator _contentKeyGenerator;
         private readonly ContentUrlLoader _contentUrlLoader;
         private readonly IRepository<ContentUrlHistory> _contentUrlHistoryRepository;
+        private readonly IContentUrlHistoryLoader _contentUrlHistoryLoader;
 
         public ContentUrlIndexer(
             ContentKeyGenerator contentKeyGenerator,
             ContentUrlLoader contentUrlLoader,
-            IRepository<ContentUrlHistory> contentUrlHistoryRepository)
+            IRepository<ContentUrlHistory> contentUrlHistoryRepository,
+            IContentUrlHistoryLoader contentUrlHistoryLoader)
         {
             _contentKeyGenerator = contentKeyGenerator;
             _contentUrlLoader = contentUrlLoader;
             _contentUrlHistoryRepository = contentUrlHistoryRepository;
+            _contentUrlHistoryLoader = contentUrlHistoryLoader;
         }
 
         public virtual void IndexContentUrl(ContentReference contentLink)
@@ -27,7 +30,11 @@ namespace Geta.NotFoundHandler.Optimizely.Core.AutomaticRedirects
 
             var urls = _contentUrlLoader.GetUrls(contentLink).ToList();
             var history = new ContentUrlHistory { ContentKey = keyResult.Key, Urls = urls };
-            _contentUrlHistoryRepository.Save(history);
+
+            if (!_contentUrlHistoryLoader.IsRegistered(history))
+            {
+                _contentUrlHistoryRepository.Save(history);
+            }
         }
     }
 }
