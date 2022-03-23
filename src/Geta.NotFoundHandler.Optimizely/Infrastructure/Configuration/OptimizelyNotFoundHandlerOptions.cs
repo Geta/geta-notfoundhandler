@@ -7,12 +7,6 @@ namespace Geta.NotFoundHandler.Optimizely.Infrastructure.Configuration
     {
         public static int CurrentDbVersion = 1;
 
-        public string ConnectionString { get; private set; }
-
-        public OptimizelyNotFoundHandlerOptions UseSqlServer(string connectionString)
-        {
-            ConnectionString = connectionString;
-            return this;
-        }
+        public bool AutomaticRedirectsEnabled { get; set; }
     }
 }

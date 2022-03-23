@@ -2,7 +2,6 @@ using System;
 using System.Linq;
 using EPiServer.PlugIn;
 using EPiServer.Scheduler;
-using Geta.NotFoundHandler.Data;
 using Geta.NotFoundHandler.Optimizely.Infrastructure;
 
 namespace Geta.NotFoundHandler.Optimizely.Core.AutomaticRedirects
@@ -14,23 +13,14 @@ namespace Geta.NotFoundHandler.Optimizely.Core.AutomaticRedirects
     {
         private bool _stopped;
 
+        private readonly ContentUrlIndexer _contentUrlIndexer;
         private readonly ContentLinkLoader _contentLinkLoader;
-        private readonly ContentKeyGenerator _contentKeyGenerator;
-        private readonly IRepository<ContentUrlHistory> _contentUrlHistoryRepository;
-        private readonly ContentUrlLoader _contentUrlLoader;
         private readonly JobStatusLogger _jobStatusLogger;
 
-        public IndexContentUrlsJob(
-            ContentLinkLoader contentLinkLoader,
-            ContentKeyGenerator contentKeyGenerator,
-            ContentUrlLoader contentUrlLoader,
-            IRepository<ContentUrlHistory> contentUrlHistoryRepository
-        )
+        public IndexContentUrlsJob(ContentUrlIndexer contentUrlIndexer, ContentLinkLoader contentLinkLoader)
         {
+            _contentUrlIndexer = contentUrlIndexer;
             _contentLinkLoader = contentLinkLoader;
-            _contentKeyGenerator = contentKeyGenerator;
-            _contentUrlLoader = contentUrlLoader;
-            _contentUrlHistoryRepository = contentUrlHistoryRepository;
             _jobStatusLogger = new JobStatusLogger(OnStatusChanged);
 
             IsStoppable = true;
@@ -60,12 +50,7 @@ namespace Geta.NotFoundHandler.Optimizely.Core.AutomaticRedirects
 
                 try
                 {
-                    var keyResult = _contentKeyGenerator.GetContentKey(contentLink);
-                    if (!keyResult.HasValue) continue;
-
-                    var urls = _contentUrlLoader.GetUrls(contentLink).ToList();
-                    var history = new ContentUrlHistory { ContentKey = keyResult.Key, Urls = urls };
-                    _contentUrlHistoryRepository.Save(history);
+                    _contentUrlIndexer.IndexContentUrl(contentLink);
 
                     successCount++;
                 }

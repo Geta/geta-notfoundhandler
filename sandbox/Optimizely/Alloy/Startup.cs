@@ -66,7 +66,10 @@ namespace EPiServer.Templates.Alloy.Mvc
             {
                 policy.RequireRole(Roles.CmsAdmins);
             });
-            services.AddOptimizelyNotFoundHandler();
+            services.AddOptimizelyNotFoundHandler(o =>
+            {
+                o.AutomaticRedirectsEnabled = true;
+            });
 
             services.AddEmbeddedLocalization<Startup>();
         }

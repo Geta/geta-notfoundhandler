@@ -9,6 +9,7 @@ using Geta.NotFoundHandler.Optimizely.Core.AutomaticRedirects;
 using Geta.NotFoundHandler.Optimizely.Core.Events;
 using Geta.NotFoundHandler.Optimizely.Data;
 using Geta.NotFoundHandler.Optimizely.Infrastructure.Initialization;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Geta.NotFoundHandler.Optimizely.Infrastructure.Configuration
@@ -17,7 +18,15 @@ namespace Geta.NotFoundHandler.Optimizely.Infrastructure.Configuration
     {
         public static IServiceCollection AddOptimizelyNotFoundHandler(this IServiceCollection services)
         {
+            return AddOptimizelyNotFoundHandler(services, _ => { });
+        }
+
+        public static IServiceCollection AddOptimizelyNotFoundHandler(
+            this IServiceCollection services,
+            Action<OptimizelyNotFoundHandlerOptions> setupAction)
+        {
             services.AddSingleton<OptimizelySyncEvents>();
+            services.AddSingleton<ContentUrlHistoryEvents>();
             services.AddTransient<Upgrader>();
             services.AddTransient<ContentLinkLoader>();
             services.AddTransient<ContentKeyGenerator>();
@@ -26,6 +35,8 @@ namespace Geta.NotFoundHandler.Optimizely.Infrastructure.Configuration
             services.AddTransient<IContentLinkProvider, CmsContentLinkProvider>();
             services.AddTransient<IContentUrlProvider, CmsContentUrlProvider>();
             services.AddTransient<IRepository<ContentUrlHistory>, SqlContentUrlHistoryRepository>();
+            services.AddSingleton<Func<ContentUrlIndexer>>(x => x.GetService<ContentUrlIndexer>);
+            services.AddTransient<ContentUrlIndexer>();
 
             services.Configure<ProtectedModuleOptions>(
                 pm =>
@@ -35,6 +46,14 @@ namespace Geta.NotFoundHandler.Optimizely.Infrastructure.Configuration
                         pm.Items.Add(new ModuleDetails { Name = Constants.ModuleName });
                     }
                 });
+
+            var providerOptions = new OptimizelyNotFoundHandlerOptions();
+            setupAction(providerOptions);
+            services.AddOptions<OptimizelyNotFoundHandlerOptions>().Configure<IConfiguration>((options, configuration) =>
+            {
+                setupAction(options);
+                configuration.GetSection("Geta:NotFoundHandler:Optimizely").Bind(options);
+            });
 
             return services;
         }
