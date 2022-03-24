@@ -39,6 +39,7 @@ namespace Geta.NotFoundHandler.Optimizely.Infrastructure.Configuration
             services.AddTransient<IContentUrlHistoryLoader>(x => x.GetRequiredService<SqlContentUrlHistoryRepository>());
             services.AddSingleton<Func<ContentUrlIndexer>>(x => x.GetService<ContentUrlIndexer>);
             services.AddTransient<ContentUrlIndexer>();
+            services.AddTransient<RedirectBuilder>();
 
             services.Configure<ProtectedModuleOptions>(
                 pm =>
