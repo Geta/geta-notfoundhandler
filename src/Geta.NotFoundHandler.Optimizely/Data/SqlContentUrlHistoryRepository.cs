@@ -11,10 +11,14 @@ namespace Geta.NotFoundHandler.Optimizely.Data
 {
     public class SqlContentUrlHistoryRepository : IRepository<ContentUrlHistory>, IContentUrlHistoryLoader
     {
-        private readonly IDataExecutor _dataExecutor;
-
         private const string ContentUrlHistoryTable = "[dbo].[NotFoundHandler.ContentUrlHistory]";
         private const string AllFields = "Id, ContentKey, Urls, CreatedUtc";
+        private readonly IDataExecutor _dataExecutor;
+
+        public SqlContentUrlHistoryRepository(IDataExecutor dataExecutor)
+        {
+            _dataExecutor = dataExecutor;
+        }
 
         private static JsonSerializerSettings JsonSettings
         {
@@ -29,9 +33,38 @@ namespace Geta.NotFoundHandler.Optimizely.Data
             }
         }
 
-        public SqlContentUrlHistoryRepository(IDataExecutor dataExecutor)
+        public bool IsRegistered(ContentUrlHistory entity)
         {
-            _dataExecutor = dataExecutor;
+            var sqlCommand = $@"SELECT {AllFields} 
+                                FROM {ContentUrlHistoryTable}
+                                WHERE ContentKey = @contentKey AND Urls = @urls
+                                ORDER BY CreatedUtc DESC";
+
+            var dataTable = _dataExecutor.ExecuteQuery(
+                sqlCommand,
+                _dataExecutor.CreateStringParameter("contentKey", entity.ContentKey),
+                _dataExecutor.CreateStringParameter("urls", ToJson(entity.Urls)));
+
+            return ToContentUrlHistory(dataTable).FirstOrDefault() != null;
+        }
+
+        public IEnumerable<(string contentKey, IReadOnlyCollection<ContentUrlHistory> histories)> GetAllMoved()
+        {
+            var sqlCommand = $@"SELECT h.Id, h.ContentKey, h.Urls, h.CreatedUtc 
+                                FROM {ContentUrlHistoryTable} h
+                                INNER JOIN 
+                                    (SELECT ContentKey
+                                    FROM {ContentUrlHistoryTable}
+                                    GROUP BY ContentKey
+                                    HAVING COUNT(*) > 1) k
+                                ON h.ContentKey = k.ContentKey
+                                ORDER BY h.ContentKey, h.CreatedUtc DESC";
+
+            var dataTable = _dataExecutor.ExecuteQuery(sqlCommand);
+
+            var histories = ToContentUrlHistory(dataTable);
+
+            return histories.GroupBy(x => x.ContentKey).Select(x => (x.Key, (IReadOnlyCollection<ContentUrlHistory>)x.ToList()));
         }
 
         public void Save(ContentUrlHistory entity)
@@ -50,21 +83,6 @@ namespace Geta.NotFoundHandler.Optimizely.Data
             var sqlCommand = $"DELETE FROM {ContentUrlHistoryTable} WHERE [Id] = @id";
             var idParameter = _dataExecutor.CreateGuidParameter("id", entity.Id);
             _dataExecutor.ExecuteNonQuery(sqlCommand, idParameter);
-        }
-
-        public bool IsRegistered(ContentUrlHistory entity)
-        {
-            var sqlCommand = $@"SELECT {AllFields} 
-                                FROM {ContentUrlHistoryTable}
-                                WHERE ContentKey = @contentKey AND Urls = @urls
-                                ORDER BY CreatedUtc DESC";
-
-            var dataTable = _dataExecutor.ExecuteQuery(
-                sqlCommand,
-                _dataExecutor.CreateStringParameter("contentKey", entity.ContentKey),
-                _dataExecutor.CreateStringParameter("urls", ToJson(entity.Urls)));
-
-            return ToContentUrlHistory(dataTable).FirstOrDefault() != null;
         }
 
         private void Create(ContentUrlHistory entity)
@@ -125,7 +143,7 @@ namespace Geta.NotFoundHandler.Optimizely.Data
 
         private static ContentUrlHistory ToContentUrlHistory(DataRow x)
         {
-            return new ContentUrlHistory()
+            return new ContentUrlHistory
             {
                 Id = x.Field<Guid>("Id"),
                 ContentKey = x.Field<string>("ContentKey"),
