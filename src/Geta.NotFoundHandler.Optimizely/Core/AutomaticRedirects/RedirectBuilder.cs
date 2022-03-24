@@ -2,11 +2,20 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Geta.NotFoundHandler.Core.Redirects;
+using Geta.NotFoundHandler.Optimizely.Infrastructure.Configuration;
+using Microsoft.Extensions.Options;
 
 namespace Geta.NotFoundHandler.Optimizely.Core.AutomaticRedirects
 {
     public class RedirectBuilder
     {
+        private readonly OptimizelyNotFoundHandlerOptions _configuration;
+
+        public RedirectBuilder(IOptions<OptimizelyNotFoundHandlerOptions> options)
+        {
+            _configuration = options.Value;
+        }
+
         public virtual IEnumerable<CustomRedirect> CreateRedirects(IReadOnlyCollection<ContentUrlHistory> histories)
         {
             var ordered = histories.OrderByDescending(x => x.CreatedUtc).ToList();
@@ -35,10 +44,7 @@ namespace Geta.NotFoundHandler.Optimizely.Core.AutomaticRedirects
                     continue;
                 }
 
-                yield return new CustomRedirect(sourceUrl,
-                                                destinationUrl,
-                                                false,
-                                                RedirectType.Permanent); // TODO: Use configured redirect type
+                yield return new CustomRedirect(sourceUrl, destinationUrl, false, _configuration.AutomaticRedirectType);
             }
         }
 

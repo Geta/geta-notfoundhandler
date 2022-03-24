@@ -1,16 +1,24 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Geta.NotFoundHandler.Core.Redirects;
 using Geta.NotFoundHandler.Optimizely.Core.AutomaticRedirects;
+using Geta.NotFoundHandler.Optimizely.Infrastructure.Configuration;
+using Microsoft.Extensions.Options;
 using Xunit;
 
 namespace Geta.NotFoundHandler.Optimizely.Tests.AutomaticRedirects;
 
 public class RedirectBuilderTests
 {
-    private readonly RedirectBuilder _redirectBuilder = new();
+    private readonly RedirectBuilder _redirectBuilder;
     private const string DefaultContentKey = "312";
     private const string DefaultPrimaryUrl = "/primary-default";
+
+    public RedirectBuilderTests()
+    {
+        _redirectBuilder = new(Options(RedirectType.Permanent));
+    }
 
     [Fact]
     public void CreateRedirects_returns_primary_redirect()
@@ -133,6 +141,30 @@ public class RedirectBuilderTests
         var redirects = _redirectBuilder.CreateRedirects(histories).ToList();
 
         Assert.Empty(redirects);
+    }
+
+    [Theory]
+    [InlineData(RedirectType.Permanent)]
+    [InlineData(RedirectType.Temporary)]
+    public void CreateRedirect_returns_redirect_with_redirect_type(RedirectType redirectType)
+    {
+        var redirectBuilder = new RedirectBuilder(Options(redirectType));
+        var oldUrl = "/initial";
+        var newUrl = "/destination";
+        var histories = new List<ContentUrlHistory>
+        {
+            HistoryWithPrimaryUrl("2022-01-01", oldUrl), HistoryWithPrimaryUrl("2022-01-02", newUrl)
+        };
+
+        var redirects = redirectBuilder.CreateRedirects(histories).ToList();
+
+        Assert.All(redirects, x => Assert.Equal(redirectType, x.RedirectType));
+    }
+
+    private static OptionsWrapper<OptimizelyNotFoundHandlerOptions> Options(RedirectType redirectType)
+    {
+        return new OptionsWrapper<OptimizelyNotFoundHandlerOptions>(
+            new OptimizelyNotFoundHandlerOptions { AutomaticRedirectType = redirectType });
     }
 
     private static ContentUrlHistory HistoryWithSecondaryUrl(string dateString, params string[] secondaryUrls)
