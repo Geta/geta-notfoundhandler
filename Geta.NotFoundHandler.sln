@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30804.86
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Geta.NotFoundHandler", "src\Geta.NotFoundHandler\Geta.NotFoundHandler.csproj", "{00BEC106-B3EE-421B-8ED5-B51EA016FD3D}"
 EndProject
@@ -24,7 +24,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Geta.NotFoundHandler.Admin"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AlloyMvcTemplates", "sandbox\Optimizely\Alloy\AlloyMvcTemplates.csproj", "{70BEE855-F32D-493E-8803-DA8AA49D4C9A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Geta.NotFoundHandler.Optimizely", "src\Geta.NotFoundHandler.Optimizely\Geta.NotFoundHandler.Optimizely.csproj", "{1356CAA1-8364-4147-A068-641A06EEE5FD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Geta.NotFoundHandler.Optimizely", "src\Geta.NotFoundHandler.Optimizely\Geta.NotFoundHandler.Optimizely.csproj", "{1356CAA1-8364-4147-A068-641A06EEE5FD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Geta.NotFoundHandler.Optimizely.Tests", "tests\Geta.NotFoundHandler.Optimizely.Tests\Geta.NotFoundHandler.Optimizely.Tests.csproj", "{8DD01C7F-3D7A-49B5-A255-AC69F4EA0162}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -52,6 +54,10 @@ Global
 		{1356CAA1-8364-4147-A068-641A06EEE5FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1356CAA1-8364-4147-A068-641A06EEE5FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1356CAA1-8364-4147-A068-641A06EEE5FD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8DD01C7F-3D7A-49B5-A255-AC69F4EA0162}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8DD01C7F-3D7A-49B5-A255-AC69F4EA0162}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8DD01C7F-3D7A-49B5-A255-AC69F4EA0162}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8DD01C7F-3D7A-49B5-A255-AC69F4EA0162}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -59,6 +65,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{80F6A409-357F-4EF2-BAAF-9603180BF1E1} = {751ABE30-032D-40A9-B36C-5549905113BD}
 		{70BEE855-F32D-493E-8803-DA8AA49D4C9A} = {320DF82B-2EF9-4AFA-9A77-FCE2B94F7038}
+		{8DD01C7F-3D7A-49B5-A255-AC69F4EA0162} = {751ABE30-032D-40A9-B36C-5549905113BD}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {76CC4F02-91DF-4BB8-A977-065BC8CB65C5}
