@@ -9,16 +9,16 @@ namespace Geta.NotFoundHandler.Optimizely.Core.AutomaticRedirects
 {
     public class CmsContentUrlProvider : IContentUrlProvider
     {
-        private readonly IContentRepository _contentRepository;
+        private readonly IContentLoader _contentLoader;
         private readonly IContentVersionRepository _contentVersionRepository;
         private readonly IUrlResolver _urlResolver;
 
         public CmsContentUrlProvider(
-            IContentRepository contentRepository,
+            IContentLoader contentLoader,
             IContentVersionRepository contentVersionRepository,
             IUrlResolver urlResolver)
         {
-            _contentRepository = contentRepository;
+            _contentLoader = contentLoader;
             _contentVersionRepository = contentVersionRepository;
             _urlResolver = urlResolver;
         }
@@ -39,6 +39,11 @@ namespace Geta.NotFoundHandler.Optimizely.Core.AutomaticRedirects
             return GetPageUrls(page);
         }
 
+        public bool CanHandle(IContent content)
+        {
+            return content is PageData;
+        }
+
         private IEnumerable<TypedUrl> GetPageUrls(PageData page)
         {
             return new List<TypedUrl> { new() { Url = GetPageUrl(page), Type = UrlType.Primary } };
@@ -49,7 +54,7 @@ namespace Geta.NotFoundHandler.Optimizely.Core.AutomaticRedirects
             if (page.LinkType == PageShortcutType.External || page.LinkType == PageShortcutType.Shortcut)
             {
                 var lastPublishedVersion = _contentVersionRepository.LoadPublished(page.ParentLink);
-                var parent = _contentRepository.Get<IContent>(lastPublishedVersion.ContentLink);
+                var parent = _contentLoader.Get<IContent>(lastPublishedVersion.ContentLink);
                 if (parent is PageData parentPage)
                 {
                     var parentUrl = GetPageUrl(parentPage);
@@ -60,11 +65,6 @@ namespace Geta.NotFoundHandler.Optimizely.Core.AutomaticRedirects
             }
 
             return _urlResolver.GetUrl(page.ContentLink);
-        }
-
-        public bool CanHandle(IContent content)
-        {
-            return content is PageData;
         }
     }
 }
