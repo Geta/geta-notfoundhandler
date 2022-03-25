@@ -134,7 +134,7 @@ namespace Geta.NotFoundHandler.Core.Redirects
 
         private static bool HasChanged(CustomRedirect oldRedirect, CustomRedirect newRedirect)
         {
-            if (oldRedirect == null) return false;
+            if (oldRedirect == null) return true;
 
             var comparer = new CustomRedirectEqualityComparer();
 
