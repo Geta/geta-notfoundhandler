@@ -9,18 +9,18 @@ namespace Geta.NotFoundHandler.Optimizely.Core.AutomaticRedirects
     public class CmsContentLinkProvider : IContentLinkProvider
     {
         private readonly ISiteDefinitionRepository _siteDefinitionRepository;
-        private readonly IContentRepository _contentRepository;
+        private readonly IContentLoader _contentLoader;
 
-        public CmsContentLinkProvider(ISiteDefinitionRepository siteDefinitionRepository, IContentRepository contentRepository)
+        public CmsContentLinkProvider(ISiteDefinitionRepository siteDefinitionRepository, IContentLoader contentLoader)
         {
             _siteDefinitionRepository = siteDefinitionRepository;
-            _contentRepository = contentRepository;
+            _contentLoader = contentLoader;
         }
 
         public IEnumerable<ContentReference> GetAllLinks()
         {
             var allSites = _siteDefinitionRepository.List();
-            return allSites.SelectMany(site => _contentRepository.GetDescendents(site.StartPage));
+            return allSites.SelectMany(site => _contentLoader.GetDescendents(site.StartPage));
         }
     }
 }
