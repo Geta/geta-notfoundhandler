@@ -33,9 +33,6 @@ namespace Geta.NotFoundHandler.Optimizely.Core.AutomaticRedirects
 
         public override string Execute()
         {
-            // Add settings to redirect as Permanent or Temp
-            // Think about cases when accidentally two same histories are registered - how and when to cleanup and consolidate. Maybe add cleanup to indexing.
-
             var movedContent = _contentUrlHistoryLoader.GetAllMoved().ToList();
             var totalCount = movedContent.Count;
             var successCount = 0;
