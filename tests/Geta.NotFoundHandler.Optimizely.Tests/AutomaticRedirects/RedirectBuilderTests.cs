@@ -68,7 +68,6 @@ public class RedirectBuilderTests
 
         var redirects = _redirectBuilder.CreateRedirects(histories).ToList();
 
-        Assert.Single(redirects);
         Assert.Contains(redirects, x => x.OldUrl == oldUrl && x.NewUrl == newUrl);
     }
 
@@ -83,7 +82,6 @@ public class RedirectBuilderTests
 
         var redirects = _redirectBuilder.CreateRedirects(histories).ToList();
 
-        Assert.Single(redirects);
         Assert.Contains(redirects, x => x.OldUrl == oldUrl && x.NewUrl == DefaultPrimaryUrl);
     }
 
@@ -99,26 +97,7 @@ public class RedirectBuilderTests
 
         var redirects = _redirectBuilder.CreateRedirects(histories).ToList();
 
-        Assert.Single(redirects);
         Assert.Contains(redirects, x => x.OldUrl == firstUrl && x.NewUrl == DefaultPrimaryUrl);
-    }
-
-    [Fact]
-    public void CreateRedirects_does_not_return_secondary_redirect_when_no_changes()
-    {
-        var initialUrl = "/initial";
-        var destinationUrl = "/destination";
-        var secondaryUrl = "/secondary-unchanged";
-        var histories = new List<ContentUrlHistory>
-        {
-            HistoryWithPrimaryAndSecondaryUrl("2022-01-01", initialUrl, secondaryUrl),
-            HistoryWithPrimaryAndSecondaryUrl("2022-01-02", destinationUrl, secondaryUrl)
-        };
-
-        var redirects = _redirectBuilder.CreateRedirects(histories).ToList();
-
-        Assert.Single(redirects);
-        Assert.DoesNotContain(redirects, x => x.OldUrl == secondaryUrl && x.NewUrl == destinationUrl);
     }
 
     [Fact]

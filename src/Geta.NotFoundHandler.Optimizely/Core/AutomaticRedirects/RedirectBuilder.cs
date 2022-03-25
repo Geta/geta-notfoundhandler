@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Geta.NotFoundHandler.Core.Redirects;
@@ -36,13 +35,6 @@ namespace Geta.NotFoundHandler.Optimizely.Core.AutomaticRedirects
             {
                 var sourceUrl = source.Url;
                 var destinationUrl = GetDestinationUrl(source, destinationHistory, destinationPrimary);
-
-                if (string.IsNullOrEmpty(sourceUrl)
-                    || string.IsNullOrEmpty(destinationUrl)
-                    || string.Equals(sourceUrl, destinationUrl, StringComparison.InvariantCultureIgnoreCase))
-                {
-                    continue;
-                }
 
                 yield return new CustomRedirect(sourceUrl, destinationUrl, false, _configuration.AutomaticRedirectType);
             }
