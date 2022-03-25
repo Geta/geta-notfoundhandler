@@ -113,6 +113,11 @@ namespace Geta.NotFoundHandler.Core.Redirects
         {
             var match = _redirectLoader.GetByOldUrl(redirect.OldUrl);
 
+            if (!HasChanged(match, redirect))
+            {
+                return;
+            }
+
             // if there is a match, replace the value.
             if (match != null)
             {
@@ -125,6 +130,15 @@ namespace Geta.NotFoundHandler.Core.Redirects
             {
                 _redirectsEvents.RedirectsUpdated();
             }
+        }
+
+        private static bool HasChanged(CustomRedirect oldRedirect, CustomRedirect newRedirect)
+        {
+            if (oldRedirect == null) return false;
+
+            var comparer = new CustomRedirectEqualityComparer();
+
+            return !comparer.Equals(oldRedirect, newRedirect);
         }
     }
 }

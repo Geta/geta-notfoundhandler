@@ -76,6 +76,6 @@ namespace Geta.NotFoundHandler.Core.Redirects
             NewUrl = redirect.NewUrl;
             WildCardSkipAppend = redirect.WildCardSkipAppend;
             RedirectType = redirect.RedirectType;
-        }
+        }   
     }
 }
