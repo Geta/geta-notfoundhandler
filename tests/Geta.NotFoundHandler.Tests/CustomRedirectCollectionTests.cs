@@ -281,7 +281,7 @@ namespace Geta.NotFoundHandler.Tests
         {
             var storedUrl = "/contentassets";
             var requesttUrl = "/contentassets";
-            var redirect = new CustomRedirect(storedUrl, (int)RedirectState.Deleted, 1);
+            var redirect = new CustomRedirect(storedUrl, RedirectState.Deleted);
             _sut.Add(redirect);
 
             var actual = _sut.Find(requesttUrl.ToUri());
@@ -294,7 +294,7 @@ namespace Geta.NotFoundHandler.Tests
         {
             var storedUrl = "/contentassets";
             var requesttUrl = "/contentassets/moreurl";
-            var redirect = new CustomRedirect(storedUrl, (int)RedirectState.Deleted, 1);
+            var redirect = new CustomRedirect(storedUrl, RedirectState.Deleted);
             _sut.Add(redirect);
 
             var actual = _sut.Find(requesttUrl.ToUri());

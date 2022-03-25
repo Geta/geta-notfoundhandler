@@ -113,7 +113,7 @@ namespace Geta.NotFoundHandler.Core.Redirects
         {
             var match = _redirectLoader.GetByOldUrl(redirect.OldUrl);
 
-            //if there is a match, replace the value.
+            // if there is a match, replace the value.
             if (match != null)
             {
                 redirect.Id = match.Id;
