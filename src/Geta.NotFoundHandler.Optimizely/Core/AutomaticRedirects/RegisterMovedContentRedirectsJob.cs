@@ -54,8 +54,10 @@ namespace Geta.NotFoundHandler.Optimizely.Core.AutomaticRedirects
 
                 try
                 {
-                    var redirects = _redirectBuilder.CreateRedirects(content.histories);
+                    var redirects = _redirectBuilder.CreateRedirects(content.histories).ToList();
                     _redirectsService.AddOrUpdate(redirects);
+                    var urlsToRemove = redirects.Where(x => x.NewUrl == x.OldUrl).Select(x => x.OldUrl);
+                    _redirectsService.DeleteByOldUrl(urlsToRemove);
 
                     successCount++;
                 }

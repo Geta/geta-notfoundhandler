@@ -35,17 +35,18 @@ namespace Geta.NotFoundHandler.Optimizely.Data
 
         public bool IsRegistered(ContentUrlHistory entity)
         {
-            var sqlCommand = $@"SELECT {AllFields} 
+            var sqlCommand = $@"SELECT TOP 1 {AllFields} 
                                 FROM {ContentUrlHistoryTable}
-                                WHERE ContentKey = @contentKey AND Urls = @urls
+                                WHERE ContentKey = @contentKey
                                 ORDER BY CreatedUtc DESC";
 
             var dataTable = _dataExecutor.ExecuteQuery(
                 sqlCommand,
-                _dataExecutor.CreateStringParameter("contentKey", entity.ContentKey),
-                _dataExecutor.CreateStringParameter("urls", ToJson(entity.Urls)));
+                _dataExecutor.CreateStringParameter("contentKey", entity.ContentKey));
 
-            return ToContentUrlHistory(dataTable).FirstOrDefault() != null;
+            var last = ToContentUrlHistory(dataTable).FirstOrDefault();
+
+            return last != null && last.Urls.Count == entity.Urls.Count && last.Urls.All(entity.Urls.Contains);
         }
 
         public IEnumerable<(string contentKey, IReadOnlyCollection<ContentUrlHistory> histories)> GetAllMoved()

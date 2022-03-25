@@ -75,12 +75,17 @@ namespace Geta.NotFoundHandler.Core.Redirects
 
         public void DeleteByOldUrl(string oldUrl)
         {
-            var match = _redirectLoader.GetByOldUrl(oldUrl);
-            if (match != null)
+            DeleteByOldUrl(new[] { oldUrl });
+        }
+
+        public void DeleteByOldUrl(IEnumerable<string> oldUrls)
+        {
+            foreach (var oldUrl in oldUrls)
             {
-                _repository.Delete(match);
-                _redirectsEvents.RedirectsUpdated();
+                DeleteByOldUrl(oldUrl, notifyUpdated: false);
             }
+
+            _redirectsEvents.RedirectsUpdated();
         }
 
         public int DeleteAll()
@@ -107,6 +112,20 @@ namespace Geta.NotFoundHandler.Core.Redirects
 
             _redirectsEvents.RedirectsUpdated();
             return ignoredRedirects.Count;
+        }
+
+        public void DeleteByOldUrl(string oldUrl, bool notifyUpdated)
+        {
+            var match = _redirectLoader.GetByOldUrl(oldUrl);
+            if (match != null)
+            {
+                _repository.Delete(match);
+            }
+
+            if (notifyUpdated)
+            {
+                _redirectsEvents.RedirectsUpdated();
+            }
         }
 
         public void AddOrUpdate(CustomRedirect redirect, bool notifyUpdated)
