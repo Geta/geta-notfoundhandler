@@ -1,0 +1,37 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+    <PackageId>Geta.NotFoundHandler.Optimizely.Commerce</PackageId>
+    <Title>NotFound handler Admin UI integration Optimizely Commerce</Title>
+    <PackageVersion>1.0.0</PackageVersion>
+    <Authors>Geta Digital</Authors>
+    <Company>Geta Digital</Company>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/Geta/geta-notfoundhandler</PackageProjectUrl>
+    <PackageIcon>icon.png</PackageIcon>
+    <PackageIconUrl>https://cdn.geta.no/opensource/icons/Geta-logo-3.png</PackageIconUrl>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <Description>This library contains a NotFound handler Admin user interface integration in an Optimizely Commerce project.</Description>
+    <PackageReleaseNotes>https://github.com/Geta/geta-notfoundhandler/blob/master/CHANGELOG.md</PackageReleaseNotes>
+    <PackageTags>404 NotFound 404Error Handler Geta Redirect</PackageTags>
+    <RepositoryUrl>https://github.com/Geta/geta-notfoundhandler.git</RepositoryUrl>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Geta.NotFoundHandler.Optimizely\Geta.NotFoundHandler.Optimizely.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\images\icon.png" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Infrastructure\Configuration\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="EPiServer.Commerce.Core" Version="14.1.3" />
+  </ItemGroup>
+
+</Project>

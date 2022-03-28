@@ -20,6 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\Geta.NotFoundHandler.Optimizely.Commerce\Geta.NotFoundHandler.Optimizely.Commerce.csproj" />
     <ProjectReference Include="..\..\src\Geta.NotFoundHandler.Optimizely\Geta.NotFoundHandler.Optimizely.csproj" />
   </ItemGroup>
 
