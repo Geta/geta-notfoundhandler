@@ -2,26 +2,25 @@ using System.Collections.Generic;
 using System.Linq;
 using EPiServer;
 using EPiServer.Core;
-using EPiServer.Web;
 using Geta.NotFoundHandler.Optimizely.Core.AutomaticRedirects;
+using Mediachase.Commerce.Catalog;
 
 namespace Geta.NotFoundHandler.Optimizely.Commerce.AutomaticRedirects
 {
     public class CommerceContentLinkProvider : IContentLinkProvider
     {
-        private readonly ISiteDefinitionRepository _siteDefinitionRepository;
+        private readonly ReferenceConverter _referenceConverter;
         private readonly IContentLoader _contentLoader;
 
-        public CommerceContentLinkProvider(ISiteDefinitionRepository siteDefinitionRepository, IContentLoader contentLoader)
+        public CommerceContentLinkProvider(ReferenceConverter referenceConverter, IContentLoader contentLoader)
         {
-            _siteDefinitionRepository = siteDefinitionRepository;
+            _referenceConverter = referenceConverter;
             _contentLoader = contentLoader;
         }
 
         public IEnumerable<ContentReference> GetAllLinks()
         {
-            var allSites = _siteDefinitionRepository.List();
-            return allSites.SelectMany(site => _contentLoader.GetDescendents(site.StartPage));
+            return _contentLoader.GetDescendents(_referenceConverter.GetRootLink()).ToList();
         }
     }
 }
