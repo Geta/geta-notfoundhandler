@@ -21,7 +21,7 @@ namespace Geta.NotFoundHandler.Infrastructure.Configuration
         public bool LogWithHostname { get; set; } = false;
         public string ConnectionString { get; private set; }
 
-        private readonly List<Type> _providers = new List<Type>();
+        private readonly List<Type> _providers = new();
         public IEnumerable<Type> Providers => _providers;
 
         public NotFoundHandlerOptions AddProvider<T>()

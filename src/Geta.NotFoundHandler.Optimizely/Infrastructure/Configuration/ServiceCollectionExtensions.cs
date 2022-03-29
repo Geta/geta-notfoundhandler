@@ -31,15 +31,27 @@ namespace Geta.NotFoundHandler.Optimizely.Infrastructure.Configuration
             services.AddTransient<ContentLinkLoader>();
             services.AddTransient<ContentKeyGenerator>();
             services.AddTransient<ContentUrlLoader>();
-            services.AddTransient<IContentKeyProvider, CmsContentKeyProvider>();
-            services.AddTransient<IContentLinkProvider, CmsContentLinkProvider>();
-            services.AddTransient<IContentUrlProvider, CmsContentUrlProvider>();
             services.AddTransient<SqlContentUrlHistoryRepository>();
             services.AddTransient<IRepository<ContentUrlHistory>>(x => x.GetRequiredService<SqlContentUrlHistoryRepository>());
             services.AddTransient<IContentUrlHistoryLoader>(x => x.GetRequiredService<SqlContentUrlHistoryRepository>());
             services.AddSingleton<Func<ContentUrlIndexer>>(x => x.GetService<ContentUrlIndexer>);
             services.AddTransient<ContentUrlIndexer>();
             services.AddTransient<RedirectBuilder>();
+
+            var providerOptions = new OptimizelyNotFoundHandlerOptions();
+            setupAction(providerOptions);
+            foreach (var provider in providerOptions.ContentKeyProviders)
+            {
+                services.AddSingleton(typeof(IContentKeyProvider), provider);
+            }
+            foreach (var provider in providerOptions.ContentLinkProviders)
+            {
+                services.AddSingleton(typeof(IContentLinkProvider), provider);
+            }
+            foreach (var provider in providerOptions.ContentUrlProviders)
+            {
+                services.AddSingleton(typeof(IContentUrlProvider), provider);
+            }
 
             services.Configure<ProtectedModuleOptions>(
                 pm =>
@@ -50,8 +62,6 @@ namespace Geta.NotFoundHandler.Optimizely.Infrastructure.Configuration
                     }
                 });
 
-            var providerOptions = new OptimizelyNotFoundHandlerOptions();
-            setupAction(providerOptions);
             services.AddOptions<OptimizelyNotFoundHandlerOptions>().Configure<IConfiguration>((options, configuration) =>
             {
                 setupAction(options);
