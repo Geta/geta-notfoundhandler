@@ -20,7 +20,10 @@ namespace Geta.NotFoundHandler.Optimizely.Core.AutomaticRedirects
             var ordered = histories.OrderByDescending(x => x.CreatedUtc).ToList();
             var destination = ordered.First();
 
-            return ordered.Skip(1).SelectMany(source => CreateRedirects(source, destination));
+            return ordered
+                .Skip(1)
+                .SelectMany(source => CreateRedirects(source, destination))
+                .Where(x => !string.IsNullOrEmpty(x.NewUrl));
         }
 
         private IEnumerable<CustomRedirect> CreateRedirects(ContentUrlHistory sourceHistory, ContentUrlHistory destinationHistory)

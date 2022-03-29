@@ -101,6 +101,20 @@ public class RedirectBuilderTests
     }
 
     [Fact]
+    public void CreateRedirects_does_not_return_secondary_redirect_when_not_changed()
+    {
+        var sameUrl = "/same-url";
+        var histories = new List<ContentUrlHistory>
+        {
+            HistoryWithSecondaryUrl("2022-01-01", sameUrl), HistoryWithSecondaryUrl("2022-01-02", sameUrl)
+        };
+
+        var redirects = _redirectBuilder.CreateRedirects(histories).ToList();
+
+        Assert.Collection(redirects, x => Assert.NotEqual(sameUrl, x.NewUrl));
+    }
+
+    [Fact]
     public void CreateRedirects_does_not_return_redirects_when_no_primary_destination()
     {
         var oldUrl = "/initial";
