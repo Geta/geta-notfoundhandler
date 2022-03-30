@@ -1,0 +1,17 @@
+﻿.category-page {
+    .toolbar {
+        margin-bottom: 15px;
+
+        &__page-size {
+            font-size: 5px;
+        }
+    }
+}
+
+@media (max-width: 991.98px) {
+    .category-page {
+        &__facets {
+            order: 1;
+        }
+    }
+}

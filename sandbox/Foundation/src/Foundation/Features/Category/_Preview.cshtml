@@ -1,0 +1,38 @@
+﻿@using EPiServer.Core
+@using EPiServer.Web.Mvc.Html
+@using EPiServer.AddOns.Helpers
+@using Foundation.Features.Category
+@using Foundation.Features.Locations.LocationItemPage
+
+@model CategoryFoundationPageViewModel
+
+<div class="blog__thumbnail">
+    <div class="w-100">
+        @if (!ContentReference.IsNullOrEmpty(Model.CurrentContent.PageImage))
+        {
+            <img data-src="@Url.ContentUrl(Model.CurrentContent.PageImage)?format=webp" class="img-fluid lazyload" />
+        }
+        else if (Model.CurrentContent as LocationItemPage != null && !ContentReference.IsNullOrEmpty(((LocationItemPage)Model.CurrentContent).Image))
+        {
+            <img data-src="@Url.ContentUrl(((LocationItemPage)Model.CurrentContent).Image)?format=webp" class="img-fluid lazyload" />
+        }
+        else
+        {
+            <img data-src="/imgs/blog-img1.jpg?format=webp" class="img-fluid lazyload" />
+        }
+    </div>
+    <div class="blog__title-container">
+        <div class="blog__title-wrapper">
+            <span>
+                @foreach (var tag in Model.Categories)
+                {
+                    <b><a class="account-link" title="@tag.Name" href="@tag.ContentLink.GetPublicUrl()">#@tag.Name</a></b>
+                }
+            </span>
+            <h2 class="blog__title">
+                <a href="@Model.CurrentContent.ContentLink.GetPublicUrl()">@Model.CurrentContent.MetaTitle</a>
+            </h2>
+            <p>@Html.Raw(Model.PreviewText)</p>
+        </div>
+    </div>
+</div>
