@@ -2,8 +2,8 @@
 
 namespace Geta.NotFoundHandler.Optimizely.Core.AutomaticRedirects
 {
-    public interface IMovedContentRedirectsRegistrator
+    public interface IMovedContentRegistratorQueue
     {
-        void Register(ContentReference contentLink);
+        void Enqueue(ContentReference contentLink);
     }
 }

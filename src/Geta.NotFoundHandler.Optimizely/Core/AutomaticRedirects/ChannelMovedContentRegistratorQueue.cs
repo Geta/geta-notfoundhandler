@@ -1,11 +1,11 @@
-﻿using System.Threading;
+using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 using EPiServer.Core;
 
 namespace Geta.NotFoundHandler.Optimizely.Core.AutomaticRedirects
 {
-    public class ChannelMovedContentRedirectsRegistrator : IMovedContentRedirectsRegistrator
+    public class ChannelMovedContentRegistratorQueue : IMovedContentRegistratorQueue
     {
         private static readonly Channel<ContentReference> _buffer = Channel.CreateUnbounded<ContentReference>(
             new UnboundedChannelOptions
@@ -25,7 +25,7 @@ namespace Geta.NotFoundHandler.Optimizely.Core.AutomaticRedirects
             return _buffer.Reader.TryRead(out contentLink);
         }
 
-        public void Register(ContentReference contentLink)
+        public void Enqueue(ContentReference contentLink)
         {
             _buffer.Writer.TryWrite(contentLink);
         }

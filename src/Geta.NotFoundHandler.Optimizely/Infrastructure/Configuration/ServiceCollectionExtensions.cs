@@ -39,9 +39,9 @@ namespace Geta.NotFoundHandler.Optimizely.Infrastructure.Configuration
 
             // Background service
             services.AddSingleton<IAutomaticRedirectsService, DefaultAutomaticRedirectsService>();
-            services.AddSingleton<ChannelMovedContentRedirectsRegistrator>();
-            services.AddSingleton<IMovedContentRedirectsRegistrator, ChannelMovedContentRedirectsRegistrator>();
-            services.AddHostedService<RegisterMovedContentRedirectsBackgroundService>();
+            services.AddSingleton<ChannelMovedContentRegistratorQueue>();
+            services.AddSingleton<IMovedContentRegistratorQueue, ChannelMovedContentRegistratorQueue>();
+            services.AddHostedService<MovedContentRegistratorBackgroundService>();
 
             var providerOptions = new OptimizelyNotFoundHandlerOptions();
             setupAction(providerOptions);

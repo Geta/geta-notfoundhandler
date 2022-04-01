@@ -38,7 +38,7 @@ public class ContentUrlIndexerTests
         var contentLink = CreateContentLink();
         A.CallTo(() => _fakeContentKeyGenerator.GetContentKey(contentLink)).Returns(ContentKeyResult.Empty);
 
-        _indexer.IndexContentUrl(contentLink);
+        _indexer.IndexContentUrls(contentLink);
 
         AssertNotSaved();
     }
@@ -49,7 +49,7 @@ public class ContentUrlIndexerTests
         var contentLink = CreateContentLink();
         A.CallTo(() => _fakeContentUrlHistoryLoader.IsRegistered(A<ContentUrlHistory>._)).Returns(true);
 
-        _indexer.IndexContentUrl(contentLink);
+        _indexer.IndexContentUrls(contentLink);
 
         AssertNotSaved();
     }
@@ -63,7 +63,7 @@ public class ContentUrlIndexerTests
         A.CallTo(() => _fakeContentKeyGenerator.GetContentKey(contentLink)).Returns(new ContentKeyResult(key));
         A.CallTo(() => _fakeContentUrlLoader.GetUrls(contentLink)).Returns(urls);
 
-        _indexer.IndexContentUrl(contentLink);
+        _indexer.IndexContentUrls(contentLink);
 
         var expected = new ContentUrlHistory { ContentKey = key, Urls = urls };
         AssertSaved(expected);

@@ -50,7 +50,7 @@ namespace Geta.NotFoundHandler.Optimizely.Core.AutomaticRedirects
 
                 try
                 {
-                    _contentUrlIndexer.IndexContentUrl(contentLink);
+                    _contentUrlIndexer.IndexContentUrls(contentLink);
 
                     successCount++;
                 }

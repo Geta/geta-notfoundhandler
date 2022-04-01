@@ -9,18 +9,18 @@ namespace Geta.NotFoundHandler.Optimizely.Core.AutomaticRedirects
     {
         private readonly IContentEvents _contentEvents;
         private readonly ContentUrlIndexer _contentUrlIndexer;
-        private readonly IMovedContentRedirectsRegistrator _movedContentRedirectsRegistrator;
+        private readonly IMovedContentRegistratorQueue _movedContentRegistratorQueue;
         private readonly OptimizelyNotFoundHandlerOptions _configuration;
 
         public ContentUrlHistoryEvents(
             IContentEvents contentEvents,
             IOptions<OptimizelyNotFoundHandlerOptions> options,
             ContentUrlIndexer contentUrlIndexer,
-            IMovedContentRedirectsRegistrator movedContentRedirectsRegistrator)
+            IMovedContentRegistratorQueue movedContentRegistratorQueue)
         {
             _contentEvents = contentEvents;
             _contentUrlIndexer = contentUrlIndexer;
-            _movedContentRedirectsRegistrator = movedContentRedirectsRegistrator;
+            _movedContentRegistratorQueue = movedContentRegistratorQueue;
             _configuration = options.Value;
         }
 
@@ -35,18 +35,12 @@ namespace Geta.NotFoundHandler.Optimizely.Core.AutomaticRedirects
 
         private void OnMovedContent(object sender, ContentEventArgs e)
         {
-            IndexContentUrl(e);
-            _movedContentRedirectsRegistrator.Register(e.ContentLink);
+            _movedContentRegistratorQueue.Enqueue(e.ContentLink);
         }
 
         private void OnPublishedContent(object sender, ContentEventArgs e)
         {
-            IndexContentUrl(e);
-        }
-
-        private void IndexContentUrl(ContentEventArgs e)
-        {
-            _contentUrlIndexer.IndexContentUrl(e.ContentLink);
+            _contentUrlIndexer.IndexContentUrls(e.ContentLink);
         }
     }
 }

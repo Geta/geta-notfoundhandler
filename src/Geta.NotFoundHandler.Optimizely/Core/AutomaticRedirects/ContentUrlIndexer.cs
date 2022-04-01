@@ -23,7 +23,7 @@ namespace Geta.NotFoundHandler.Optimizely.Core.AutomaticRedirects
             _contentUrlHistoryLoader = contentUrlHistoryLoader;
         }
 
-        public virtual void IndexContentUrl(ContentReference contentLink)
+        public virtual void IndexContentUrls(ContentReference contentLink)
         {
             var keyResult = _contentKeyGenerator.GetContentKey(contentLink);
             if (!keyResult.HasValue) return;
