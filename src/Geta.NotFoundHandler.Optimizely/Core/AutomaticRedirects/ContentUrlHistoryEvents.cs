@@ -1,4 +1,3 @@
-using System;
 using EPiServer;
 using EPiServer.Core;
 using Geta.NotFoundHandler.Optimizely.Infrastructure.Configuration;
@@ -9,16 +8,19 @@ namespace Geta.NotFoundHandler.Optimizely.Core.AutomaticRedirects
     public class ContentUrlHistoryEvents
     {
         private readonly IContentEvents _contentEvents;
-        private readonly Func<ContentUrlIndexer> _contentUrlIndexerFactory;
+        private readonly ContentUrlIndexer _contentUrlIndexer;
+        private readonly IMovedContentRedirectsRegistrator _movedContentRedirectsRegistrator;
         private readonly OptimizelyNotFoundHandlerOptions _configuration;
 
         public ContentUrlHistoryEvents(
             IContentEvents contentEvents,
             IOptions<OptimizelyNotFoundHandlerOptions> options,
-            Func<ContentUrlIndexer> contentUrlIndexerFactory)
+            ContentUrlIndexer contentUrlIndexer,
+            IMovedContentRedirectsRegistrator movedContentRedirectsRegistrator)
         {
             _contentEvents = contentEvents;
-            _contentUrlIndexerFactory = contentUrlIndexerFactory;
+            _contentUrlIndexer = contentUrlIndexer;
+            _movedContentRedirectsRegistrator = movedContentRedirectsRegistrator;
             _configuration = options.Value;
         }
 
@@ -34,6 +36,7 @@ namespace Geta.NotFoundHandler.Optimizely.Core.AutomaticRedirects
         private void OnMovedContent(object sender, ContentEventArgs e)
         {
             IndexContentUrl(e);
+            _movedContentRedirectsRegistrator.Register(e.ContentLink);
         }
 
         private void OnPublishedContent(object sender, ContentEventArgs e)
@@ -43,8 +46,7 @@ namespace Geta.NotFoundHandler.Optimizely.Core.AutomaticRedirects
 
         private void IndexContentUrl(ContentEventArgs e)
         {
-            var indexer = _contentUrlIndexerFactory();
-            indexer.IndexContentUrl(e.ContentLink);
+            _contentUrlIndexer.IndexContentUrl(e.ContentLink);
         }
     }
 }

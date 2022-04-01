@@ -28,15 +28,20 @@ namespace Geta.NotFoundHandler.Optimizely.Infrastructure.Configuration
             services.AddSingleton<OptimizelySyncEvents>();
             services.AddSingleton<ContentUrlHistoryEvents>();
             services.AddTransient<Upgrader>();
-            services.AddTransient<ContentLinkLoader>();
-            services.AddTransient<ContentKeyGenerator>();
-            services.AddTransient<ContentUrlLoader>();
-            services.AddTransient<SqlContentUrlHistoryRepository>();
-            services.AddTransient<IRepository<ContentUrlHistory>>(x => x.GetRequiredService<SqlContentUrlHistoryRepository>());
-            services.AddTransient<IContentUrlHistoryLoader>(x => x.GetRequiredService<SqlContentUrlHistoryRepository>());
-            services.AddSingleton<Func<ContentUrlIndexer>>(x => x.GetService<ContentUrlIndexer>);
-            services.AddTransient<ContentUrlIndexer>();
-            services.AddTransient<RedirectBuilder>();
+            services.AddSingleton<ContentLinkLoader>();
+            services.AddSingleton<ContentKeyGenerator>();
+            services.AddSingleton<ContentUrlLoader>();
+            services.AddSingleton<SqlContentUrlHistoryRepository>();
+            services.AddSingleton<IRepository<ContentUrlHistory>, SqlContentUrlHistoryRepository>();
+            services.AddSingleton<IContentUrlHistoryLoader, SqlContentUrlHistoryRepository>();
+            services.AddSingleton<ContentUrlIndexer>();
+            services.AddSingleton<RedirectBuilder>();
+
+            // Background service
+            services.AddSingleton<IAutomaticRedirectsService, DefaultAutomaticRedirectsService>();
+            services.AddSingleton<ChannelMovedContentRedirectsRegistrator>();
+            services.AddSingleton<IMovedContentRedirectsRegistrator, ChannelMovedContentRedirectsRegistrator>();
+            services.AddHostedService<RegisterMovedContentRedirectsBackgroundService>();
 
             var providerOptions = new OptimizelyNotFoundHandlerOptions();
             setupAction(providerOptions);
@@ -44,10 +49,12 @@ namespace Geta.NotFoundHandler.Optimizely.Infrastructure.Configuration
             {
                 services.AddSingleton(typeof(IContentKeyProvider), provider);
             }
+
             foreach (var provider in providerOptions.ContentLinkProviders)
             {
                 services.AddSingleton(typeof(IContentLinkProvider), provider);
             }
+
             foreach (var provider in providerOptions.ContentUrlProviders)
             {
                 services.AddSingleton(typeof(IContentUrlProvider), provider);

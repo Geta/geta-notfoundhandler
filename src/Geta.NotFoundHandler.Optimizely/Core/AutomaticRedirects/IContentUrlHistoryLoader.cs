@@ -6,5 +6,6 @@ namespace Geta.NotFoundHandler.Optimizely.Core.AutomaticRedirects
     {
         bool IsRegistered(ContentUrlHistory entity);
         IEnumerable<(string contentKey, IReadOnlyCollection<ContentUrlHistory> histories)> GetAllMoved();
+        IReadOnlyCollection<ContentUrlHistory> GetMoved(string contentKey);
     }
 }

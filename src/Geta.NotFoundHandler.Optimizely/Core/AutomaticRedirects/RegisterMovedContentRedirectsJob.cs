@@ -2,7 +2,6 @@ using System;
 using System.Linq;
 using EPiServer.PlugIn;
 using EPiServer.Scheduler;
-using Geta.NotFoundHandler.Core.Redirects;
 using Geta.NotFoundHandler.Optimizely.Infrastructure;
 
 namespace Geta.NotFoundHandler.Optimizely.Core.AutomaticRedirects
@@ -13,19 +12,16 @@ namespace Geta.NotFoundHandler.Optimizely.Core.AutomaticRedirects
     public class RegisterMovedContentRedirectsJob : ScheduledJobBase
     {
         private readonly IContentUrlHistoryLoader _contentUrlHistoryLoader;
-        private readonly RedirectBuilder _redirectBuilder;
         private readonly JobStatusLogger _jobStatusLogger;
-        private readonly IRedirectsService _redirectsService;
+        private readonly IAutomaticRedirectsService _automaticRedirectsService;
         private bool _stopped;
 
         public RegisterMovedContentRedirectsJob(
-            IRedirectsService redirectsService,
-            IContentUrlHistoryLoader contentUrlHistoryLoader, 
-            RedirectBuilder redirectBuilder)
+            IAutomaticRedirectsService automaticRedirectsService,
+            IContentUrlHistoryLoader contentUrlHistoryLoader)
         {
-            _redirectsService = redirectsService;
+            _automaticRedirectsService = automaticRedirectsService;
             _contentUrlHistoryLoader = contentUrlHistoryLoader;
-            _redirectBuilder = redirectBuilder;
             _jobStatusLogger = new JobStatusLogger(OnStatusChanged);
 
             IsStoppable = true;
@@ -54,11 +50,7 @@ namespace Geta.NotFoundHandler.Optimizely.Core.AutomaticRedirects
 
                 try
                 {
-                    var redirects = _redirectBuilder.CreateRedirects(content.histories).ToList();
-                    _redirectsService.AddOrUpdate(redirects);
-                    var urlsToRemove = redirects.Where(x => x.NewUrl == x.OldUrl).Select(x => x.OldUrl);
-                    _redirectsService.DeleteByOldUrl(urlsToRemove);
-
+                    _automaticRedirectsService.CreateRedirects(content.histories);
                     successCount++;
                 }
                 catch (Exception ex)

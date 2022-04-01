@@ -68,6 +68,26 @@ namespace Geta.NotFoundHandler.Optimizely.Data
             return histories.GroupBy(x => x.ContentKey).Select(x => (x.Key, (IReadOnlyCollection<ContentUrlHistory>)x.ToList()));
         }
 
+        public IReadOnlyCollection<ContentUrlHistory> GetMoved(string contentKey)
+        {
+            var sqlCommand = $@"SELECT h.Id, h.ContentKey, h.Urls, h.CreatedUtc 
+                                FROM {ContentUrlHistoryTable} h
+                                INNER JOIN 
+                                    (SELECT ContentKey
+                                    FROM {ContentUrlHistoryTable}
+                                    GROUP BY ContentKey
+                                    HAVING COUNT(*) > 1) k
+                                ON h.ContentKey = k.ContentKey
+                                WHERE h.ContentKey = @contentKey
+                                ORDER BY h.ContentKey, h.CreatedUtc DESC";
+
+            var dataTable = _dataExecutor.ExecuteQuery(sqlCommand, _dataExecutor.CreateStringParameter("contentKey", contentKey));
+
+            var histories = ToContentUrlHistory(dataTable);
+
+            return histories.ToList();
+        }
+
         public void Save(ContentUrlHistory entity)
         {
             if (entity.Id == Guid.Empty)
