@@ -1,9 +1,9 @@
 // Copyright (c) Geta Digital. All rights reserved.
 // Licensed under Apache-2.0. See the LICENSE file in the project root for more information
 
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Channels;
-using System.Threading.Tasks;
 using EPiServer.Core;
 
 namespace Geta.NotFoundHandler.Optimizely.Core.AutomaticRedirects
@@ -18,14 +18,9 @@ namespace Geta.NotFoundHandler.Optimizely.Core.AutomaticRedirects
                 SingleReader = true
             });
 
-        public ValueTask<bool> WaitToReadAsync(CancellationToken cancellationToken = default)
+        public IAsyncEnumerable<ContentReference> ReadAllAsync(CancellationToken cancellationToken = default)
         {
-            return _buffer.Reader.WaitToReadAsync(cancellationToken);
-        }
-
-        public bool TryRead(out ContentReference contentLink)
-        {
-            return _buffer.Reader.TryRead(out contentLink);
+            return _buffer.Reader.ReadAllAsync(cancellationToken);
         }
 
         public void Enqueue(ContentReference contentLink)

@@ -37,8 +37,7 @@ namespace Geta.NotFoundHandler.Optimizely.Core.AutomaticRedirects
 
         protected override async Task ExecuteAsync(CancellationToken cancellationToken)
         {
-            while (await _registratorQueue.WaitToReadAsync(cancellationToken))
-            while (_registratorQueue.TryRead(out var contentLink))
+            await foreach (var contentLink in _registratorQueue.ReadAllAsync(cancellationToken))
             {
                 try
                 {
