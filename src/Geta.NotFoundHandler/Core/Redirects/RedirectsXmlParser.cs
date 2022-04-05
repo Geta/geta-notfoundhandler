@@ -63,7 +63,7 @@ namespace Geta.NotFoundHandler.Core.Redirects
             // Parse all url nodes
             var nodes = _customRedirectsXmlFile.SelectNodes(urlPath);
 
-            if (nodes == null) throw new Exception($"Can't find nodes under '{urlPath}'.");
+            if (nodes == null) throw new InvalidOperationException($"Can't find nodes under '{UrlPath}'.");
 
             foreach (XmlNode node in nodes)
             {
@@ -72,8 +72,8 @@ namespace Geta.NotFoundHandler.Core.Redirects
                 var newNode = node.SelectSingleNode(NewUrl);
                 var oldNodes = node.SelectNodes(OldUrl);
 
-                if (newNode == null) throw new Exception($"Can't find node under '{urlPath}/{NewUrl}'.");
-                if (oldNodes == null) throw new Exception($"Can't find nodes under '{urlPath}/{OldUrl}'.");
+                if (newNode == null) throw new InvalidOperationException($"Can't find node under '{UrlPath}/{NewUrl}'.");
+                if (oldNodes == null) throw new InvalidOperationException($"Can't find nodes under '{UrlPath}/{OldUrl}'.");
 
                 foreach (XmlNode oldNode in oldNodes)
                 {
