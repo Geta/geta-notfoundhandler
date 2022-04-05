@@ -40,7 +40,8 @@ namespace Geta.NotFoundHandler.Data
             catch (Exception ex)
             {
                 _logger.LogError(ex,
-                    "An error occurred in the ExecuteSQL method with the following sql: {SqlCommand}", sqlCommand);
+                                 "An error occurred in the ExecuteSQL method with the following sql: {SqlCommand}",
+                                 sqlCommand);
             }
 
             return ds.Tables[0];
@@ -62,7 +63,8 @@ namespace Geta.NotFoundHandler.Data
             {
                 success = false;
                 _logger.LogError(ex,
-                    "An error occurred in the ExecuteSQL method with the following sql: {SqlCommand}", sqlCommand);
+                                 "An error occurred in the ExecuteSQL method with the following sql: {SqlCommand}",
+                                 sqlCommand);
             }
 
             return success;
@@ -83,7 +85,8 @@ namespace Geta.NotFoundHandler.Data
             {
                 result = 0;
                 _logger.LogError(ex,
-                    "An error occurred in the ExecuteScalar method with the following sql: {SqlCommand}", sqlCommand);
+                                 "An error occurred in the ExecuteScalar method with the following sql: {SqlCommand}",
+                                 sqlCommand);
             }
 
             return result;
@@ -112,6 +115,7 @@ namespace Geta.NotFoundHandler.Data
             {
                 _logger.LogError(ex, "Error while running stored procedure");
             }
+
             return value;
         }
 
@@ -119,9 +123,7 @@ namespace Geta.NotFoundHandler.Data
         {
             var parameter = new SqlParameter
             {
-                ParameterName = parameterName,
-                DbType = dbType,
-                Direction = ParameterDirection.Input
+                ParameterName = parameterName, DbType = dbType, Direction = ParameterDirection.Input
             };
             return parameter;
         }
@@ -183,9 +185,7 @@ namespace Geta.NotFoundHandler.Data
         {
             var parameter = new SqlParameter
             {
-                ParameterName = "@ReturnValue",
-                DbType = DbType.Int32,
-                Direction = ParameterDirection.ReturnValue,
+                ParameterName = "@ReturnValue", DbType = DbType.Int32, Direction = ParameterDirection.ReturnValue,
             };
             return parameter;
         }
