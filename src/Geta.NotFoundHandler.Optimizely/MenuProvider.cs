@@ -23,10 +23,7 @@ namespace Geta.NotFoundHandler.Optimizely
                 AuthorizationPolicy = NotFoundHandler.Infrastructure.Constants.PolicyName
             };
 
-            return new List<MenuItem>
-            {
-                link
-            };
+            return new List<MenuItem> { link };
         }
     }
 }
