@@ -10,7 +10,7 @@ namespace Geta.NotFoundHandler.Optimizely.Core.AutomaticRedirects
 {
     public class ChannelMovedContentRegistratorQueue : IMovedContentRegistratorQueue
     {
-        private static readonly Channel<ContentReference> _buffer = Channel.CreateUnbounded<ContentReference>(
+        private static readonly Channel<ContentReference> Buffer = Channel.CreateUnbounded<ContentReference>(
             new UnboundedChannelOptions
             {
                 AllowSynchronousContinuations = false,
@@ -20,12 +20,12 @@ namespace Geta.NotFoundHandler.Optimizely.Core.AutomaticRedirects
 
         public IAsyncEnumerable<ContentReference> ReadAllAsync(CancellationToken cancellationToken = default)
         {
-            return _buffer.Reader.ReadAllAsync(cancellationToken);
+            return Buffer.Reader.ReadAllAsync(cancellationToken);
         }
 
         public void Enqueue(ContentReference contentLink)
         {
-            _buffer.Writer.TryWrite(contentLink);
+            Buffer.Writer.TryWrite(contentLink);
         }
     }
 }
