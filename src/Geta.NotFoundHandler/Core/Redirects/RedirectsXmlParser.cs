@@ -56,12 +56,12 @@ namespace Geta.NotFoundHandler.Core.Redirects
         /// <returns>A collection of CustomRedirect objects</returns>
         private CustomRedirectCollection Load()
         {
-            const string urlPath = "/redirects/urls/url";
+            const string UrlPath = "/redirects/urls/url";
 
             var redirects = new CustomRedirectCollection();
 
             // Parse all url nodes
-            var nodes = _customRedirectsXmlFile.SelectNodes(urlPath);
+            var nodes = _customRedirectsXmlFile.SelectNodes(UrlPath);
 
             if (nodes == null) throw new InvalidOperationException($"Can't find nodes under '{UrlPath}'.");
 
