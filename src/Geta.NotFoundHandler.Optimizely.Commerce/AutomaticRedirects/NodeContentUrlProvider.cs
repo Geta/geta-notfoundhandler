@@ -45,6 +45,7 @@ namespace Geta.NotFoundHandler.Optimizely.Commerce.AutomaticRedirects
                 .GetParents<NodeRelation>(node.ContentLink)
                 .Select(x => x.Parent)
                 .ToList();
+
             // primary parent node is not returned from _relationRepository.GetParents for nodes while it is for entries
             parentsLinks.Insert(0, node.ParentLink);
             parentsLinks = parentsLinks.Distinct().ToList();
