@@ -1,11 +1,14 @@
 
 # NotFound Handler for ASP.NET Core and Optimizely
 
+## Status
+
+
 ## Description
 
-![](http://tc.geta.no/app/rest/builds/buildType:(id:GetaPackages_GetaNotFoundHandler_00ci),branch:master/statusIcon)
-[![Platform](https://img.shields.io/badge/Platform-.NET%205-blue.svg?style=flat)](https://docs.microsoft.com/en-us/dotnet/)
-[![Platform](https://img.shields.io/badge/Optimizely-%2012-orange.svg?style=flat)](http://world.episerver.com/cms/)
+|Build|Code Analysis|.NET|CMS|
+|-----|-------------|----|---|
+|![](http://tc.geta.no/app/rest/builds/buildType:(id:GetaPackages_GetaNotFoundHandler_00ci),branch:master/statusIcon) | [![Quality gate](https://sonarcloud.io/api/project_badges/quality_gate?project=Geta_geta-notfoundhandler)](https://sonarcloud.io/summary/new_code?id=Geta_geta-notfoundhandler) | [![Platform](https://img.shields.io/badge/Platform-.NET%205-blue.svg?style=flat)](https://docs.microsoft.com/en-us/dotnet/) | [![Platform](https://img.shields.io/badge/Optimizely-%2012-orange.svg?style=flat)](http://world.episerver.com/cms/) |
 
 The popular NotFound handler for ASP.NET Core and Optimizely, enabling better control over your 404 page in addition to allowing redirects for old URLs that no longer works.
 
