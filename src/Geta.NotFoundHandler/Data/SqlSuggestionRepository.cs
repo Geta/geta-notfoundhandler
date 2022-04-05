@@ -76,7 +76,7 @@ namespace Geta.NotFoundHandler.Data
             _dataExecutor.ExecuteNonQuery(sqlCommand);
         }
 
-        public void Delete(int maxErrors, int minimumDays)
+        public void Delete(int maxErrors, int minimumDaysOld)
         {
             var sqlCommand = $@"delete from {SuggestionsTable}
                                                 where [OldUrl] in (
@@ -84,7 +84,7 @@ namespace Geta.NotFoundHandler.Data
                                                   from (
                                                       select [OldUrl]
                                                       from {SuggestionsTable}
-                                                      Where DATEDIFF(day, [Requested], getdate()) >= {minimumDays}
+                                                      Where DATEDIFF(day, [Requested], getdate()) >= {minimumDaysOld}
                                                       group by [OldUrl]
                                                       having count(*) <= {maxErrors}
                                                       ) t
