@@ -18,12 +18,12 @@ namespace Geta.NotFoundHandler.Optimizely.Core.AutomaticRedirects
                 SingleReader = true
             });
 
-        public IAsyncEnumerable<ContentReference> ReadAllAsync(CancellationToken cancellationToken = default)
+        public virtual IAsyncEnumerable<ContentReference> ReadAllAsync(CancellationToken cancellationToken = default)
         {
             return Buffer.Reader.ReadAllAsync(cancellationToken);
         }
 
-        public void Enqueue(ContentReference contentLink)
+        public virtual void Enqueue(ContentReference contentLink)
         {
             Buffer.Writer.TryWrite(contentLink);
         }
