@@ -319,7 +319,7 @@ namespace Geta.NotFoundHandler.Tests
 
         private void AssertRedirected(HttpContext context, CustomRedirect redirect)
         {
-            Assert.True(_sut.IsHandled(context));
+            Assert.True(RequestHandler.IsHandled(context));
             Assert.NotEqual(404, context.Response.StatusCode);
 
             var headers = context.Response.Headers;
@@ -329,19 +329,19 @@ namespace Geta.NotFoundHandler.Tests
 
         private void Assert404ResponseSet(HttpContext context)
         {
-            Assert.True(_sut.IsHandled(context));
+            Assert.True(RequestHandler.IsHandled(context));
             Assert.Equal(404, context.Response.StatusCode);
         }
 
         private void Assert410ResponseSet(HttpContext context)
         {
-            Assert.True(_sut.IsHandled(context));
+            Assert.True(RequestHandler.IsHandled(context));
             Assert.Equal(410, context.Response.StatusCode);
         }
 
         private void AssertNotHandled(HttpContext context)
         {
-            Assert.False(_sut.IsHandled(context));
+            Assert.False(RequestHandler.IsHandled(context));
         }
     }
 }
