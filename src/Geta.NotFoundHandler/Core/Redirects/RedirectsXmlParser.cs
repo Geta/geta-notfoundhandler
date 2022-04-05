@@ -50,6 +50,53 @@ namespace Geta.NotFoundHandler.Core.Redirects
             return Load();
         }
 
+        public virtual XmlDocument Export(List<CustomRedirect> redirects)
+        {
+            var document = new XmlDocument();
+            var xmlDeclaration = document.CreateXmlDeclaration("1.0", "UTF-8", null);
+            var root = document.DocumentElement;
+            document.InsertBefore(xmlDeclaration, root);
+
+            var redirectsElement = document.CreateElement(string.Empty, "redirects", string.Empty);
+            document.AppendChild(redirectsElement);
+
+            var urlsElement = document.CreateElement(string.Empty, "urls", string.Empty);
+            redirectsElement.AppendChild(urlsElement);
+
+            foreach (var redirect in redirects)
+            {
+                if (string.IsNullOrWhiteSpace(redirect.OldUrl) || string.IsNullOrWhiteSpace(redirect.NewUrl))
+                {
+                    continue;
+                }
+
+                var urlElement = document.CreateElement(string.Empty, "url", string.Empty);
+
+                var oldElement = document.CreateElement(string.Empty, OldUrl, string.Empty);
+                oldElement.AppendChild(document.CreateTextNode(redirect.OldUrl.Trim()));
+                if (redirect.WildCardSkipAppend)
+                {
+                    var wildCardAttribute = document.CreateAttribute(string.Empty, SkipWildcard, string.Empty);
+                    wildCardAttribute.Value = "true";
+                    oldElement.Attributes.Append(wildCardAttribute);
+                }
+
+                var redirectTypeAttribute = document.CreateAttribute(string.Empty, RedirectType, string.Empty);
+                redirectTypeAttribute.Value = redirect.RedirectType.ToString();
+                oldElement.Attributes.Append(redirectTypeAttribute);
+
+                var newElement = document.CreateElement(string.Empty, NewUrl, string.Empty);
+                newElement.AppendChild(document.CreateTextNode(redirect.NewUrl.Trim()));
+
+                urlElement.AppendChild(oldElement);
+                urlElement.AppendChild(newElement);
+
+                urlsElement.AppendChild(urlElement);
+            }
+
+            return document;
+        }
+
         /// <summary>
         /// Parses the xml file and reads all redirects.
         /// </summary>
@@ -109,53 +156,6 @@ namespace Geta.NotFoundHandler.Core.Redirects
             }
 
             return Redirects.RedirectType.Permanent;
-        }
-
-        public XmlDocument Export(List<CustomRedirect> redirects)
-        {
-            var document = new XmlDocument();
-            var xmlDeclaration = document.CreateXmlDeclaration("1.0", "UTF-8", null);
-            var root = document.DocumentElement;
-            document.InsertBefore(xmlDeclaration, root);
-
-            var redirectsElement = document.CreateElement(string.Empty, "redirects", string.Empty);
-            document.AppendChild(redirectsElement);
-
-            var urlsElement = document.CreateElement(string.Empty, "urls", string.Empty);
-            redirectsElement.AppendChild(urlsElement);
-
-            foreach (var redirect in redirects)
-            {
-                if (string.IsNullOrWhiteSpace(redirect.OldUrl) || string.IsNullOrWhiteSpace(redirect.NewUrl))
-                {
-                    continue;
-                }
-
-                var urlElement = document.CreateElement(string.Empty, "url", string.Empty);
-
-                var oldElement = document.CreateElement(string.Empty, OldUrl, string.Empty);
-                oldElement.AppendChild(document.CreateTextNode(redirect.OldUrl.Trim()));
-                if (redirect.WildCardSkipAppend)
-                {
-                    var wildCardAttribute = document.CreateAttribute(string.Empty, SkipWildcard, string.Empty);
-                    wildCardAttribute.Value = "true";
-                    oldElement.Attributes.Append(wildCardAttribute);
-                }
-
-                var redirectTypeAttribute = document.CreateAttribute(string.Empty, RedirectType, string.Empty);
-                redirectTypeAttribute.Value = redirect.RedirectType.ToString();
-                oldElement.Attributes.Append(redirectTypeAttribute);
-
-                var newElement = document.CreateElement(string.Empty, NewUrl, string.Empty);
-                newElement.AppendChild(document.CreateTextNode(redirect.NewUrl.Trim()));
-
-                urlElement.AppendChild(oldElement);
-                urlElement.AppendChild(newElement);
-
-                urlsElement.AppendChild(urlElement);
-            }
-
-            return document;
         }
     }
 }
