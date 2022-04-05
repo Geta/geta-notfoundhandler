@@ -34,17 +34,6 @@ namespace Geta.NotFoundHandler.Core.Redirects
         // 301 (permanent) or 302 (temporary)
         public RedirectType RedirectType { get; set; }
 
-        /// <summary>
-        /// The hash code for the CustomRedirect class is the
-        /// old url string, which is the one we'll be doing lookups
-        /// based on.
-        /// </summary>
-        /// <returns>The Hash code of the old Url</returns>
-        public override int GetHashCode()
-        {
-            return OldUrl != null ? OldUrl.GetHashCode() : 0;
-        }
-
         public Guid? Id { get; set; }
 
         public CustomRedirect()
