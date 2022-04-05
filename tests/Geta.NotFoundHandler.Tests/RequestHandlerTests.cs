@@ -317,7 +317,7 @@ namespace Geta.NotFoundHandler.Tests
             _httpContext.Connection.LocalIpAddress = new IPAddress(321);
         }
 
-        private void AssertRedirected(HttpContext context, CustomRedirect redirect)
+        private static void AssertRedirected(HttpContext context, CustomRedirect redirect)
         {
             Assert.True(RequestHandler.IsHandled(context));
             Assert.NotEqual(404, context.Response.StatusCode);
@@ -327,19 +327,19 @@ namespace Geta.NotFoundHandler.Tests
             Assert.Equal(redirect.NewUrl, redirectLocation);
         }
 
-        private void Assert404ResponseSet(HttpContext context)
+        private static void Assert404ResponseSet(HttpContext context)
         {
             Assert.True(RequestHandler.IsHandled(context));
             Assert.Equal(404, context.Response.StatusCode);
         }
 
-        private void Assert410ResponseSet(HttpContext context)
+        private static void Assert410ResponseSet(HttpContext context)
         {
             Assert.True(RequestHandler.IsHandled(context));
             Assert.Equal(410, context.Response.StatusCode);
         }
 
-        private void AssertNotHandled(HttpContext context)
+        private static void AssertNotHandled(HttpContext context)
         {
             Assert.False(RequestHandler.IsHandled(context));
         }
