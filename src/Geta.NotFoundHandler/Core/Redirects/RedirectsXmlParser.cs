@@ -77,22 +77,8 @@ namespace Geta.NotFoundHandler.Core.Redirects
 
                 foreach (XmlNode oldNode in oldNodes)
                 {
-                    var skipWildCardAppend = false;
-                    var skipWildCardAttr = oldNode.Attributes?[SkipWildcard];
-                    if (skipWildCardAttr != null)
-                    {
-                        // If value parsing fails, it will be false by default. We do
-                        // not really care to check if it fails, as we cannot do anything
-                        // about it (throwing an exception is not a good idea here)
-                        bool.TryParse(skipWildCardAttr.Value, out skipWildCardAppend);
-                    }
-
-                    var redirectType = Redirects.RedirectType.Permanent;
-                    var redirectTypeAttr = oldNode.Attributes?[RedirectType];
-                    if (redirectTypeAttr != null)
-                    {
-                        Enum.TryParse(redirectTypeAttr.Value, out redirectType);
-                    }
+                    var skipWildCardAppend = GetSkipWildCardAppend(oldNode);
+                    var redirectType = GetRedirectType(oldNode);
 
                     // Create new custom redirect nodes
                     var redirect = new CustomRedirect(oldNode.InnerText, newNode.InnerText, skipWildCardAppend, redirectType);
@@ -101,6 +87,28 @@ namespace Geta.NotFoundHandler.Core.Redirects
             }
 
             return redirects;
+        }
+
+        private static bool GetSkipWildCardAppend(XmlNode oldNode)
+        {
+            var skipWildCardAttr = oldNode.Attributes?[SkipWildcard];
+            if (skipWildCardAttr != null && bool.TryParse(skipWildCardAttr.Value, out var skipWildCardAppend))
+            {
+                return skipWildCardAppend;
+            }
+
+            return false;
+        }
+
+        private static RedirectType GetRedirectType(XmlNode oldNode)
+        {
+            var redirectTypeAttr = oldNode.Attributes?[RedirectType];
+            if (redirectTypeAttr != null && Enum.TryParse(redirectTypeAttr.Value, out RedirectType redirectType))
+            {
+                return redirectType;
+            }
+
+            return Redirects.RedirectType.Permanent;
         }
 
         public XmlDocument Export(List<CustomRedirect> redirects)
