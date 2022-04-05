@@ -54,10 +54,7 @@ namespace Geta.NotFoundHandler.Optimizely.Core.AutomaticRedirects
         private void CreateRedirects(ContentReference contentLink)
         {
             var keyResult = _contentKeyGenerator.GetContentKey(contentLink);
-            if (!keyResult.HasValue)
-            {
-                return;
-            }
+            if (!keyResult.HasValue) return;
 
             var contentKey = keyResult.Key;
             var histories = _contentUrlHistoryLoader.GetMoved(contentKey);

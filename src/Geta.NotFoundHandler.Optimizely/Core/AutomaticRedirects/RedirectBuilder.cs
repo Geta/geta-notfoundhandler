@@ -32,10 +32,7 @@ namespace Geta.NotFoundHandler.Optimizely.Core.AutomaticRedirects
         private IEnumerable<CustomRedirect> CreateRedirects(ContentUrlHistory sourceHistory, ContentUrlHistory destinationHistory)
         {
             var destinationPrimary = destinationHistory.Urls.FirstOrDefault(x => x.Type == UrlType.Primary);
-            if (destinationPrimary == null)
-            {
-                yield break;
-            }
+            if (destinationPrimary == null) yield break;
 
             foreach (var source in sourceHistory.Urls)
             {
