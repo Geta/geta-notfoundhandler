@@ -179,7 +179,7 @@ namespace Geta.NotFoundHandler.Data
             return parameter;
         }
 
-        private SqlParameter CreateReturnParameter()
+        private static SqlParameter CreateReturnParameter()
         {
             var parameter = new SqlParameter
             {
@@ -190,7 +190,7 @@ namespace Geta.NotFoundHandler.Data
             return parameter;
         }
 
-        private SqlCommand CreateCommand(SqlConnection connection, string sqlCommand, params IDbDataParameter[] parameters)
+        private static SqlCommand CreateCommand(SqlConnection connection, string sqlCommand, params IDbDataParameter[] parameters)
         {
             var command = connection.CreateCommand();
             command.CommandText = sqlCommand;
