@@ -48,7 +48,7 @@ namespace Geta.NotFoundHandler.Data
             var unknownReferers = 0;
             foreach (DataRow row in table.Rows)
             {
-                var referer = row[0].ToString();
+                var referer = row[0].ToString() ?? string.Empty;
                 var count = Convert.ToInt32(row[1].ToString());
                 if (referer.Trim() != string.Empty
                     && !referer.Contains("(null)"))

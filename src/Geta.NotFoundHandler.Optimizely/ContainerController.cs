@@ -8,7 +8,7 @@ namespace Geta.NotFoundHandler.Optimizely
 {
     public class ContainerController : Controller
     {
-        [Authorize(Policy = Infrastructure.Constants.PolicyName)]
+        [Authorize(Policy = NotFoundHandler.Infrastructure.Constants.PolicyName)]
         [HttpGet]
         public IActionResult Index()
         {

@@ -1,0 +1,74 @@
+﻿@using EPiServer.Web.Mvc.Html
+@using Foundation.Features.StandardPage
+@inject IContextModeResolver contextModeResolver
+@model StandardPageViewModel
+
+@{
+    var heroClass = "";
+    var boxClass = "";
+    switch (Model.CurrentContent.TopPaddingMode)
+    {
+        case StandardPageTopPaddingModeSelectionFactory.TopPaddingModes.Half:
+            heroClass = "hero__half";
+            boxClass = "box__half";
+            break;
+        case StandardPageTopPaddingModeSelectionFactory.TopPaddingModes.Full:
+            heroClass = "hero__full";
+            boxClass = "box__full";
+            break;
+        default:
+            break;
+    }
+}
+
+<div class="row">
+    <div class="col-12 standard-page__container">
+        <div class="standard-page__hero @heroClass">
+            @if (!ContentReference.IsNullOrEmpty(Model.CurrentContent.BackgroundVideo))
+            {
+                <video class="standard-page__video @heroClass" autoplay loop playsinline muted>
+                    <source src="@Url.ContentUrl(Model.CurrentContent.BackgroundVideo)" type="video/mp4" @Html.EditAttributes(x => x.CurrentContent.BackgroundVideo)>
+                </video>
+            }
+            else if (!ContentReference.IsNullOrEmpty(Model.CurrentContent.BackgroundImage))
+            {
+                <div class="standard-page__background" style="background:@Model.CurrentContent.BackgroundColor;opacity:@(Model.CurrentContent.BackgroundOpacity?.ToString("N") ?? "1");"></div>
+                <img class="standard-page__banner lazyload" src="@Url.ContentUrl(Model.CurrentContent.BackgroundImage)?width=1440&format=webp" />
+                <div class="hero__gradient">
+                </div>
+            }
+            else if (!ContentReference.IsNullOrEmpty(Model.CurrentContent.PageImage))
+            {
+                <img class="standard-page__banner lazyload" data-src="@Url.ContentUrl(Model.CurrentContent.PageImage)?width=1440&format=webp" />
+                <div class="hero__gradient">
+                </div>
+                <div class="standard-page__background" style="background:@Model.CurrentContent.BackgroundColor;opacity:@(Model.CurrentContent.BackgroundOpacity?.ToString("N") ?? "1");">
+                </div>
+            }
+        </div>
+        <div class="standard-page__box @boxClass">
+            <div class="article__title">
+                @if (!Model.CategoryName.IsEmpty())
+                {
+                    <h4 style="color: @Model.CurrentContent.TitleColor">@Model.CategoryName</h4>
+                }
+                <h1 style="color: @Model.CurrentContent.TitleColor">@Html.PropertyFor(x => x.CurrentContent.Name)</h1>
+            </div>
+            <div class="standard-page__content">
+                @if ((Model.CurrentContent.MainBody != null && !Model.CurrentContent.MainBody.IsEmpty) || contextModeResolver.CurrentMode == ContextMode.Edit)
+                {
+                    <div class="row">
+                        <div class="col-12">
+                            @Html.PropertyFor(m => m.CurrentContent.MainBody)
+                        </div>
+                    </div>
+                }
+                <div class="row">
+                    <div class="col-12">
+                        @Html.PropertyFor(x => x.CurrentContent.MainContentArea)
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

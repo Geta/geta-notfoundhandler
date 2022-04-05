@@ -20,13 +20,10 @@ namespace Geta.NotFoundHandler.Optimizely
                 url)
             {
                 SortIndex = 100,
-                AuthorizationPolicy = Infrastructure.Constants.PolicyName
+                AuthorizationPolicy = NotFoundHandler.Infrastructure.Constants.PolicyName
             };
 
-            return new List<MenuItem>
-            {
-                link
-            };
+            return new List<MenuItem> { link };
         }
     }
 }

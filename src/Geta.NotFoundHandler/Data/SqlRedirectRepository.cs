@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.Common;
 using System.Linq;
 using Geta.NotFoundHandler.Core.Redirects;
 
@@ -43,12 +42,12 @@ namespace Geta.NotFoundHandler.Data
 
             _dataExecutor.ExecuteNonQuery(
                 sqlCommand,
-                CreateGuidParameter("id", Guid.NewGuid()),
-                CreateStringParameter("oldurl", entity.OldUrl),
-                CreateStringParameter("newurl", entity.NewUrl),
-                CreateIntParameter("state", entity.State),
-                CreateBoolParameter("wildcardskipappend", entity.WildCardSkipAppend),
-                CreateIntParameter("redirectType", (int)entity.RedirectType));
+                _dataExecutor.CreateGuidParameter("id", Guid.NewGuid()),
+                _dataExecutor.CreateStringParameter("oldurl", entity.OldUrl),
+                _dataExecutor.CreateStringParameter("newurl", entity.NewUrl),
+                _dataExecutor.CreateIntParameter("state", entity.State),
+                _dataExecutor.CreateBoolParameter("wildcardskipappend", entity.WildCardSkipAppend),
+                _dataExecutor.CreateIntParameter("redirectType", (int)entity.RedirectType));
         }
 
         private void Update(CustomRedirect entity)
@@ -68,12 +67,12 @@ namespace Geta.NotFoundHandler.Data
 
             _dataExecutor.ExecuteNonQuery(
                 sqlCommand,
-                CreateGuidParameter("id", entity.Id.Value),
-                CreateStringParameter("oldurl", entity.OldUrl),
-                CreateStringParameter("newurl", entity.NewUrl),
-                CreateIntParameter("state", entity.State),
-                CreateBoolParameter("wildcardskipappend", entity.WildCardSkipAppend),
-                CreateIntParameter("redirectType", (int)entity.RedirectType));
+                _dataExecutor.CreateGuidParameter("id", entity.Id.Value),
+                _dataExecutor.CreateStringParameter("oldurl", entity.OldUrl),
+                _dataExecutor.CreateStringParameter("newurl", entity.NewUrl),
+                _dataExecutor.CreateIntParameter("state", entity.State),
+                _dataExecutor.CreateBoolParameter("wildcardskipappend", entity.WildCardSkipAppend),
+                _dataExecutor.CreateIntParameter("redirectType", (int)entity.RedirectType));
         }
 
         public void Delete(CustomRedirect entity)
@@ -88,7 +87,7 @@ namespace Geta.NotFoundHandler.Data
 
             _dataExecutor.ExecuteNonQuery(
                 sqlCommand,
-                CreateGuidParameter("id", entity.Id.Value));
+                _dataExecutor.CreateGuidParameter("id", entity.Id.Value));
         }
 
         public CustomRedirect GetByOldUrl(string oldUrl)
@@ -98,7 +97,7 @@ namespace Geta.NotFoundHandler.Data
 
             var dataTable = _dataExecutor.ExecuteQuery(
                 sqlCommand,
-                CreateStringParameter("oldurl", oldUrl));
+                _dataExecutor.CreateStringParameter("oldurl", oldUrl));
 
             return ToCustomRedirects(dataTable).FirstOrDefault();
         }
@@ -119,7 +118,7 @@ namespace Geta.NotFoundHandler.Data
 
             var dataTable = _dataExecutor.ExecuteQuery(
                 sqlCommand,
-                CreateIntParameter("state", (int)state));
+                _dataExecutor.CreateIntParameter("state", (int)state));
 
             return ToCustomRedirects(dataTable);
         }
@@ -132,7 +131,7 @@ namespace Geta.NotFoundHandler.Data
 
             var dataTable = _dataExecutor.ExecuteQuery(
                 sqlCommand,
-                CreateStringParameter("searchText", searchText));
+                _dataExecutor.CreateStringParameter("searchText", searchText));
 
             return ToCustomRedirects(dataTable);
         }
@@ -144,7 +143,7 @@ namespace Geta.NotFoundHandler.Data
 
             var dataTable = _dataExecutor.ExecuteQuery(
                 sqlCommand,
-                CreateGuidParameter("id", id));
+                _dataExecutor.CreateGuidParameter("id", id));
 
             return ToCustomRedirects(dataTable).FirstOrDefault();
         }
@@ -161,34 +160,6 @@ namespace Geta.NotFoundHandler.Data
                 x.Field<string>("NewUrl"),
                 x.Field<bool>("WildCardSkipAppend"),
                 x.Field<RedirectType>("RedirectType")) { Id = x.Field<Guid>("Id"), State = x.Field<int>("State") };
-        }
-
-        private DbParameter CreateGuidParameter(string name, Guid value)
-        {
-            var parameter = _dataExecutor.CreateParameter(name, DbType.Guid);
-            parameter.Value = value;
-            return parameter;
-        }
-
-        private DbParameter CreateStringParameter(string name, string value)
-        {
-            var parameter = _dataExecutor.CreateParameter(name, DbType.String, 2000);
-            parameter.Value = value;
-            return parameter;
-        }
-
-        private DbParameter CreateIntParameter(string name, int value)
-        {
-            var parameter = _dataExecutor.CreateParameter(name, DbType.Int32);
-            parameter.Value = value;
-            return parameter;
-        }
-
-        private DbParameter CreateBoolParameter(string name, bool value)
-        {
-            var parameter = _dataExecutor.CreateParameter(name, DbType.Boolean);
-            parameter.Value = value;
-            return parameter;
         }
     }
 }

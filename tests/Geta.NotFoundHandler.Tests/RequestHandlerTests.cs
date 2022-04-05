@@ -106,7 +106,7 @@ namespace Geta.NotFoundHandler.Tests
         [Fact]
         public void Handle_redirects_when_redirect_url_found()
         {
-            var redirect = new CustomRedirect("http://example.com/missing", (int)RedirectState.Saved, 1)
+            var redirect = new CustomRedirect("http://example.com/missing", RedirectState.Saved)
             {
                 NewUrl = "http://example.com/page"
             };
@@ -167,7 +167,7 @@ namespace Geta.NotFoundHandler.Tests
         [Fact]
         public void HandleRequest_returns_true_when_redirect_found_with_deleted_state()
         {
-            var redirect = new CustomRedirect("http://example.com/missing", (int) RedirectState.Deleted, 1);
+            var redirect = new CustomRedirect("http://example.com/missing", RedirectState.Deleted);
             WhenRedirectFound(redirect);
 
             var actual = _sut.HandleRequest(DefaultOldUri, new Uri("http://example.com/path"), out var _);
@@ -178,7 +178,7 @@ namespace Geta.NotFoundHandler.Tests
         [Fact]
         public void HandleRequest_returns_redirect_when_redirect_found_with_deleted_state()
         {
-            var redirect = new CustomRedirect("http://example.com/missing", (int) RedirectState.Deleted, 1);
+            var redirect = new CustomRedirect("http://example.com/missing", RedirectState.Deleted);
             WhenRedirectFound(redirect);
 
             _sut.HandleRequest(DefaultOldUri, new Uri("http://example.com/path"), out var actual);
@@ -189,7 +189,7 @@ namespace Geta.NotFoundHandler.Tests
         [Fact]
         public void HandleRequest_returns_true_when_redirect_found_with_saved_state()
         {
-            var redirect = new CustomRedirect("http://example.com/found", (int) RedirectState.Saved, 1);
+            var redirect = new CustomRedirect("http://example.com/found", RedirectState.Saved);
             WhenRedirectFound(redirect);
 
             var actual = _sut.HandleRequest(DefaultOldUri, new Uri("http://example.com/path"), out var _);
@@ -200,7 +200,7 @@ namespace Geta.NotFoundHandler.Tests
         [Fact]
         public void HandleRequest_returns_redirect_when_redirect_found_with_saved_state()
         {
-            var redirect = new CustomRedirect("http://example.com/found", (int)RedirectState.Saved, 1);
+            var redirect = new CustomRedirect("http://example.com/found", RedirectState.Saved);
             WhenRedirectFound(redirect);
 
             _sut.HandleRequest(DefaultOldUri, new Uri("http://example.com/path"), out var actual);
@@ -212,7 +212,7 @@ namespace Geta.NotFoundHandler.Tests
         public void HandleRequest_returns_false_when_redirect_is_same_as_not_found()
         {
             var sameUri = new Uri("http://example.com/same");
-            var redirect = new CustomRedirect(sameUri.ToString(), (int) RedirectState.Saved, 1)
+            var redirect = new CustomRedirect(sameUri.ToString(), RedirectState.Saved)
             {
                 NewUrl = sameUri.PathAndQuery
             };
@@ -268,7 +268,7 @@ namespace Geta.NotFoundHandler.Tests
 
         private void WhenResourceDeleted()
         {
-            var redirect = new CustomRedirect("http://example.com", (int)RedirectState.Deleted, 1);
+            var redirect = new CustomRedirect("http://example.com", RedirectState.Deleted);
             A.CallTo(() => _sut.HandleRequest(A<Uri>._, A<Uri>._, out redirect)).Returns(true);
         }
 

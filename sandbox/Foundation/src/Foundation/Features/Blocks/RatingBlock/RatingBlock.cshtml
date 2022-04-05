@@ -1,0 +1,69 @@
+﻿@using EPiServer.Web.Mvc.Html
+
+@using Foundation.Features.Blocks.RatingBlock
+
+@model RatingBlockViewModel
+
+<script type="text/javascript">
+    function EnableRatingSubmitButton() {
+        $("input[name='submitsocialrating']").removeAttr("disabled");
+        $("input[name='submitsocialrating']").removeClass("btn disabled");
+        $("input[name='submitsocialrating']").addClass("btn");
+    }
+</script>
+
+<div style="background-color: @Model.CurrentBlock.BackgroundColor; opacity:@Model.CurrentBlock.BlockOpacity;" class="row @(Model.CurrentBlock.Padding + " " + Model.CurrentBlock.Margin)">
+    @if (Model.ShowHeading)
+    {
+        <h2 @Html.EditAttributes(x => x.Heading)>@Model.Heading</h2>
+        <hr />
+    }
+
+    @foreach (var message in Model.Messages)
+    {
+        var messageStyle = message.ResolveStyle(message.Type);
+        <div style="color:@messageStyle">@message.Body</div>
+    }
+
+    <div class="mt-2">
+        @if (this.User.Identity.IsAuthenticated && Model.IsMemberOfGroup)
+        {
+            if (Model.CurrentRating.HasValue)
+            {
+                <div>You rated the page as @Model.CurrentRating out of @Model.RatingSettings.Last().ToString()</div>
+            }
+            else
+            {
+                using (Html.BeginForm("Submit", "RatingBlock", FormMethod.Post))
+                {
+                    @Html.HiddenFor(m => m.SendActivity)
+                    @Html.HiddenFor(m => m.CurrentLink)
+                    <div>
+                        <div class="mb-1"><b><i>How do you rate this page?</i></b></div>
+                        <div class="mb-2">
+                            @for (var numOfRatings = 0; numOfRatings < @Model.RatingSettings.Count; numOfRatings++)
+                            {
+                                @Html.RadioButtonFor(r => Model.SubmittedRating, Model.RatingSettings[numOfRatings],
+                                                    new { @CssClass = "d-inline", @onchange = "EnableRatingSubmitButton();" })
+                                <label class="mr-2 d-inline">@Model.RatingSettings[numOfRatings].ToString()</label>
+                            }
+                        </div>
+                        <div>
+                            <input type="submit" name="submitsocialrating" value="Submit" class="button-black">
+                        </div>
+                    </div>
+                }
+            }
+        }
+
+        @if (!String.IsNullOrWhiteSpace(Model.NoStatisticsFoundMessage))
+        {
+            <div class="text-primary">@Model.NoStatisticsFoundMessage</div>
+        }
+        else
+        {
+            <div class="mt-2"><strong>Average rating: @Model.Average.ToString("F")</strong></div>
+            <div><strong>Total of ratings: @Model.TotalCount</strong></div>
+        }
+    </div>
+</div>

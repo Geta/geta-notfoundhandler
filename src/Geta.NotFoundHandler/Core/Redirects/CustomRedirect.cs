@@ -7,9 +7,6 @@ namespace Geta.NotFoundHandler.Core.Redirects
 {
     public class CustomRedirect
     {
-        private string _oldUrl;
-        public int NotFoundErrorCount;
-
         /// <summary>
         /// Gets or sets a value indicating whether to skip appending the
         /// old url fragment to the new one. Default value is false.
@@ -23,6 +20,7 @@ namespace Geta.NotFoundHandler.Core.Redirects
         /// <value><c>true</c> to skip appending old url if wild card match; otherwise, <c>false</c>.</value>
         public bool WildCardSkipAppend { get; set; }
 
+        private string _oldUrl;
         public string OldUrl
         {
             get => _oldUrl;
@@ -35,13 +33,6 @@ namespace Geta.NotFoundHandler.Core.Redirects
 
         // 301 (permanent) or 302 (temporary)
         public RedirectType RedirectType { get; set; }
-
-        /// <summary>
-        /// Tells if the new url is a virtual url, not containing
-        /// the base root url to redirect to. All urls starting with
-        /// "/" is determined to be virtuals.
-        /// </summary>
-        public bool IsVirtual => NewUrl.StartsWith("/");
 
         /// <summary>
         /// The hash code for the CustomRedirect class is the
@@ -79,19 +70,12 @@ namespace Geta.NotFoundHandler.Core.Redirects
             NewUrl = newUrl;
         }
 
-        public CustomRedirect(string oldUrl, int state, int count)
-        {
-            OldUrl = oldUrl;
-            State = state;
-            NotFoundErrorCount = count;
-        }
-
         public CustomRedirect(CustomRedirect redirect)
         {
             OldUrl = redirect._oldUrl;
             NewUrl = redirect.NewUrl;
             WildCardSkipAppend = redirect.WildCardSkipAppend;
             RedirectType = redirect.RedirectType;
-        }
+        }   
     }
 }

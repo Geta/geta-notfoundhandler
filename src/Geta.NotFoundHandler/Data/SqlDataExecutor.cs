@@ -1,3 +1,6 @@
+// Copyright (c) Geta Digital. All rights reserved.
+// Licensed under Apache-2.0. See the LICENSE file in the project root for more information
+
 using System;
 using System.Data;
 using System.Data.Common;
@@ -135,6 +138,47 @@ namespace Geta.NotFoundHandler.Data
             return parameter;
         }
 
+        public static int GetReturnValue(DbCommand cmd)
+        {
+            var parameter = cmd.Parameters["@ReturnValue"];
+            return Convert.ToInt32(parameter.Value, CultureInfo.InvariantCulture);
+        }
+
+        public DbParameter CreateGuidParameter(string name, Guid value)
+        {
+            var parameter = CreateParameter(name, DbType.Guid);
+            parameter.Value = value;
+            return parameter;
+        }
+
+        public DbParameter CreateStringParameter(string name, string value, int size = 2000)
+        {
+            var parameter = CreateParameter(name, DbType.String, size);
+            parameter.Value = value;
+            return parameter;
+        }
+
+        public DbParameter CreateIntParameter(string name, int value)
+        {
+            var parameter = CreateParameter(name, DbType.Int32);
+            parameter.Value = value;
+            return parameter;
+        }
+
+        public DbParameter CreateBoolParameter(string name, bool value)
+        {
+            var parameter = CreateParameter(name, DbType.Boolean);
+            parameter.Value = value;
+            return parameter;
+        }
+
+        public DbParameter CreateDateTimeParameter(string name, DateTime value)
+        {
+            var parameter = CreateParameter(name, DbType.DateTime, 0);
+            parameter.Value = value;
+            return parameter;
+        }
+
         private SqlParameter CreateReturnParameter()
         {
             var parameter = new SqlParameter
@@ -144,12 +188,6 @@ namespace Geta.NotFoundHandler.Data
                 Direction = ParameterDirection.ReturnValue,
             };
             return parameter;
-        }
-
-        public static int GetReturnValue(DbCommand cmd)
-        {
-            var parameter = cmd.Parameters["@ReturnValue"];
-            return Convert.ToInt32(parameter.Value, CultureInfo.InvariantCulture);
         }
 
         private SqlCommand CreateCommand(SqlConnection connection, string sqlCommand, params IDbDataParameter[] parameters)
