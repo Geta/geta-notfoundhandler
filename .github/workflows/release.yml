@@ -18,7 +18,7 @@ jobs:
         run: |
           echo "VERSION=${GITHUB_REF/refs\/tags\/v/}" >> $GITHUB_ENV
           echo "${{ env.GITHUB_REF }}"
-          echo "${{ env.GITHUB_REF/refs\/tags\/v/ }}"
+          echo "${{env.GITHUB_REF/refs\/tags\/v/}}"
           echo "${{ GITHUB_ENV }}"
       - name: Release
         run: |
