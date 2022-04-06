@@ -5,7 +5,6 @@
     <AddRazorSupportForMvc>true</AddRazorSupportForMvc>
     <PackageId>Geta.NotFoundHandler.Admin</PackageId>
     <Title>Admin UI for NotFound Handler for ASP.NET Core and EPiServer</Title>
-    <PackageVersion>1.0.0</PackageVersion>
     <Authors>Geta Digital</Authors>
     <Company>Geta Digital</Company>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>

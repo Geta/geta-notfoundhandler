@@ -4,7 +4,6 @@
     <TargetFramework>net5.0</TargetFramework>
     <PackageId>Geta.NotFoundHandler.Optimizely.Commerce</PackageId>
     <Title>NotFound handler Admin UI integration Optimizely Commerce</Title>
-    <PackageVersion>1.0.0</PackageVersion>
     <Authors>Geta Digital</Authors>
     <Company>Geta Digital</Company>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
