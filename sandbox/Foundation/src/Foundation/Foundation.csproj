@@ -4,6 +4,7 @@
 		<VersionPrefix>2021.04.1.0</VersionPrefix>
 		<VersionSuffix></VersionSuffix>
 		<PackageVersion Condition=" '$(PackageVersion)' == '' ">$(VersionPrefix)$(VersionSuffix)</PackageVersion>
+		<IsPackable>false</IsPackable>
 	</PropertyGroup>
 	<ItemGroup>
 		<PackageReference Include="Baaijte.Optimizely.ImageSharp.Web" Version="1.0.6" />
