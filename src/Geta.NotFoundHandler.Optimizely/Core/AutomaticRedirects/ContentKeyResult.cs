@@ -5,7 +5,7 @@ namespace Geta.NotFoundHandler.Optimizely.Core.AutomaticRedirects
 {
     public class ContentKeyResult
     {
-        public static ContentKeyResult Empty => new();
+        public static ContentKeyResult Empty { get; } = new();
 
         public string Key { get; }
         public bool HasValue { get; }
