@@ -86,7 +86,7 @@ public class CommerceContentKeyProviderTests
         A.CallTo(() => _fakeReferenceConverter.GetContentType(A<ContentReference>._)).Returns(contentType);
     }
 
-    private ContentReference CreateCommerceContentLink()
+    private static ContentReference CreateCommerceContentLink()
     {
         var random = new Random(DateTime.Now.Millisecond);
         return new ContentReference(random.Next(), random.Next(), "CatalogContent");

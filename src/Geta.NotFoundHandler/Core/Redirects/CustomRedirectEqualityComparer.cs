@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace Geta.NotFoundHandler.Core.Redirects
 {
-    public class CustomRedirectEqualityComparer: IEqualityComparer<CustomRedirect>
+    public class CustomRedirectEqualityComparer : IEqualityComparer<CustomRedirect>
     {
         public bool Equals(CustomRedirect x, CustomRedirect y)
         {
@@ -30,12 +30,17 @@ namespace Geta.NotFoundHandler.Core.Redirects
                 return false;
             }
 
-            return x.WildCardSkipAppend == y.WildCardSkipAppend && x.NewUrl == y.NewUrl && x.State == y.State && x.RedirectType == y.RedirectType;
+            return
+                x.WildCardSkipAppend == y.WildCardSkipAppend
+                && x.OldUrl == y.OldUrl
+                && x.NewUrl == y.NewUrl
+                && x.State == y.State
+                && x.RedirectType == y.RedirectType;
         }
 
         public int GetHashCode(CustomRedirect obj)
         {
-            return HashCode.Combine(obj.WildCardSkipAppend, obj.NewUrl, obj.State, (int)obj.RedirectType);
+            return HashCode.Combine(obj.WildCardSkipAppend, obj.OldUrl, obj.NewUrl, obj.State, (int)obj.RedirectType);
         }
     }
 }

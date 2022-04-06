@@ -111,13 +111,14 @@ namespace Geta.NotFoundHandler.Core
             MarkHandled(context);
         }
 
-        public bool IsHandled(HttpContext context)
+        public static bool IsHandled(HttpContext context)
         {
             return context.Items.Keys.Contains(HandledRequestItemKey)
+                   && context.Items[HandledRequestItemKey] != null
                    && (bool)context.Items[HandledRequestItemKey];
         }
 
-        private void MarkHandled(HttpContext context)
+        private static void MarkHandled(HttpContext context)
         {
             context.Items[HandledRequestItemKey] = true;
         }

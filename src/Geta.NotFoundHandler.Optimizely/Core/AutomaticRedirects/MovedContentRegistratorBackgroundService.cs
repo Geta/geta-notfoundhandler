@@ -35,9 +35,9 @@ namespace Geta.NotFoundHandler.Optimizely.Core.AutomaticRedirects
             _logger = logger;
         }
 
-        protected override async Task ExecuteAsync(CancellationToken cancellationToken)
+        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            await foreach (var contentLink in _registratorQueue.ReadAllAsync(cancellationToken))
+            await foreach (var contentLink in _registratorQueue.ReadAllAsync(stoppingToken))
             {
                 try
                 {
