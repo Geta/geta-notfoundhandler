@@ -16,7 +16,7 @@ jobs:
           git branch --remote --contains | grep origin/master
       - name: Set VERSION variable from tag
         run: |
-          echo "VERSION=" + ("${{github.ref_name}}").Remove(0, 1) >> $GITHUB_ENV
+          echo "VERSION=1.1.0" >> $GITHUB_ENV
       - name: Release
         run: |
           echo $VERSION
