@@ -19,8 +19,8 @@ jobs:
           $env:VERSION = "VERSION=1.1.0"
       - name: Release
         run: |
-          echo $env:VERSION
-          dotnet build --configuration Release /p:Version=$env:VERSION
+          echo ${{env:VERSION}}
+          dotnet build --configuration Release /p:Version=${{env:VERSION}}
       - name: Test
         run: dotnet test --configuration Release /p:Version=${env.VERSION} --no-build
       - name: Pack
