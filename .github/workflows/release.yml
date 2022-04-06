@@ -16,9 +16,11 @@ jobs:
           git branch --remote --contains | grep origin/master
       - name: Set VERSION variable from tag
         run: |
-          echo "VERSION=${GITHUB_REF/refs\/tags\/v/}" >> $GITHUB_ENV
-          echo "${{ env.GITHUB_REF }}"
-          echo "${{ env.GITHUB_ENV }}"
+          echo "VERSION=${env.GITHUB_REF/refs\/tags\/v/}" >> $GITHUB_ENV
+          echo $GITHUB_REF
+          echo $GITHUB_ENV
+          echo ${{ env.VERSION }}
+          echo ${{ github.ref }}
       - name: Release
         run: |
           echo "${{ env.VERSION }}"
