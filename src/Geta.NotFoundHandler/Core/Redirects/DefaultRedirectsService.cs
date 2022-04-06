@@ -64,6 +64,29 @@ namespace Geta.NotFoundHandler.Core.Redirects
             _redirectsEvents.RedirectsUpdated();
         }
 
+        public void AddOrUpdate(CustomRedirect redirect, bool notifyUpdated)
+        {
+            var match = _redirectLoader.GetByOldUrl(redirect.OldUrl);
+
+            if (!HasChanged(match, redirect))
+            {
+                return;
+            }
+
+            // if there is a match, replace the value.
+            if (match != null)
+            {
+                redirect.Id = match.Id;
+            }
+
+            _repository.Save(redirect);
+
+            if (notifyUpdated)
+            {
+                _redirectsEvents.RedirectsUpdated();
+            }
+        }
+
         public void AddDeletedRedirect(string oldUrl)
         {
             var redirect = new CustomRedirect
@@ -86,6 +109,20 @@ namespace Geta.NotFoundHandler.Core.Redirects
             }
 
             _redirectsEvents.RedirectsUpdated();
+        }
+
+        public void DeleteByOldUrl(string oldUrl, bool notifyUpdated)
+        {
+            var match = _redirectLoader.GetByOldUrl(oldUrl);
+            if (match != null)
+            {
+                _repository.Delete(match);
+            }
+
+            if (notifyUpdated)
+            {
+                _redirectsEvents.RedirectsUpdated();
+            }
         }
 
         public int DeleteAll()
@@ -112,43 +149,6 @@ namespace Geta.NotFoundHandler.Core.Redirects
 
             _redirectsEvents.RedirectsUpdated();
             return ignoredRedirects.Count;
-        }
-
-        public void DeleteByOldUrl(string oldUrl, bool notifyUpdated)
-        {
-            var match = _redirectLoader.GetByOldUrl(oldUrl);
-            if (match != null)
-            {
-                _repository.Delete(match);
-            }
-
-            if (notifyUpdated)
-            {
-                _redirectsEvents.RedirectsUpdated();
-            }
-        }
-
-        public void AddOrUpdate(CustomRedirect redirect, bool notifyUpdated)
-        {
-            var match = _redirectLoader.GetByOldUrl(redirect.OldUrl);
-
-            if (!HasChanged(match, redirect))
-            {
-                return;
-            }
-
-            // if there is a match, replace the value.
-            if (match != null)
-            {
-                redirect.Id = match.Id;
-            }
-
-            _repository.Save(redirect);
-
-            if (notifyUpdated)
-            {
-                _redirectsEvents.RedirectsUpdated();
-            }
         }
 
         private static bool HasChanged(CustomRedirect oldRedirect, CustomRedirect newRedirect)

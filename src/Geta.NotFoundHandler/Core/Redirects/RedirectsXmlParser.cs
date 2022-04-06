@@ -50,60 +50,7 @@ namespace Geta.NotFoundHandler.Core.Redirects
             return Load();
         }
 
-        /// <summary>
-        /// Parses the xml file and reads all redirects.
-        /// </summary>
-        /// <returns>A collection of CustomRedirect objects</returns>
-        private CustomRedirectCollection Load()
-        {
-            const string urlPath = "/redirects/urls/url";
-
-            var redirects = new CustomRedirectCollection();
-
-            // Parse all url nodes
-            var nodes = _customRedirectsXmlFile.SelectNodes(urlPath);
-
-            if (nodes == null) throw new Exception($"Can't find nodes under '{urlPath}'.");
-
-            foreach (XmlNode node in nodes)
-            {
-                // Each url new url can have several old values
-                // we need to create a redirect object for each pair
-                var newNode = node.SelectSingleNode(NewUrl);
-                var oldNodes = node.SelectNodes(OldUrl);
-
-                if (newNode == null) throw new Exception($"Can't find node under '{urlPath}/{NewUrl}'.");
-                if (oldNodes == null) throw new Exception($"Can't find nodes under '{urlPath}/{OldUrl}'.");
-
-                foreach (XmlNode oldNode in oldNodes)
-                {
-                    var skipWildCardAppend = false;
-                    var skipWildCardAttr = oldNode.Attributes?[SkipWildcard];
-                    if (skipWildCardAttr != null)
-                    {
-                        // If value parsing fails, it will be false by default. We do
-                        // not really care to check if it fails, as we cannot do anything
-                        // about it (throwing an exception is not a good idea here)
-                        bool.TryParse(skipWildCardAttr.Value, out skipWildCardAppend);
-                    }
-
-                    var redirectType = Redirects.RedirectType.Permanent;
-                    var redirectTypeAttr = oldNode.Attributes?[RedirectType];
-                    if (redirectTypeAttr != null)
-                    {
-                        Enum.TryParse(redirectTypeAttr.Value, out redirectType);
-                    }
-
-                    // Create new custom redirect nodes
-                    var redirect = new CustomRedirect(oldNode.InnerText, newNode.InnerText, skipWildCardAppend, redirectType);
-                    redirects.Add(redirect);
-                }
-            }
-
-            return redirects;
-        }
-
-        public XmlDocument Export(List<CustomRedirect> redirects)
+        public virtual XmlDocument Export(List<CustomRedirect> redirects)
         {
             var document = new XmlDocument();
             var xmlDeclaration = document.CreateXmlDeclaration("1.0", "UTF-8", null);
@@ -148,6 +95,67 @@ namespace Geta.NotFoundHandler.Core.Redirects
             }
 
             return document;
+        }
+
+        /// <summary>
+        /// Parses the xml file and reads all redirects.
+        /// </summary>
+        /// <returns>A collection of CustomRedirect objects</returns>
+        private CustomRedirectCollection Load()
+        {
+            const string UrlPath = "/redirects/urls/url";
+
+            var redirects = new CustomRedirectCollection();
+
+            // Parse all url nodes
+            var nodes = _customRedirectsXmlFile.SelectNodes(UrlPath);
+
+            if (nodes == null) throw new InvalidOperationException($"Can't find nodes under '{UrlPath}'.");
+
+            foreach (XmlNode node in nodes)
+            {
+                // Each url new url can have several old values
+                // we need to create a redirect object for each pair
+                var newNode = node.SelectSingleNode(NewUrl);
+                var oldNodes = node.SelectNodes(OldUrl);
+
+                if (newNode == null) throw new InvalidOperationException($"Can't find node under '{UrlPath}/{NewUrl}'.");
+                if (oldNodes == null) throw new InvalidOperationException($"Can't find nodes under '{UrlPath}/{OldUrl}'.");
+
+                foreach (XmlNode oldNode in oldNodes)
+                {
+                    var skipWildCardAppend = GetSkipWildCardAppend(oldNode);
+                    var redirectType = GetRedirectType(oldNode);
+
+                    // Create new custom redirect nodes
+                    var redirect = new CustomRedirect(oldNode.InnerText, newNode.InnerText, skipWildCardAppend, redirectType);
+                    redirects.Add(redirect);
+                }
+            }
+
+            return redirects;
+        }
+
+        private static bool GetSkipWildCardAppend(XmlNode oldNode)
+        {
+            var skipWildCardAttr = oldNode.Attributes?[SkipWildcard];
+            if (skipWildCardAttr != null && bool.TryParse(skipWildCardAttr.Value, out var skipWildCardAppend))
+            {
+                return skipWildCardAppend;
+            }
+
+            return false;
+        }
+
+        private static RedirectType GetRedirectType(XmlNode oldNode)
+        {
+            var redirectTypeAttr = oldNode.Attributes?[RedirectType];
+            if (redirectTypeAttr != null && Enum.TryParse(redirectTypeAttr.Value, out RedirectType redirectType))
+            {
+                return redirectType;
+            }
+
+            return Redirects.RedirectType.Permanent;
         }
     }
 }

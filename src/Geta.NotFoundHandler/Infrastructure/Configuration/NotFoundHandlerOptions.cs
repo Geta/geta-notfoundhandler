@@ -9,7 +9,7 @@ namespace Geta.NotFoundHandler.Infrastructure.Configuration
 {
     public class NotFoundHandlerOptions
     {
-        public static int CurrentDbVersion = 1;
+        public const int CurrentDbVersion = 1;
         public int BufferSize { get; set; } = 30;
         public int ThreshHold { get; set; } = 5;
         public FileNotFoundMode HandlerMode { get; set; } = FileNotFoundMode.On;

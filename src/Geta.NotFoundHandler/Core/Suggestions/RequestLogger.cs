@@ -30,7 +30,7 @@ namespace Geta.NotFoundHandler.Core.Suggestions
         public void LogRequest(string oldUrl, string referer)
         {
             var bufferSize = _configuration.BufferSize;
-            if (LogQueue.Count > 0 && LogQueue.Count >= bufferSize)
+            if (!LogQueue.IsEmpty && LogQueue.Count >= bufferSize)
             {
                 lock (LogQueue)
                 {
@@ -63,7 +63,7 @@ namespace Geta.NotFoundHandler.Core.Suggestions
             if ((diff != 0 && bufferSize / diff <= threshold)
                 || bufferSize == 0)
             {
-                while (logEvents.Count > 0)
+                while (!logEvents.IsEmpty)
                 {
                     if (logEvents.TryDequeue(out var logEvent))
                     {

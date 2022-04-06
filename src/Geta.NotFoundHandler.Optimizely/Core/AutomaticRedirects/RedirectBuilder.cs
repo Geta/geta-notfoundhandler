@@ -43,7 +43,7 @@ namespace Geta.NotFoundHandler.Optimizely.Core.AutomaticRedirects
             }
         }
 
-        private string GetDestinationUrl(TypedUrl source, ContentUrlHistory destinationHistory, TypedUrl destinationPrimary)
+        private static string GetDestinationUrl(TypedUrl source, ContentUrlHistory destinationHistory, TypedUrl destinationPrimary)
         {
             switch (source.Type)
             {

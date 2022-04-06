@@ -40,10 +40,6 @@ namespace Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin
         [BindProperty]
         public IFormFile ImportFile { get; set; }
 
-        public void OnGet()
-        {
-        }
-
         public IActionResult OnPostDeleteAllIgnoredSuggestions()
         {
             var count = _redirectsService.DeleteAllIgnored();
