@@ -19,8 +19,8 @@ jobs:
           echo "VERSION=1.1.0" >> $GITHUB_ENV
       - name: Release
         run: |
-          echo $VERSION
-          dotnet build --configuration Release /p:Version=${env.VERSION}
+          echo ${{env.VERSION}}
+          dotnet build --configuration Release /p:Version=${{env.VERSION}}
       - name: Test
         run: dotnet test --configuration Release /p:Version=${env.VERSION} --no-build
       - name: Pack
