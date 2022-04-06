@@ -23,10 +23,14 @@ jobs:
           echo "${env:VERSION}"
           dotnet build --configuration Release /p:Version=${{env.VERSION}}
       - name: Test
-        run: dotnet test --configuration Release /p:Version=${env.VERSION} --no-build
+        run: dotnet test --configuration Release /p:Version=${{env.VERSION}} --no-build
       - name: Pack
-        run: dotnet pack --configuration Release /p:Version=${env.VERSION} --no-build --output .
+        run: dotnet pack --configuration Release /p:Version=${{env.VERSION}} --no-build --output .
       - name: Push
-        run: dotnet nuget push Geta.NotFoundHandler.${VERSION}.nupkg --source https://nuget.pkg.github.com/Geta/index.json --api-key ${GITHUB_TOKEN}
+        run: |
+          dotnet nuget push Geta.NotFoundHandler.${{env.VERSION}}.nupkg --source https://nuget.pkg.github.com/Geta/index.json --api-key ${GITHUB_TOKEN}
+          dotnet nuget push Geta.NotFoundHandler.Admin.${{env.VERSION}}.nupkg --source https://nuget.pkg.github.com/Geta/index.json --api-key ${GITHUB_TOKEN}
+          dotnet nuget push Geta.NotFoundHandler.Optimizely.${{env.VERSION}}.nupkg --source https://nuget.pkg.github.com/Geta/index.json --api-key ${GITHUB_TOKEN}
+          dotnet nuget push Geta.NotFoundHandler.Optimizely.Commerce.${{env.VERSION}}.nupkg --source https://nuget.pkg.github.com/Geta/index.json --api-key ${GITHUB_TOKEN}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
