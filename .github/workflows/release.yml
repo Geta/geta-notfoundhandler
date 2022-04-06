@@ -17,12 +17,12 @@ jobs:
       - name: Set VERSION variable from tag
         run: |
           echo "VERSION=${GITHUB_REF/refs\/tags\/v/}" >> $GITHUB_ENV
-          echo "${{ GITHUB_REF }}"
-          echo "${{ GITHUB_REF/refs\/tags\/v/ }}"
+          echo "${{ env.GITHUB_REF }}"
+          echo "${{ env.GITHUB_REF/refs\/tags\/v/ }}"
           echo "${{ GITHUB_ENV }}"
       - name: Release
         run: |
-          echo "${{ VERSION }}"
+          echo "${{ env.VERSION }}"
           dotnet build --configuration Release /p:Version=${env.VERSION}
       - name: Test
         run: dotnet test --configuration Release /p:Version=${env.VERSION} --no-build
