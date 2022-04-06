@@ -17,17 +17,18 @@ jobs:
       - name: Set VERSION variable from tag
         run: |
           echo "VERSION=${GITHUB_REF/refs\/tags\/v/}" >> $GITHUB_ENV
-          echo $GITHUB_ENV
+          echo "${{ GITHUB_REF }}"
+          echo "${{ GITHUB_REF/refs\/tags\/v/ }}"
+          echo "${{ GITHUB_ENV }}"
       - name: Release
         run: |
-          echo $VERSION
-          echo ${VERSION}
-          dotnet build --configuration Release /p:Version=${VERSION}
+          echo "${{ VERSION }}"
+          dotnet build --configuration Release /p:Version=${env.VERSION}
       - name: Test
-        run: dotnet test --configuration Release /p:Version=${VERSION} --no-build
+        run: dotnet test --configuration Release /p:Version=${env.VERSION} --no-build
       - name: Pack
-        run: dotnet pack --configuration Release /p:Version=${VERSION} --no-build --output .
+        run: dotnet pack --configuration Release /p:Version=${env.VERSION} --no-build --output .
       - name: Push
-        run: dotnet nuget push NuGet.Workflow.${VERSION}.nupkg --source https://nuget.pkg.github.com/Geta/index.json --api-key ${GITHUB_TOKEN}
+        run: dotnet nuget push Geta.NotFoundHandler.${VERSION}.nupkg --source https://nuget.pkg.github.com/Geta/index.json --api-key ${GITHUB_TOKEN}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
