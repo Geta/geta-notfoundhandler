@@ -16,11 +16,12 @@ jobs:
           git branch --remote --contains | grep origin/master
       - name: Set VERSION variable from tag
         run: |
-          $env:VERSION = "VERSION=1.1.0"
+          $version = ("${{github.ref_name}}").Remove(0, 1)
+          echo "VERSION=$version" >> $env:GITHUB_ENV
       - name: Release
         run: |
-          echo ${{env:VERSION}}
-          dotnet build --configuration Release /p:Version=${{env:VERSION}}
+          echo "${env:VERSION}"
+          dotnet build --configuration Release /p:Version=${{env.VERSION}}
       - name: Test
         run: dotnet test --configuration Release /p:Version=${env.VERSION} --no-build
       - name: Pack
