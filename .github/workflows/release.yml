@@ -18,6 +18,8 @@ jobs:
         run: |
           echo "VERSION=${GITHUB_REF#refs/*/v/}" >> $GITHUB_ENV
           echo $GITHUB_REF
+          echo ${{github.ref_name}}
+          echo $github.ref_name
       - name: Release
         run: |
           echo $VERSION
