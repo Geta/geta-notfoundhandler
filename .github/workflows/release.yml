@@ -16,11 +16,11 @@ jobs:
           git branch --remote --contains | grep origin/master
       - name: Set VERSION variable from tag
         run: |
-          echo "VERSION=${github.ref/refs\/tags\/v/}" >> $GITHUB_ENV
-          echo ${{ github.ref }}
+          echo "VERSION=${GITHUB_REF#refs/*/v/}" >> $GITHUB_ENV
+          echo $GITHUB_REF
       - name: Release
         run: |
-          echo "${{ env.VERSION }}"
+          echo $VERSION
           dotnet build --configuration Release /p:Version=${env.VERSION}
       - name: Test
         run: dotnet test --configuration Release /p:Version=${env.VERSION} --no-build
