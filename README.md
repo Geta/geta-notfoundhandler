@@ -8,7 +8,7 @@
 
 |Build|Code Analysis|.NET|CMS|
 |-----|-------------|----|---|
-|[![Build](https://github.com/Geta/geta-notfoundhandler/actions/workflows/build.yml/badge.svg)](https://github.com/Geta/geta-notfoundhandler/actions/workflows/build.yml) | [![Quality gate](https://sonarcloud.io/api/project_badges/quality_gate?project=Geta_geta-notfoundhandler)](https://sonarcloud.io/summary/new_code?id=Geta_geta-notfoundhandler) | [![Platform](https://img.shields.io/badge/Platform-.NET%205-blue.svg?style=flat)](https://docs.microsoft.com/en-us/dotnet/) | [![Platform](https://img.shields.io/badge/Optimizely-%2012-orange.svg?style=flat)](http://world.episerver.com/cms/) |
+|[![Build](https://github.com/Geta/geta-notfoundhandler/actions/workflows/build.yml/badge.svg)](https://github.com/Geta/geta-notfoundhandler/actions/workflows/build.yml) | [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=Geta_geta-notfoundhandler&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=Geta_geta-notfoundhandler) | [![Platform](https://img.shields.io/badge/Platform-.NET%205-blue.svg?style=flat)](https://docs.microsoft.com/en-us/dotnet/) | [![Platform](https://img.shields.io/badge/Optimizely-%2012-orange.svg?style=flat)](http://world.episerver.com/cms/) |
 
 The popular NotFound handler for ASP.NET Core and Optimizely, enabling better control over your 404 page in addition to allowing redirects for old URLs that no longer works.
 
