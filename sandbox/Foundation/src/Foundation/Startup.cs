@@ -19,6 +19,7 @@ using Foundation.Infrastructure.Cms.Users;
 using Foundation.Infrastructure.Display;
 using Geta.NotFoundHandler.Infrastructure.Configuration;
 using Geta.NotFoundHandler.Infrastructure.Initialization;
+using Geta.NotFoundHandler.Optimizely;
 using Geta.NotFoundHandler.Optimizely.Commerce.Infrastructure.Configuration;
 using Geta.NotFoundHandler.Optimizely.Infrastructure.Configuration;
 using Geta.NotFoundHandler.Optimizely.Infrastructure.Initialization;
@@ -50,6 +51,11 @@ namespace Foundation
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.Configure<DataAccessOptions>(options => options.ConnectionStrings.Add(new ConnectionStringOptions
+            {
+                Name = "EcfSqlConnection",
+                ConnectionString = _configuration.GetConnectionString("EcfSqlConnection")
+            }));
             services.AddCmsAspNetIdentity<SiteUser>(o =>
             {
                 if (string.IsNullOrEmpty(o.ConnectionStringOptions?.ConnectionString))
@@ -176,7 +182,7 @@ namespace Foundation
         {
             app.UseNotFoundHandler();
             app.UseOptimizelyNotFoundHandler();
-
+            
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
