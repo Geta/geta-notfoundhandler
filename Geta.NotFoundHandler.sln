@@ -22,8 +22,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Geta.NotFoundHandler.Tests"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Geta.NotFoundHandler.Admin", "src\Geta.NotFoundHandler.Admin\Geta.NotFoundHandler.Admin.csproj", "{2265ED23-C9E3-4B8D-B9C1-730FE90F0DED}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AlloyMvcTemplates", "sandbox\Optimizely\Alloy\AlloyMvcTemplates.csproj", "{70BEE855-F32D-493E-8803-DA8AA49D4C9A}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Geta.NotFoundHandler.Optimizely", "src\Geta.NotFoundHandler.Optimizely\Geta.NotFoundHandler.Optimizely.csproj", "{1356CAA1-8364-4147-A068-641A06EEE5FD}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Geta.NotFoundHandler.Optimizely.Tests", "tests\Geta.NotFoundHandler.Optimizely.Tests\Geta.NotFoundHandler.Optimizely.Tests.csproj", "{8DD01C7F-3D7A-49B5-A255-AC69F4EA0162}"
@@ -50,10 +48,6 @@ Global
 		{2265ED23-C9E3-4B8D-B9C1-730FE90F0DED}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2265ED23-C9E3-4B8D-B9C1-730FE90F0DED}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2265ED23-C9E3-4B8D-B9C1-730FE90F0DED}.Release|Any CPU.Build.0 = Release|Any CPU
-		{70BEE855-F32D-493E-8803-DA8AA49D4C9A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{70BEE855-F32D-493E-8803-DA8AA49D4C9A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{70BEE855-F32D-493E-8803-DA8AA49D4C9A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{70BEE855-F32D-493E-8803-DA8AA49D4C9A}.Release|Any CPU.Build.0 = Release|Any CPU
 		{1356CAA1-8364-4147-A068-641A06EEE5FD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{1356CAA1-8364-4147-A068-641A06EEE5FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1356CAA1-8364-4147-A068-641A06EEE5FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -76,7 +70,6 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{80F6A409-357F-4EF2-BAAF-9603180BF1E1} = {751ABE30-032D-40A9-B36C-5549905113BD}
-		{70BEE855-F32D-493E-8803-DA8AA49D4C9A} = {320DF82B-2EF9-4AFA-9A77-FCE2B94F7038}
 		{8DD01C7F-3D7A-49B5-A255-AC69F4EA0162} = {751ABE30-032D-40A9-B36C-5549905113BD}
 		{F1F575B3-A136-41C5-8EB3-97752D8BF8B1} = {320DF82B-2EF9-4AFA-9A77-FCE2B94F7038}
 	EndGlobalSection
