@@ -43,6 +43,12 @@ For the Optimizely project, you would want to install Admin UI integration packa
 Install-Package Geta.NotFoundHandler.Optimizely
 ```
 
+For the Optimizely Commerce project, if you want to use Automatic redirects, install:
+
+```
+Install-Package Geta.NotFoundHandler.Optimizely.Commerce
+```
+
 The package can be found in the [Optimizely Nuget Feed](https://nuget.episerver.com/package/?id=Geta.NotFoundHandler).
 
 # Configuration
@@ -66,13 +72,19 @@ public void ConfigureServices(IServiceCollection services)
         o.AddProvider<NullNotFoundHandlerProvider>();
     });
 
-services.AddOptimizelyNotFoundHandler();
+    services.AddOptimizelyNotFoundHandler(o =>
+    {
+        o.AutomaticRedirectsEnabled = true;
+        o.AddOptimizelyCommerceProviders();
+    });
 
 ...
 }
 ```
 
 The first and the mandatory configuration is a connection string. Use `UseSqlServer` method to set up the database connection string.
+
+Call the `AddOptimizelyNotFoundHandler` method in Optimizely projects. To enable Automatic redirects, you should set `AutomaticRedirectsEnabled` to `true` and for Optimizely Commerce projects call `AddOptimizelyCommerceProviders`.
 
 In addition, the configuration can be read from the `appsettings.json`:
 
@@ -245,7 +257,29 @@ public class CustomProductRedirectHandler : INotFoundHandler
 
 **Note!** Make sure the code you add has good performance, it could be called a lot. If you're querying a database or a search index, you might want to add caching and perhaps Denial Of Service prevention measures.
 
+# Automatic redirects
+
+Automatic redirects is a feature that when enabled will create redirects for content that is moved.
+
+See the *Configuration* section how to enable it.
+
+Once you enabled Automatic redirects, you should run *[Geta NotFoundHandler] Index content URLs* scheduled job. It will index all URLs of content and will start monitoring those for changes.
+
+Now Automatic redirects will create redirects on content move. It will create redirects with the old URLs by checking the indexed URLs for the content and new URLs of the new place where a content is moved to. After that, it will index new URLs too.
+
+It will monitor primary, secondary and SEO URLs:
+- a primary URL will be redirected to the new primary URL,
+- all secondary URLs will be redirected to the new primary URL,
+- a SEO URL is redirected to the new SEO URL if possible and to the new primary URL, if not possible.
+
+Optimizely Content Cloud supports only primary URLs and Optimizely Commerce supports all three types of URLs.
+
+There are two scheduled jobs:
+- *[Geta NotFoundHandler] Index content URLs* - as mentioned before, this job indexes URLs of content. Usually, it is required to run this job only once. All new content is automatically indexed. But if for some reasons content publish events are not firing when creating new content (for example, during the import), then you should set this job to run frequently.
+ - *[Geta NotFoundHandler] Register content move redirects* - this job creates redirects based on registered moved content. Normally, this job is not required at all, but there might be situations when content move is registered but redirect creation is not completed. This could happen during deployments. In this case, you can manually run this job or schedule it to run time to time to fix such issues.
+
 # Troubleshooting
+
 The module has extensive logging. Turn on debug logging for the `Geta.NotFoundHandler` namespace in your logging configuration.
 
 # Usage
