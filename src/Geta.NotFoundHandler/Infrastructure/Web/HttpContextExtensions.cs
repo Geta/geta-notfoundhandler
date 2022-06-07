@@ -1,4 +1,4 @@
-﻿// Copyright (c) Geta Digital. All rights reserved.
+// Copyright (c) Geta Digital. All rights reserved.
 // Licensed under Apache-2.0. See the LICENSE file in the project root for more information
 
 using System.Net;
@@ -34,8 +34,12 @@ namespace Geta.NotFoundHandler.Infrastructure.Web
 
         public static HttpContext SetStatusCode(this HttpContext context, int statusCode)
         {
-            context.Response.Clear();
-            context.Response.StatusCode = statusCode;
+            if (!context.Response.HasStarted)
+            {
+                context.Response.Clear();
+                context.Response.StatusCode = statusCode;
+            }
+            
             return context;
         }
 
