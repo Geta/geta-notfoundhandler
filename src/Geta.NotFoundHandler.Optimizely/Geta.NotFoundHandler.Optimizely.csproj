@@ -49,7 +49,7 @@
       <Pack>true</Pack>
       <PackageCopyToOutput>true</PackageCopyToOutput>
       <BuildAction>None</BuildAction>
-      <PackagePath>build\net5.0\$(MSBuildProjectName).targets</PackagePath>
+      <PackagePath>build\net6.0\$(MSBuildProjectName).targets</PackagePath>
     </Content>
   </ItemGroup>
 
