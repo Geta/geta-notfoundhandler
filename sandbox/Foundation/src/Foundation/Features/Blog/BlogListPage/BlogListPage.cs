@@ -6,7 +6,7 @@ using EPiServer.Shell.ObjectEditing;
 using Foundation.Features.Shared;
 using Foundation.Features.Shared.SelectionFactories;
 using Foundation.Infrastructure;
-//using Geta.EpiCategories.DataAnnotations;
+using Geta.Optimizely.Categories.DataAnnotations;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
@@ -18,7 +18,7 @@ namespace Foundation.Features.Blog.BlogListPage
         Description = "Blog List Page for dates such as year and month",
         GroupName = GroupNames.Blog)]
     [AvailableContentTypes(Availability.Specific, Include = new[] { typeof(BlogListPage), typeof(BlogItemPage.BlogItemPage) })]
-    [ImageUrl("/icons/cms/pages/cms-icon-page-20.png")]
+    [ImageUrl("/icons/cms/pages/CMS-icon-page-20.png")]
     public class BlogListPage : FoundationPageData
     {
         [Display(GroupName = SystemTabNames.Content, Order = 5)]
@@ -42,7 +42,7 @@ namespace Foundation.Features.Blog.BlogListPage
         [Display(Name = "Include teaser text", GroupName = TabNames.BlogList, Order = 50)]
         public virtual bool IncludeTeaserText { get; set; }
 
-        //[Categories]
+        [Categories]
         [Display(
             Name = "Category filter (match all selected)",
             Description = "Categories to filter the list on",
@@ -59,11 +59,11 @@ namespace Foundation.Features.Blog.BlogListPage
         public virtual string PreviewOption { get; set; }
 
         [Display(Name = "Overlay color (hex or rgba)", Description = "Apply for Card template", GroupName = TabNames.BlogList, Order = 100)]
-        [ClientEditor(ClientEditingClass = "foundation/editors/ColorPicker")]
+        [ClientEditor(ClientEditingClass = "foundation/Editors/ColorPicker")]
         public virtual string OverlayColor { get; set; }
 
         [Display(Name = "Overlay text color (hex or rgba)", Description = "Apply for Card template", GroupName = TabNames.BlogList, Order = 110)]
-        [ClientEditor(ClientEditingClass = "foundation/editors/ColorPicker")]
+        [ClientEditor(ClientEditingClass = "foundation/Editors/ColorPicker")]
         public virtual string OverlayTextColor { get; set; }
 
         public override void SetDefaultValues(ContentType contentType)

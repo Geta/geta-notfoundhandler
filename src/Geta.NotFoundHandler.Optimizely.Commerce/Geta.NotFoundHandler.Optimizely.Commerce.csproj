@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <PackageId>Geta.NotFoundHandler.Optimizely.Commerce</PackageId>
     <Title>NotFound handler Admin UI integration Optimizely Commerce</Title>
     <Authors>Geta Digital</Authors>
@@ -30,7 +30,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="EPiServer.Commerce.Core" Version="14.1.3" />
+    <PackageReference Include="EPiServer.Commerce.Core" Version="14.3.1" />
   </ItemGroup>
 
 </Project>

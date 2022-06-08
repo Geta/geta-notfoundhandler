@@ -9,7 +9,7 @@ using Foundation.Features.Folder;
 using Foundation.Features.Shared;
 using Foundation.Features.Shared.SelectionFactories;
 using Foundation.Infrastructure;
-//using Geta.EpiCategories.DataAnnotations;
+using Geta.Optimizely.Categories.DataAnnotations;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -51,7 +51,7 @@ namespace Foundation.Features.Blocks.PageListBlock
         [Display(Name = "Filter by page type", GroupName = SystemTabNames.Content, Order = 70)]
         public virtual PageType PageTypeFilter { get; set; }
 
-        //[Categories]
+        [Categories]
         [Display(Name = "Filter by category",
             Description = "Categories to filter the list on",
             GroupName = SystemTabNames.Content,
@@ -70,11 +70,11 @@ namespace Foundation.Features.Blocks.PageListBlock
         public virtual string PreviewOption { get; set; }
 
         [Display(Name = "Overlay color (only for Card template)", Description = "Apply for Card template", GroupName = SystemTabNames.Content, Order = 120)]
-        [ClientEditor(ClientEditingClass = "foundation/editors/ColorPicker")]
+        [ClientEditor(ClientEditingClass = "foundation/Editors/ColorPicker")]
         public virtual string OverlayColor { get; set; }
 
         [Display(Name = "Overlay text color (only for Card template)", Description = "Apply for Card template", GroupName = SystemTabNames.Content, Order = 130)]
-        [ClientEditor(ClientEditingClass = "foundation/editors/ColorPicker")]
+        [ClientEditor(ClientEditingClass = "foundation/Editors/ColorPicker")]
         public virtual string OverlayTextColor { get; set; }
 
         public override void SetDefaultValues(ContentType contentType)

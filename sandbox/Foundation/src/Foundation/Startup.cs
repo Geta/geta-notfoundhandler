@@ -1,10 +1,12 @@
-﻿using EPiServer.Authorization;
+﻿using Advanced.CMS.AdvancedReviews;
+using EPiServer.Authorization;
 using EPiServer.ContentApi.Cms;
 using EPiServer.ContentApi.Cms.Internal;
 using EPiServer.ContentDefinitionsApi;
 using EPiServer.ContentManagementApi;
 using EPiServer.Data;
 using EPiServer.Framework.Web.Resources;
+using EPiServer.Labs.BlockEnhancements;
 using EPiServer.Labs.ContentManager;
 using EPiServer.OpenIDConnect;
 using EPiServer.ServiceLocation;
@@ -19,11 +21,12 @@ using Foundation.Infrastructure.Cms.Users;
 using Foundation.Infrastructure.Display;
 using Geta.NotFoundHandler.Infrastructure.Configuration;
 using Geta.NotFoundHandler.Infrastructure.Initialization;
-using Geta.NotFoundHandler.Optimizely;
 using Geta.NotFoundHandler.Optimizely.Commerce.Infrastructure.Configuration;
 using Geta.NotFoundHandler.Optimizely.Infrastructure.Configuration;
 using Geta.NotFoundHandler.Optimizely.Infrastructure.Initialization;
-using Jhoose.Security.DependencyInjection;
+using Geta.Optimizely.Categories.Configuration;
+using Geta.Optimizely.Categories.Find.Infrastructure.Initialization;
+using Geta.Optimizely.Categories.Infrastructure.Initialization;
 using Mediachase.Commerce.Anonymous;
 using Mediachase.Commerce.Orders;
 using Microsoft.AspNetCore.Builder;
@@ -34,6 +37,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using System;
 using System.Linq;
+using UNRVLD.ODP.VisitorGroups.Initilization;
 
 namespace Foundation
 {
@@ -87,6 +91,7 @@ namespace Foundation
 
             services.AddCommerce();
             services.AddFind();
+            services.AddSocialFramework();
             services.AddDisplay();
             services.TryAddEnumerable(Microsoft.Extensions.DependencyInjection.ServiceDescriptor.Singleton(typeof(IFirstRequestInitializer), typeof(ContentInstaller)));
             services.AddDetection();
@@ -109,6 +114,17 @@ namespace Foundation
             services.AddContentDeliveryApi()
                 .WithFriendlyUrl()
                 .WithSiteBasedCors();
+            services.AddContentDeliveryApi(OpenIDConnectOptionsDefaults.AuthenticationScheme, options => {
+                options.SiteDefinitionApiEnabled = true;
+            })
+               .WithFriendlyUrl()
+               .WithSiteBasedCors();
+
+            // Content Delivery Search API
+            services.AddContentSearchApi(o =>
+            {
+                o.MaximumSearchResults = 100;
+            });
 
             // Content Definitions API
             services.AddContentDefinitionsApi(options =>
@@ -118,11 +134,12 @@ namespace Foundation
             });
 
             // Content Management
-            services.AddContentManagementApi(c =>
+            services.AddContentManagementApi(OpenIDConnectOptionsDefaults.AuthenticationScheme, options =>
             {
                 // Accept anonymous calls
-                c.DisableScopeValidation = true;
+                options.DisableScopeValidation = true;
             });
+
             services.AddOpenIDConnect<SiteUser>(options =>
             {
                 //options.RequireHttps = !_webHostingEnvironment.IsDevelopment();
@@ -155,7 +172,6 @@ namespace Foundation
                 o.AutomaticRedirectsEnabled = true;
                 o.AddOptimizelyCommerceProviders();
             });
-            services.AddJhooseSecurity(_configuration);
             services.Configure<ProtectedModuleOptions>(x =>
             {
                 if (!x.Items.Any(x => x.Name.Equals("Foundation")))
@@ -175,6 +191,23 @@ namespace Foundation
 
             // Add ContentManager
             services.AddContentManager();
+
+            // Add BlockEnhancements
+            services.AddBlockEnhancements();
+            services.Configure<BlockEnhancementsOptions>(options =>
+            {
+                //var blockEnhancements = new BlockEnhancementsOptions
+                options.LocalContentFeatureEnabled = false;
+                options.HideForThisFolder = false;
+                options.AllowQuickEditOnSharedBlocks = true;
+                options.PublishPageWithBlocks = true;
+            });
+
+            // Add AdvancedReviews
+            services.AddAdvancedReviews();
+            services.AddGetaCategories();
+            services.AddODPVisitorGroups();
+           
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -187,6 +220,9 @@ namespace Foundation
             {
                 app.UseDeveloperExceptionPage();
             }
+
+            app.UseGetaCategories();
+            app.UseGetaCategoriesFind();
 
             app.UseAnonymousId();
             app.UseStaticFiles();
