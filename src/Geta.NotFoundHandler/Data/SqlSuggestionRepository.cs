@@ -126,7 +126,7 @@ namespace Geta.NotFoundHandler.Data
         private DataTable GetAllSuggestions()
         {
             var sqlCommand = $@"
-            SELECT c.OldUrlCount, c.OldUrl, r.Referer, count(r.Referer) as RefererCount
+            SELECT c.OldUrlCount, c.OldUrl, r.Referer, COUNT(r.Referer) as RefererCount
             FROM
                 (SELECT 
                     COUNT([OldUrl]) as OldUrlCount
