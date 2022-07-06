@@ -23,14 +23,17 @@ namespace Geta.NotFoundHandler.Data
         public IEnumerable<SuggestionSummary> GetAllSummaries()
         {
             var summaries = new List<SuggestionSummary>();
-            var table = GetAllSuggestionCount();
+            var table = GetAllSuggestions();
 
-            foreach (DataRow row in table.Rows)
+            var suggestionsCountTable = table.DefaultView.ToTable(true, "OldUrlCount", "OldUrl");
+
+            foreach (DataRow row in suggestionsCountTable.Rows)
             {
-                var oldUrl = row[0].ToString();
+                var oldUrl = row["OldUrl"].ToString();
+                
                 var summary = new SuggestionSummary
                 {
-                    OldUrl = oldUrl, Count = Convert.ToInt32(row[1]), Referers = GetReferers(oldUrl).ToList()
+                    OldUrl = oldUrl, Count = Convert.ToInt32(row["OldUrlCount"]), Referers = GetReferers(oldUrl, table).ToList()
                 };
                 summaries.Add(summary);
             }
@@ -38,18 +41,19 @@ namespace Geta.NotFoundHandler.Data
             return summaries;
         }
 
-        private IEnumerable<RefererSummary> GetReferers(string url)
+        private IEnumerable<RefererSummary> GetReferers(string url, DataTable table)
         {
             var referers = new List<RefererSummary>();
 
-            var table = GetSuggestionReferers(url);
-            if (table == null) return referers;
+            //note DataTable is not vulnerable to sql-injection since it's an in-memory object
+            var referrersTable = table.Select($"OldUrl = '{url.Replace("'", "''")}'" ,"RefererCount DESC");
+            if (referrersTable.Length == 0) return referers;
 
             var unknownReferers = 0;
-            foreach (DataRow row in table.Rows)
+            foreach (var row in referrersTable)
             {
-                var referer = row[0].ToString() ?? string.Empty;
-                var count = Convert.ToInt32(row[1].ToString());
+                var referer = row["Referer"].ToString() ?? string.Empty;
+                var count = Convert.ToInt32(row["RefererCount"].ToString());
                 if (referer.Trim() != string.Empty
                     && !referer.Contains("(null)"))
                 {
@@ -120,21 +124,20 @@ namespace Geta.NotFoundHandler.Data
             _dataExecutor.ExecuteNonQuery(sqlCommand, requestedParam, refererParam, oldUrlParam);
         }
 
-        private DataTable GetAllSuggestionCount()
+        private DataTable GetAllSuggestions()
         {
-            var sqlCommand =
-                $"SELECT [OldUrl], COUNT(*) as Requests FROM {SuggestionsTable} GROUP BY [OldUrl] order by Requests desc";
+            var sqlCommand = $@"
+            SELECT c.[count] as OldUrlCount, c.OldUrl, r.Referer, count(r.Referer) as RefererCount
+            FROM
+                (SELECT 
+                    COUNT([OldUrl]) as [count]
+                    ,[OldUrl]
+                  FROM {SuggestionsTable}
+                GROUP BY [OldUrl]) c
+            INNER JOIN {SuggestionsTable} r  ON c.OldUrl = r.OldUrl
+            GROUP by c.[count], c.OldUrl, r.Referer
+            ORDER BY OldUrlCount desc";
             return _dataExecutor.ExecuteQuery(sqlCommand);
-        }
-
-        public DataTable GetSuggestionReferers(string url)
-        {
-            var sqlCommand =
-                $"SELECT [Referer], COUNT(*) as Requests FROM {SuggestionsTable} where [OldUrl] = @oldUrl  GROUP BY [Referer] order by Requests desc";
-            var oldUrlParam = _dataExecutor.CreateParameter("oldUrl", DbType.String, 2000);
-            oldUrlParam.Value = url;
-
-            return _dataExecutor.ExecuteQuery(sqlCommand, oldUrlParam);
         }
     }
 }
