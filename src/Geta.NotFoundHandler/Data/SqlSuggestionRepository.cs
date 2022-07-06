@@ -41,7 +41,7 @@ namespace Geta.NotFoundHandler.Data
             return summaries;
         }
 
-        private IEnumerable<RefererSummary> GetReferers(string url, DataTable table)
+        private static IEnumerable<RefererSummary> GetReferers(string url, DataTable table)
         {
             var referers = new List<RefererSummary>();
 
