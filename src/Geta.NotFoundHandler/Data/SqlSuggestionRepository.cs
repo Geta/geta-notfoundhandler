@@ -45,7 +45,6 @@ namespace Geta.NotFoundHandler.Data
         {
             var referers = new List<RefererSummary>();
 
-            //note DataTable is not vulnerable to sql-injection since it's an in-memory object
             var referrersTable = table.Select($"OldUrl = '{url.Replace("'", "''")}'" ,"RefererCount DESC");
             if (referrersTable.Length == 0) return referers;
 
@@ -127,15 +126,15 @@ namespace Geta.NotFoundHandler.Data
         private DataTable GetAllSuggestions()
         {
             var sqlCommand = $@"
-            SELECT c.[count] as OldUrlCount, c.OldUrl, r.Referer, count(r.Referer) as RefererCount
+            SELECT c.OldUrlCount, c.OldUrl, r.Referer, count(r.Referer) as RefererCount
             FROM
                 (SELECT 
-                    COUNT([OldUrl]) as [count]
+                    COUNT([OldUrl]) as OldUrlCount
                     ,[OldUrl]
                   FROM {SuggestionsTable}
                 GROUP BY [OldUrl]) c
             INNER JOIN {SuggestionsTable} r  ON c.OldUrl = r.OldUrl
-            GROUP by c.[count], c.OldUrl, r.Referer
+            GROUP by c.OldUrlCount, c.OldUrl, r.Referer
             ORDER BY OldUrlCount desc";
             return _dataExecutor.ExecuteQuery(sqlCommand);
         }
