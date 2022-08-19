@@ -1,9 +1,11 @@
 // Copyright (c) Geta Digital. All rights reserved.
 // Licensed under Apache-2.0. See the LICENSE file in the project root for more information
 
+using System;
 using System.Net;
 using Geta.NotFoundHandler.Core.Redirects;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Extensions;
 
 namespace Geta.NotFoundHandler.Infrastructure.Web
 {
@@ -47,9 +49,15 @@ namespace Geta.NotFoundHandler.Infrastructure.Web
         {
             context.Response.Clear();
             var permanent = redirectType == RedirectType.Permanent;
-            context.Response.Redirect(url, permanent);
-            
+            context.Response.Redirect(TryEncodeUrl(url), permanent);
             return context;
+        }
+        
+        private static string TryEncodeUrl(string url)
+        {
+            Uri.TryCreate(url, UriKind.RelativeOrAbsolute, out var uri);
+
+            return uri != null ? UriHelper.Encode(uri) : url;
         }
     }
 }
