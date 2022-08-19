@@ -306,8 +306,3 @@ Reach out package maintainer for additional details if needed.
 ## Package Maintainer
 
 https://github.com/marisks
-
-
-# Mentions and Resources
-
-
