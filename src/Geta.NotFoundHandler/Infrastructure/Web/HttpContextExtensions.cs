@@ -1,9 +1,11 @@
 // Copyright (c) Geta Digital. All rights reserved.
 // Licensed under Apache-2.0. See the LICENSE file in the project root for more information
 
+using System;
 using System.Net;
 using Geta.NotFoundHandler.Core.Redirects;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Extensions;
 
 namespace Geta.NotFoundHandler.Infrastructure.Web
 {
@@ -46,7 +48,14 @@ namespace Geta.NotFoundHandler.Infrastructure.Web
         public static HttpContext Redirect(this HttpContext context, string url, RedirectType redirectType)
         {
             context.Response.Clear();
+
             var permanent = redirectType == RedirectType.Permanent;
+
+            if (Uri.TryCreate(url, UriKind.RelativeOrAbsolute, out var uri))
+            {
+                url = UriHelper.Encode(uri);
+            }
+
             context.Response.Redirect(url, permanent);
             
             return context;
