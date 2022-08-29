@@ -48,6 +48,7 @@ namespace Geta.NotFoundHandler.Infrastructure.Web
         public static HttpContext Redirect(this HttpContext context, string url, RedirectType redirectType)
         {
             context.Response.Clear();
+
             var permanent = redirectType == RedirectType.Permanent;
             context.Response.Redirect(TryEncodeUrl(url), permanent);
             return context;

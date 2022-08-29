@@ -46,6 +46,23 @@ namespace Geta.NotFoundHandler.Tests
         }
 
         [Fact]
+        public void Find_handles_path_and_query_parameters_when_matching_sub_segment()
+        {
+            var collection = new CustomRedirectCollection
+            {
+                new CustomRedirect("/oldsegment1/", "/newsegment1/?test=r"),
+            };
+
+            var urlToFind = "/oldsegment1/oldsegment2/?test=q";
+            var expected = "/newsegment1/oldsegment2/?test=q&test=r";
+
+            var actual = collection.Find(urlToFind.ToUri());
+
+            Assert.Equal(expected, actual.NewUrl);
+        }
+                
+
+        [Fact]
         public void Find_finds_redirect_when_not_found_url_starts_with_stored_url_and_WildCardSkipAppend_enabled()
         {
             var storedUrl = "/old";
