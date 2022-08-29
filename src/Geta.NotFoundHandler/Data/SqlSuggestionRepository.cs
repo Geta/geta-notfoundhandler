@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using Geta.NotFoundHandler.Core.Suggestions;
+using X.PagedList;
 
 namespace Geta.NotFoundHandler.Data
 {
@@ -20,23 +21,13 @@ namespace Geta.NotFoundHandler.Data
             _dataExecutor = dataExecutor;
         }
 
-        public IEnumerable<SuggestionSummary> GetAllSummaries()
-        {
-            var table = GetSuggestionsPaged(null, null);
-
-            return CreateSuggestionSummaries(table);            
-        }
-
-        public IEnumerable<SuggestionSummary> GetSummariesPaged(int page, int pageSize)
+        public IPagedList<SuggestionSummary> GetSummaries(int page, int pageSize)
         {
             var table = GetSuggestionsPaged(page, pageSize);
+            var summaries = CreateSuggestionSummaries(table);
+            var count = CountSummaries();
 
-            return CreateSuggestionSummaries(table);
-        }
-
-        public int GetSummaryCount()
-        {
-            return CountSummaries();
+            return new StaticPagedList<SuggestionSummary>(summaries, page, pageSize, count);
         }
 
         private IEnumerable<SuggestionSummary> CreateSuggestionSummaries(DataTable table)
@@ -147,7 +138,7 @@ namespace Geta.NotFoundHandler.Data
 
             if (page.HasValue && pageSize.HasValue)
             {
-                page = Math.Min(1, page.Value);
+                page = Math.Max(1, page.Value);
                 var skip = (page.Value - 1) * pageSize.Value;
 
                 sqlCommand += $" OFFSET {skip} ROWS FETCH NEXT {pageSize.Value} ROWS ONLY";

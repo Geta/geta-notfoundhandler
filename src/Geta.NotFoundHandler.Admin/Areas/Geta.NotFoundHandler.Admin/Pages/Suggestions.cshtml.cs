@@ -53,9 +53,7 @@ namespace Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin
 
         private void Load()
         {
-            var summaries = _suggestionService.GetSummariesPaged(Paging.PageNumber, Paging.PageSize);
-            var summaryCount = _suggestionService.GetSummaryCount();
-
+            var summaries = _suggestionService.GetSummaries(Paging.PageNumber, Paging.PageSize);
             var redirectModels = summaries.Select(x => new SuggestionRedirectModel
             {
                 OldUrl = x.OldUrl,
@@ -63,14 +61,8 @@ namespace Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin
                 Referers = x.Referers
             });
 
-            IPagedList<SuggestionRedirectModel> items = new StaticPagedList<SuggestionRedirectModel>(
-                redirectModels, 
-                Paging.PageNumber, 
-                Paging.PageSize,
-                summaryCount);
-
-            Message = $"Based on the logged 404 errors, there are {summaryCount} custom redirect suggestions.";
-            Items = items;
+            Message = $"Based on the logged 404 errors, there are {summaries.TotalItemCount} custom redirect suggestions.";
+            Items = new StaticPagedList<SuggestionRedirectModel>(redirectModels, summaries);
         }
     }
 }
