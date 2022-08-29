@@ -50,15 +50,15 @@ namespace Geta.NotFoundHandler.Infrastructure.Web
             context.Response.Clear();
 
             var permanent = redirectType == RedirectType.Permanent;
-
-            if (Uri.TryCreate(url, UriKind.RelativeOrAbsolute, out var uri))
-            {
-                url = UriHelper.Encode(uri);
-            }
-
-            context.Response.Redirect(url, permanent);
-            
+            context.Response.Redirect(TryEncodeUrl(url), permanent);
             return context;
+        }
+        
+        private static string TryEncodeUrl(string url)
+        {
+            Uri.TryCreate(url, UriKind.RelativeOrAbsolute, out var uri);
+
+            return uri != null ? UriHelper.Encode(uri) : url;
         }
     }
 }
