@@ -7,6 +7,7 @@ using Geta.NotFoundHandler.Core.Suggestions;
 using Geta.NotFoundHandler.Infrastructure.Configuration;
 using Geta.NotFoundHandler.Tests.Base;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Xunit;
@@ -109,6 +110,20 @@ namespace Geta.NotFoundHandler.Tests
             var redirect = new CustomRedirect("http://example.com/missing", RedirectState.Saved)
             {
                 NewUrl = "http://example.com/page"
+            };
+            WhenRedirectUrlFound(redirect);
+
+            _sut.Handle(_httpContext);
+
+            AssertRedirected(_httpContext, redirect);
+        }
+        
+        [Fact]
+        public void Handle_redirects_when_redirect_url_found_with_non_ascii_characters()
+        {
+            var redirect = new CustomRedirect("http://example.com/missing", RedirectState.Saved)
+            {
+                NewUrl = "http://example.com/page/ö"
             };
             WhenRedirectUrlFound(redirect);
 
@@ -324,7 +339,9 @@ namespace Geta.NotFoundHandler.Tests
 
             var headers = context.Response.Headers;
             var redirectLocation = headers.ContainsKey("Location") ? (string)headers["Location"] : string.Empty;
-            Assert.Equal(redirect.NewUrl, redirectLocation);
+            
+            Uri.TryCreate(redirect.NewUrl, UriKind.RelativeOrAbsolute, out var uri);
+            Assert.Equal(uri != null ? UriHelper.Encode(uri) : redirect.NewUrl, redirectLocation);
         }
 
         private static void Assert404ResponseSet(HttpContext context)
