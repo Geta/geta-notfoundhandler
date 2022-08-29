@@ -1,9 +1,9 @@
 // Copyright (c) Geta Digital. All rights reserved.
 // Licensed under Apache-2.0. See the LICENSE file in the project root for more information
 
-using System.Collections.Generic;
 using Geta.NotFoundHandler.Core.Redirects;
 using Geta.NotFoundHandler.Data;
+using X.PagedList;
 
 namespace Geta.NotFoundHandler.Core.Suggestions
 {
@@ -23,9 +23,9 @@ namespace Geta.NotFoundHandler.Core.Suggestions
             _suggestionRepository = suggestionRepository;
         }
 
-        public IEnumerable<SuggestionSummary> GetAllSummaries()
+        public IPagedList<SuggestionSummary> GetSummaries(int page, int pageSize)
         {
-            return _suggestionLoader.GetAllSummaries();
+            return _suggestionLoader.GetSummaries(page, pageSize);
         }
 
         public void AddRedirect(SuggestionRedirect suggestionRedirect)

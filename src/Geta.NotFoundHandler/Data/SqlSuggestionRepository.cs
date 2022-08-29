@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using Geta.NotFoundHandler.Core.Suggestions;
+using X.PagedList;
 
 namespace Geta.NotFoundHandler.Data
 {
@@ -20,20 +21,27 @@ namespace Geta.NotFoundHandler.Data
             _dataExecutor = dataExecutor;
         }
 
-        public IEnumerable<SuggestionSummary> GetAllSummaries()
+        public IPagedList<SuggestionSummary> GetSummaries(int page, int pageSize)
+        {
+            var table = GetSuggestionsPaged(page, pageSize);
+            var summaries = CreateSuggestionSummaries(table);
+            var count = CountSummaries();
+
+            return new StaticPagedList<SuggestionSummary>(summaries, page, pageSize, count);
+        }
+
+        private IEnumerable<SuggestionSummary> CreateSuggestionSummaries(DataTable table)
         {
             var summaries = new List<SuggestionSummary>();
-            var table = GetAllSuggestions();
 
-            var suggestionsCountTable = table.DefaultView.ToTable(true, "OldUrlCount", "OldUrl");
-
-            foreach (DataRow row in suggestionsCountTable.Rows)
+            foreach (DataRow row in table.Rows)
             {
-                var oldUrl = row["OldUrl"].ToString();
-                
+                var oldUrl = row[0].ToString();
                 var summary = new SuggestionSummary
                 {
-                    OldUrl = oldUrl, Count = Convert.ToInt32(row["OldUrlCount"]), Referers = GetReferers(oldUrl, table).ToList()
+                    OldUrl = oldUrl,
+                    Count = Convert.ToInt32(row[1]),
+                    Referers = GetReferers(oldUrl).ToList()
                 };
                 summaries.Add(summary);
             }
@@ -41,18 +49,18 @@ namespace Geta.NotFoundHandler.Data
             return summaries;
         }
 
-        private static IEnumerable<RefererSummary> GetReferers(string url, DataTable table)
+        private IEnumerable<RefererSummary> GetReferers(string url)
         {
             var referers = new List<RefererSummary>();
 
-            var referrersTable = table.Select($"OldUrl = '{url.Replace("'", "''")}'" ,"RefererCount DESC");
-            if (referrersTable.Length == 0) return referers;
+            var table = GetSuggestionReferers(url);
+            if (table == null) return referers;
 
             var unknownReferers = 0;
-            foreach (var row in referrersTable)
+            foreach (DataRow row in table.Rows)
             {
-                var referer = row["Referer"].ToString() ?? string.Empty;
-                var count = Convert.ToInt32(row["RefererCount"].ToString());
+                var referer = row[0].ToString() ?? string.Empty;
+                var count = Convert.ToInt32(row[1].ToString());
                 if (referer.Trim() != string.Empty
                     && !referer.Contains("(null)"))
                 {
@@ -123,20 +131,38 @@ namespace Geta.NotFoundHandler.Data
             _dataExecutor.ExecuteNonQuery(sqlCommand, requestedParam, refererParam, oldUrlParam);
         }
 
-        private DataTable GetAllSuggestions()
+        private DataTable GetSuggestionsPaged(int? page, int? pageSize)
         {
-            var sqlCommand = $@"
-            SELECT c.OldUrlCount, c.OldUrl, r.Referer, COUNT(r.Referer) as RefererCount
-            FROM
-                (SELECT 
-                    COUNT([OldUrl]) as OldUrlCount
-                    ,[OldUrl]
-                  FROM {SuggestionsTable}
-                GROUP BY [OldUrl]) c
-            INNER JOIN {SuggestionsTable} r  ON c.OldUrl = r.OldUrl
-            GROUP by c.OldUrlCount, c.OldUrl, r.Referer
-            ORDER BY OldUrlCount desc";
+            var sqlCommand =
+                $"SELECT [OldUrl], COUNT(*) as Requests FROM {SuggestionsTable} GROUP BY [OldUrl] order by Requests desc";
+
+            if (page.HasValue && pageSize.HasValue)
+            {
+                page = Math.Max(1, page.Value);
+                var skip = (page.Value - 1) * pageSize.Value;
+
+                sqlCommand += $" OFFSET {skip} ROWS FETCH NEXT {pageSize.Value} ROWS ONLY";
+            }
+
             return _dataExecutor.ExecuteQuery(sqlCommand);
+        }
+
+        private int CountSummaries()
+        {
+            var sqlCommand = $"SELECT COUNT([ID]) FROM {SuggestionsTable}";
+
+            return _dataExecutor.ExecuteScalar(sqlCommand);
+        }
+
+        public DataTable GetSuggestionReferers(string url)
+        {
+            var sqlCommand =
+                $"SELECT [Referer], COUNT(*) as Requests FROM {SuggestionsTable} where [OldUrl] = @oldUrl GROUP BY [Referer] order by Requests desc";
+
+            var oldUrlParam = _dataExecutor.CreateParameter("oldUrl", DbType.String, 2000);
+            oldUrlParam.Value = url;
+
+            return _dataExecutor.ExecuteQuery(sqlCommand, oldUrlParam);
         }
     }
 }

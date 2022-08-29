@@ -53,14 +53,16 @@ namespace Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin
 
         private void Load()
         {
-            var items = _suggestionService.GetAllSummaries().Select(x => new SuggestionRedirectModel
+            var summaries = _suggestionService.GetSummaries(Paging.PageNumber, Paging.PageSize);
+            var redirectModels = summaries.Select(x => new SuggestionRedirectModel
             {
                 OldUrl = x.OldUrl,
                 Count = x.Count,
                 Referers = x.Referers
-            }).ToPagedList(Paging.PageNumber, Paging.PageSize);
-            Message = $"Based on the logged 404 errors, there are {items.TotalItemCount} custom redirect suggestions.";
-            Items = items;
+            });
+
+            Message = $"Based on the logged 404 errors, there are {summaries.TotalItemCount} custom redirect suggestions.";
+            Items = new StaticPagedList<SuggestionRedirectModel>(redirectModels, summaries);
         }
     }
 }
