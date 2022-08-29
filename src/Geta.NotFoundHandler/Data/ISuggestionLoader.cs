@@ -11,5 +11,7 @@ namespace Geta.NotFoundHandler.Data
         IEnumerable<SuggestionSummary> GetAllSummaries();
 
         IEnumerable<SuggestionSummary> GetSummariesPaged(int page, int pageSize);
+
+        int GetSummaryCount();
     }
 }

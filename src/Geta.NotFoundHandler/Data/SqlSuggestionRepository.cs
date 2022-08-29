@@ -22,16 +22,21 @@ namespace Geta.NotFoundHandler.Data
 
         public IEnumerable<SuggestionSummary> GetAllSummaries()
         {
-            var table = GetSuggestionCount(null, null);
+            var table = GetSuggestionsPaged(null, null);
 
             return CreateSuggestionSummaries(table);            
         }
 
         public IEnumerable<SuggestionSummary> GetSummariesPaged(int page, int pageSize)
         {
-            var table = GetSuggestionCount(page, pageSize);
+            var table = GetSuggestionsPaged(page, pageSize);
 
             return CreateSuggestionSummaries(table);
+        }
+
+        public int GetSummaryCount()
+        {
+            return CountSummaries();
         }
 
         private IEnumerable<SuggestionSummary> CreateSuggestionSummaries(DataTable table)
@@ -135,7 +140,7 @@ namespace Geta.NotFoundHandler.Data
             _dataExecutor.ExecuteNonQuery(sqlCommand, requestedParam, refererParam, oldUrlParam);
         }
 
-        private DataTable GetSuggestionCount(int? page, int? pageSize)
+        private DataTable GetSuggestionsPaged(int? page, int? pageSize)
         {
             var sqlCommand =
                 $"SELECT [OldUrl], COUNT(*) as Requests FROM {SuggestionsTable} GROUP BY [OldUrl] order by Requests desc";
@@ -149,6 +154,13 @@ namespace Geta.NotFoundHandler.Data
             }
 
             return _dataExecutor.ExecuteQuery(sqlCommand);
+        }
+
+        private int CountSummaries()
+        {
+            var sqlCommand = $"SELECT COUNT([ID]) FROM {SuggestionsTable}";
+
+            return _dataExecutor.ExecuteScalar(sqlCommand);
         }
 
         public DataTable GetSuggestionReferers(string url)

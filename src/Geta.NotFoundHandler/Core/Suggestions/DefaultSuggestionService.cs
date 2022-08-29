@@ -33,6 +33,11 @@ namespace Geta.NotFoundHandler.Core.Suggestions
             return _suggestionLoader.GetSummariesPaged(page, pageSize);
         }
 
+        public int GetSummaryCount()
+        {
+            return _suggestionLoader.GetSummaryCount();
+        }
+
         public void AddRedirect(SuggestionRedirect suggestionRedirect)
         {
             SaveRedirect(suggestionRedirect);

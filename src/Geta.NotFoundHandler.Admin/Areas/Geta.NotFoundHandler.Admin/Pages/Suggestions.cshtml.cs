@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using Geta.NotFoundHandler.Admin.Areas.Geta.NotFoundHandler.Admin.Pages.Infrastructure;
 using Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin.Models;
 using Geta.NotFoundHandler.Core.Suggestions;
 using Microsoft.AspNetCore.Mvc;
@@ -54,7 +53,9 @@ namespace Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin
 
         private void Load()
         {
-            var summaries = _suggestionService.GetSummariesPaged(Paging.PageNumber, Paging.PageSize + 1);
+            var summaries = _suggestionService.GetSummariesPaged(Paging.PageNumber, Paging.PageSize);
+            var summaryCount = _suggestionService.GetSummaryCount();
+
             var redirectModels = summaries.Select(x => new SuggestionRedirectModel
             {
                 OldUrl = x.OldUrl,
@@ -62,12 +63,13 @@ namespace Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin
                 Referers = x.Referers
             });
 
-            IPagedList<SuggestionRedirectModel> items = new SubsetPageList<SuggestionRedirectModel>(
+            IPagedList<SuggestionRedirectModel> items = new StaticPagedList<SuggestionRedirectModel>(
                 redirectModels, 
                 Paging.PageNumber, 
-                Paging.PageSize);
+                Paging.PageSize,
+                summaryCount);
 
-            Message = $"Based on the logged 404 errors, there are custom redirect suggestions.";
+            Message = $"Based on the logged 404 errors, there are {summaryCount} custom redirect suggestions.";
             Items = items;
         }
     }
