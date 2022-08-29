@@ -8,6 +8,7 @@ namespace Geta.NotFoundHandler.Core.Suggestions
     public interface ISuggestionService
     {
         IEnumerable<SuggestionSummary> GetAllSummaries();
+        IEnumerable<SuggestionSummary> GetSummariesPaged(int page, int pageSize);
         void AddRedirect(SuggestionRedirect suggestionRedirect);
         void IgnoreSuggestion(string oldUrl);
         void DeleteAll();

@@ -9,5 +9,7 @@ namespace Geta.NotFoundHandler.Data
     public interface ISuggestionLoader
     {
         IEnumerable<SuggestionSummary> GetAllSummaries();
+
+        IEnumerable<SuggestionSummary> GetSummariesPaged(int page, int pageSize);
     }
 }
