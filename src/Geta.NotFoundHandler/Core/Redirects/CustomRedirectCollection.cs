@@ -4,8 +4,11 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Text;
 using System.Web;
+using Geta.NotFoundHandler.Infrastructure.Processing;
 
 namespace Geta.NotFoundHandler.Core.Redirects
 {
@@ -95,6 +98,9 @@ namespace Geta.NotFoundHandler.Core.Redirects
                 _redirectsZACache = redirectsZA;
             }
 
+            var path = url.AsPathSpan();
+            var query = url.AsQuerySpan();
+
             // No exact match could be done, so we'll check if the 404 url
             // starts with one of the urls we're matching against. This
             // will be kind of a wild card match (even though we only check
@@ -108,63 +114,136 @@ namespace Geta.NotFoundHandler.Core.Redirects
             foreach (var redirectPair in redirectsZA)
             {
                 var oldUrl = redirectPair.Key;
+                if (oldUrl is null)
+                {
+                    continue;
+                }
+
+                var oldPath = oldUrl.AsPathSpan();
+                var oldQuery = oldUrl.AsQuerySpan();
+
                 // See if this "old" url (the one that cannot be found) starts with one
-                if (oldUrl != null && url.StartsWith(oldUrl, StringComparison.InvariantCultureIgnoreCase))
+                if (path.UrlPathMatch(oldPath) && query.StartsWith(oldQuery, StringComparison.InvariantCultureIgnoreCase))
                 {
                     var cr = redirectPair.Value;
                     if (cr.State == (int)RedirectState.Ignored)
                     {
                         return null;
                     }
+
                     if (cr.WildCardSkipAppend)
                     {
                         // We'll redirect without appending the 404 url
                         return cr;
                     }
 
-                    if (UrlIsOldUrlsSubSegment(url, oldUrl))
+                    if (UrlIsOldUrlsSubSegment(path, oldUrl))
                     {
-                        return CreateSubSegmentRedirect(url, cr, oldUrl);
+                        return CreateSubSegmentRedirect(path, query, cr, oldPath);
                     }
                 }
             }
 
             return null;
-        }
+        }        
 
-        private static CustomRedirect CreateSubSegmentRedirect(string url, CustomRedirect cr, string oldUrl)
+        private static CustomRedirect CreateSubSegmentRedirect(ReadOnlySpan<char> path, ReadOnlySpan<char> query, CustomRedirect cr, ReadOnlySpan<char> oldPath)
         {
-            string AppendSlash(string s)
-            {
-                if(s == null) return null;
-
-                return s.EndsWith("/") ? s : $"{s}/";
-            }
-
-            string RemoveSlash(string s)
-            {
-                return s.StartsWith("/") ? s.TrimStart('/') : s;
-            }
-
             var redirCopy = new CustomRedirect(cr);
-            var newUrl = url.IndexOf("?", StringComparison.Ordinal) > 0 ? redirCopy.NewUrl : AppendSlash(redirCopy.NewUrl);
-            var appendSegment = RemoveSlash(url.Substring(oldUrl.Length));
-            redirCopy.NewUrl = $"{newUrl}{appendSegment}";
+
+            var newUrl = redirCopy.NewUrl;
+            var newPath = newUrl.AsPathSpan();
+            var newQuery = newUrl.AsQuerySpan();
+
+            var shouldAppendSegment = path.Length > oldPath.Length;
+            var appendSegment = ReadOnlySpan<char>.Empty;
+
+            if (shouldAppendSegment)
+            {
+                appendSegment = path[oldPath.Length..];
+            }
+
+            // Note: Guard against infinite buildup of redirects
+            while (appendSegment.UrlPathMatch(oldPath))
+            {
+                appendSegment = appendSegment[oldPath.Length..];
+            }
+
+            appendSegment = appendSegment.RemoveLeadingSlash();
+
+            var pathHasTrailingSlash = path.EndsWith("/");
+
+            var size = appendSegment.Length + query.Length + newQuery.Length + 1;
+            var builder = new StringBuilder(size);
+
+            BuildPath(newPath, appendSegment, pathHasTrailingSlash, builder);
+            BuildQuery(query, newQuery, builder);
+
+            redirCopy.NewUrl = builder.ToString();
+
             return redirCopy;
         }
 
-        private static bool UrlIsOldUrlsSubSegment(string url, string oldUrl)
+        private static void BuildPath(ReadOnlySpan<char> path, ReadOnlySpan<char> appendSegment, bool pathHasTrailingSlash, StringBuilder builder)
         {
-            string RemoveQueryString(string u)
+            var hasAppendSegment = appendSegment.Length > 0;
+
+            if (!hasAppendSegment && !pathHasTrailingSlash)
+            {
+                path = path.RemoveTrailingSlash();
+            }
+
+            builder.Append(path);            
+
+            if (hasAppendSegment && !pathHasTrailingSlash)
+            {
+                builder.Append('/');
+            }
+
+            builder.Append(appendSegment);
+
+            if (pathHasTrailingSlash && hasAppendSegment && !appendSegment.EndsWith("/"))
+            {
+                builder.Append('/');
+            }
+        }
+
+        private static void BuildQuery(ReadOnlySpan<char> baseQuery, ReadOnlySpan<char> newQuery, StringBuilder builder)
+        {
+            var hasIncomingQuery = baseQuery.Length > 0;
+            var hasOutgoingQuery = newQuery.Length > 0;
+
+            if (hasIncomingQuery)
+            {
+                builder.Append(baseQuery);
+            }
+
+            if (hasOutgoingQuery && !baseQuery.StartsWith(newQuery))
+            {
+                if (hasIncomingQuery)
+                {
+                    builder.Append('&');
+                    builder.Append(newQuery[1..]);
+                }
+                else
+                {
+                    builder.Append(newQuery);
+                }
+            }
+        }        
+
+        private static bool UrlIsOldUrlsSubSegment(ReadOnlySpan<char> url, string oldUrl)
+        {
+            ReadOnlySpan<char> RemoveQueryString(ReadOnlySpan<char> u)
             {
                 var i = u.IndexOf("?", StringComparison.Ordinal);
-                return i < 0 ? u : u.Substring(0, i);
+                return i < 0 ? u : u[0..i];
             }
 
             var normalizedUrlWithoutQuery = RemoveQueryString(url).TrimEnd('/');
             var normalizedOldUrl = RemoveQueryString(oldUrl).TrimEnd('/');
             var isSameUrl = normalizedUrlWithoutQuery.Equals(normalizedOldUrl, StringComparison.OrdinalIgnoreCase);
-            var isPartOfOldUrl = normalizedUrlWithoutQuery.Substring(normalizedOldUrl.Length).StartsWith("/");
+            var isPartOfOldUrl = normalizedUrlWithoutQuery[0..normalizedOldUrl.Length].StartsWith("/");
             return isSameUrl || isPartOfOldUrl;
         }
 
