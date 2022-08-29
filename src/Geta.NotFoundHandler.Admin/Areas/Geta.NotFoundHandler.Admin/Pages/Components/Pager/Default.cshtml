@@ -3,7 +3,7 @@
 <nav aria-label="Table pagination">
     <ul class="pagination">
         <li class="page-item @(Model.HasPreviousPage ? string.Empty : "disabled")">
-            <a class="page-link" href="?page=@Model.PageUrl(Model.PageNumber-1)" aria-label="Previous">
+            <a class="page-link" href="@Model.PageUrl(Model.PageNumber-1)" aria-label="Previous">
                 <span aria-hidden="true">&laquo;</span>
             </a>
         </li>
@@ -13,7 +13,7 @@
             <li class="page-item"><a class="page-link" href="@Model.PageUrl(i)">@i</a></li>
         }
         <li class="page-item @(Model.HasNextPage ? string.Empty : "disabled")">
-            <a class="page-link" href="?page=@Model.PageUrl(Model.PageNumber+1)" aria-label="Next">
+            <a class="page-link" href="@Model.PageUrl(Model.PageNumber+1)" aria-label="Next">
                 <span aria-hidden="true">&raquo;</span>
             </a>
         </li>
