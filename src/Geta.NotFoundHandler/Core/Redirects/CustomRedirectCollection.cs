@@ -177,6 +177,15 @@ namespace Geta.NotFoundHandler.Core.Redirects
             var builder = new StringBuilder(size);
 
             BuildPath(newPath, appendSegment, pathHasTrailingSlash, builder);
+
+            var hasQuery = query.Length > 0 || newQuery.Length > 0;
+            var hasEmptyPath = builder.Length == 0;
+
+            if (hasEmptyPath && hasQuery)
+            {
+                builder.Append('/');
+            }
+
             BuildQuery(query, newQuery, builder);
 
             redirCopy.NewUrl = builder.ToString();

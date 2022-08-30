@@ -40,5 +40,25 @@ namespace Geta.NotFoundHandler.Tests
                 Assert.True(++iterations < 100);
             }
         }
+
+        [Fact]
+        public async Task Request_doesnt_loop()
+        {
+            var builder = new RedirectServerBuilder();
+
+            builder.AddRedirect("https://localhost/a/b", "/");
+            builder.AddRedirect("/a/b?a=b", "/");
+
+            using var server = builder.Build();
+            using var client = server.CreateClient();
+
+            var response = await client.GetAsync("https://localhost/a/b?a=b");
+
+            Assert.NotNull(response);
+            Assert.Equal(HttpStatusCode.MovedPermanently, response.StatusCode);
+
+            var location = response.Headers.Location?.ToString();
+            Assert.Equal("/?a=b", location);
+        }
     }
 }
