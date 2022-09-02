@@ -257,7 +257,7 @@ namespace Geta.NotFoundHandler.Tests
         {
             var provider = A.Fake<INotFoundHandler>();
             A.CallTo(() => provider.RewriteUrl(A<string>._)).Returns(null);
-            A.CallTo(() => provider.RewriteUrl(oldUrl)).Returns(newUrl);
+            A.CallTo(() => provider.RewriteUrl(oldUrl)).Returns(new RewriteResult(newUrl, RedirectType.Temporary));
             _providers.Add(provider);
         }
 

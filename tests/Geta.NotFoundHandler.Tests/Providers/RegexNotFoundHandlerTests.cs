@@ -1,23 +1,39 @@
-﻿using Geta.NotFoundHandler.Providers;
-using Geta.NotFoundHandler.Providers.RegexRedirects;
+﻿using System;
+using System.Collections.Generic;
+using System.Text.RegularExpressions;
+using FakeItEasy;
+using Geta.NotFoundHandler.Core.Providers.RegexRedirects;
+using Geta.NotFoundHandler.Data;
+using Microsoft.Extensions.Logging;
 using Xunit;
 
 namespace Geta.NotFoundHandler.Tests.Providers;
 
 public class RegexNotFoundHandlerTests
 {
+    private readonly IRegexRedirectLoader _fakeRegexRedirectLoader;
     private readonly RegexRedirectNotFoundHandler _sut;
 
     public RegexNotFoundHandlerTests()
     {
-        _sut = new RegexRedirectNotFoundHandler();
+        _fakeRegexRedirectLoader = A.Fake<IRegexRedirectLoader>();
+        var fakeLogger = A.Fake<ILogger<RegexRedirectNotFoundHandler>>();
+        _sut = new RegexRedirectNotFoundHandler(_fakeRegexRedirectLoader, fakeLogger);
     }
 
     [Fact]
     public void RewriteUrl_regex_matches_url()
     {
+        var regexRedirects = new List<RegexRedirect>
+        {
+            new(Guid.NewGuid(),
+                new Regex(@"(?<code>I-[^=?]+)[?]{0,1}(?<query>.*)", RegexOptions.Compiled, TimeSpan.FromMilliseconds(100)),
+                "/catalog-content/redirect-by-code?code=${code}&${query}")
+        };
+        A.CallTo(() => _fakeRegexRedirectLoader.GetAll()).Returns(regexRedirects);
+
         var result = _sut.RewriteUrl("https://test.example.com/I-123?a=b");
 
-
+        Assert.Equal("/catalog-content/redirect-by-code?code=I-123&a=b", result.NewUrl);
     }
 }

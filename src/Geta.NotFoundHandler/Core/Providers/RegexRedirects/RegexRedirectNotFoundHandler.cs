@@ -1,10 +1,12 @@
-﻿using System.Text.RegularExpressions;
-using Geta.NotFoundHandler.Core;
+﻿// Copyright (c) Geta Digital. All rights reserved.
+// Licensed under Apache-2.0. See the LICENSE file in the project root for more information
+
+using System.Text.RegularExpressions;
 using Geta.NotFoundHandler.Core.Redirects;
 using Geta.NotFoundHandler.Data;
 using Microsoft.Extensions.Logging;
 
-namespace Geta.NotFoundHandler.Providers.RegexRedirects;
+namespace Geta.NotFoundHandler.Core.Providers.RegexRedirects;
 
 public class RegexRedirectNotFoundHandler : INotFoundHandler
 {
@@ -39,6 +41,8 @@ public class RegexRedirectNotFoundHandler : INotFoundHandler
                                    e.Input,
                                    e.Pattern,
                                    e.MatchTimeout);
+                
+                // TODO: Record timeout failure
             }
         }
 
