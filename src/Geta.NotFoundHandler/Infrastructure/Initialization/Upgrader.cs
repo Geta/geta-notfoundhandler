@@ -131,7 +131,7 @@ public class Upgrader
                                         [NewUrlFormat] [nvarchar](2000) NOT NULL,
                                         [OrderNumber] [int] NOT NULL,
                                         [TimeoutCount] [int] NOT NULL,
-                                        CONSTRAINT [PK_NotFoundHandlerRedirects] PRIMARY KEY CLUSTERED ([Id] ASC) ON [PRIMARY]
+                                        CONSTRAINT [PK_NotFoundHandlerRegexRedirects] PRIMARY KEY CLUSTERED ([Id] ASC) ON [PRIMARY]
                                         ) ON [PRIMARY]";
         var created = _dataExecutor.ExecuteNonQuery(createTableScript);
         _logger.LogInformation("Create NotFoundHandler regex redirects table END");
