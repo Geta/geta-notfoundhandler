@@ -49,12 +49,12 @@ public class RegexNotFoundHandlerTests
         Assert.Equal("/catalog-content/redirect-by-code?code=I-123&a=b", result.NewUrl);
     }
 
-    private static RegexRedirect RegexRedirect(string oldUrlRegex, string newUrlFormat)
+    private static RegexRedirect RegexRedirect(string oldUrlRegex, string newUrlFormat, int orderNumber = 1, int timoutCount = 0)
     {
         return new RegexRedirect(Guid.NewGuid(),
                                  new Regex(oldUrlRegex, RegexOptions.Compiled, TimeSpan.FromMilliseconds(100)),
                                  newUrlFormat,
-                                 1,
-                                 0);
+                                 orderNumber,
+                                 timoutCount);
     }
 }
