@@ -3,6 +3,7 @@
 
 using System;
 using Geta.NotFoundHandler.Core;
+using Geta.NotFoundHandler.Core.Providers.RegexRedirects;
 using Geta.NotFoundHandler.Core.Redirects;
 using Geta.NotFoundHandler.Core.Suggestions;
 using Geta.NotFoundHandler.Data;
@@ -50,11 +51,15 @@ namespace Geta.NotFoundHandler.Infrastructure.Configuration
             services.AddTransient<ISuggestionLoader, SqlSuggestionRepository>();
             services.AddTransient<ISuggestionRepository, SqlSuggestionRepository>();
 
+            services.AddTransient<RegexRedirectFactory>();
+            services.AddTransient<INotFoundHandler, RegexRedirectNotFoundHandler>();
+            services.AddTransient<IRegexRedirectLoader, SqlRegexRedirectRepository>();
+
             var providerOptions = new NotFoundHandlerOptions();
             setupAction(providerOptions);
             foreach (var provider in providerOptions.Providers)
             {
-                services.AddSingleton(typeof(INotFoundHandler), provider);
+                services.AddTransient(typeof(INotFoundHandler), provider);
             }
 
             services.AddOptions<NotFoundHandlerOptions>().Configure<IConfiguration>((options, configuration) =>
