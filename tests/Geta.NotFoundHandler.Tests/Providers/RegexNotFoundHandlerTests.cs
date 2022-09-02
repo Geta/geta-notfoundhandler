@@ -53,6 +53,8 @@ public class RegexNotFoundHandlerTests
     {
         return new RegexRedirect(Guid.NewGuid(),
                                  new Regex(oldUrlRegex, RegexOptions.Compiled, TimeSpan.FromMilliseconds(100)),
-                                 newUrlFormat);
+                                 newUrlFormat,
+                                 1,
+                                 0);
     }
 }
