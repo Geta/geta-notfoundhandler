@@ -22,18 +22,37 @@ public class RegexNotFoundHandlerTests
     }
 
     [Fact]
-    public void RewriteUrl_regex_matches_url()
+    public void RewriteUrl_regex_matches_url_with_named_groups()
     {
         var regexRedirects = new List<RegexRedirect>
         {
-            new(Guid.NewGuid(),
-                new Regex(@"(?<code>I-[^=?]+)[?]{0,1}(?<query>.*)", RegexOptions.Compiled, TimeSpan.FromMilliseconds(100)),
-                "/catalog-content/redirect-by-code?code=${code}&${query}")
+            RegexRedirect(@"(?<code>I-[^=?]+)[?]{0,1}(?<query>.*)", "/catalog-content/redirect-by-code?code=${code}&${query}")
         };
         A.CallTo(() => _fakeRegexRedirectLoader.GetAll()).Returns(regexRedirects);
 
         var result = _sut.RewriteUrl("https://test.example.com/I-123?a=b");
 
         Assert.Equal("/catalog-content/redirect-by-code?code=I-123&a=b", result.NewUrl);
+    }
+
+    [Fact]
+    public void RewriteUrl_regex_matches_url_with_group_index()
+    {
+        var regexRedirects = new List<RegexRedirect>
+        {
+            RegexRedirect(@"(I-[^=?]+)[?]{0,1}(.*)", "/catalog-content/redirect-by-code?code=$1&$2")
+        };
+        A.CallTo(() => _fakeRegexRedirectLoader.GetAll()).Returns(regexRedirects);
+
+        var result = _sut.RewriteUrl("https://test.example.com/I-123?a=b");
+
+        Assert.Equal("/catalog-content/redirect-by-code?code=I-123&a=b", result.NewUrl);
+    }
+
+    private static RegexRedirect RegexRedirect(string oldUrlRegex, string newUrlFormat)
+    {
+        return new RegexRedirect(Guid.NewGuid(),
+                                 new Regex(oldUrlRegex, RegexOptions.Compiled, TimeSpan.FromMilliseconds(100)),
+                                 newUrlFormat);
     }
 }
