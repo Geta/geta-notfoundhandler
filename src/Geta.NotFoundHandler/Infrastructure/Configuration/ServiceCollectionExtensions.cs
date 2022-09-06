@@ -53,7 +53,9 @@ namespace Geta.NotFoundHandler.Infrastructure.Configuration
 
             services.AddTransient<RegexRedirectFactory>();
             services.AddTransient<INotFoundHandler, RegexRedirectNotFoundHandler>();
+            services.AddTransient<IRepository<RegexRedirect>, SqlRegexRedirectRepository>();
             services.AddTransient<IRegexRedirectLoader, SqlRegexRedirectRepository>();
+            services.AddTransient<IRegexRedirectsService, DefaultRegexRedirectsService>();
 
             var providerOptions = new NotFoundHandlerOptions();
             setupAction(providerOptions);

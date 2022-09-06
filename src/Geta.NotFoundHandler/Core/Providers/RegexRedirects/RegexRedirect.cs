@@ -8,14 +8,7 @@ namespace Geta.NotFoundHandler.Core.Providers.RegexRedirects;
 
 public class RegexRedirect
 {
-    public RegexRedirect(Regex oldUrlRegex, string newUrlFormat, int orderNumber)
-    {
-        OldUrlRegex = oldUrlRegex;
-        NewUrlFormat = newUrlFormat;
-        OrderNumber = orderNumber;
-    }
-
-    public RegexRedirect(Guid id, Regex oldUrlRegex, string newUrlFormat, int orderNumber, int timeoutCount)
+    public RegexRedirect(Guid? id, Regex oldUrlRegex, string newUrlFormat, int orderNumber, int? timeoutCount)
     {
         Id = id;
         OldUrlRegex = oldUrlRegex;
@@ -28,5 +21,5 @@ public class RegexRedirect
     public Regex OldUrlRegex { get; }
     public string NewUrlFormat { get; }
     public int OrderNumber { get; }
-    public int TimeoutCount { get; }
+    public int? TimeoutCount { get; }
 }
