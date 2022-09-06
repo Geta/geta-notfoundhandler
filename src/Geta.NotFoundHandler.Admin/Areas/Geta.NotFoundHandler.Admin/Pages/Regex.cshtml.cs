@@ -26,6 +26,8 @@ namespace Geta.NotFoundHandler.Admin.Areas.Geta.NotFoundHandler.Admin
 
         public IEnumerable<RegexRedirect> Items { get; set; } = Enumerable.Empty<RegexRedirect>();
 
+        private string EditItemId { get; set; }
+
         [BindProperty]
         public RegexRedirectModel RegexRedirect { get; set; }
 
@@ -54,6 +56,36 @@ namespace Geta.NotFoundHandler.Admin.Areas.Geta.NotFoundHandler.Admin
             return RedirectToPage();
         }
 
+        public IActionResult OnPostEdit(Guid id)
+        {
+            ModelState.Clear();
+
+            Load();
+
+            EditItemId = id.ToString();
+
+            var redirect = _redirectLoader.Get(id);
+
+            RegexRedirect = new RegexRedirectModel
+            {
+                Id = redirect.Id,
+                OldUrlRegex = redirect.OldUrlRegex.ToString(),
+                NewUrlFormat = redirect.NewUrlFormat,
+                OrderNumber = redirect.OrderNumber
+            };
+
+            return Page();
+        }
+
+        public IActionResult OnPostUpdate(Guid id)
+        {
+            _regexRedirectsService.Update(id,
+                                          RegexRedirect.OldUrlRegex,
+                                          RegexRedirect.NewUrlFormat,
+                                          RegexRedirect.OrderNumber);
+            return RedirectToPage();
+        }
+
         private void Load()
         {
             var items = FindRedirects();
@@ -64,6 +96,16 @@ namespace Geta.NotFoundHandler.Admin.Areas.Geta.NotFoundHandler.Admin
         private IList<RegexRedirect> FindRedirects()
         {
             return _redirectLoader.GetAll().ToList();
+        }
+
+        public bool IsEditing(Guid? id)
+        {
+            return id.ToString() == EditItemId;
+        }
+
+        public bool IsEditing()
+        {
+            return !string.IsNullOrEmpty(EditItemId);
         }
     }
 }

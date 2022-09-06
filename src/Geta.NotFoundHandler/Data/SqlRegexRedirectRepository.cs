@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using Geta.NotFoundHandler.Core.Providers.RegexRedirects;
 
 namespace Geta.NotFoundHandler.Data;
@@ -27,6 +28,18 @@ public class SqlRegexRedirectRepository : IRepository<RegexRedirect>, IRegexRedi
         var dataTable = _dataExecutor.ExecuteQuery(sqlCommand);
 
         return ToRedirects(dataTable);
+    }
+
+    public RegexRedirect Get(Guid id)
+    {
+        var sqlCommand = $@"SELECT {AllFields} FROM {RegexRedirectsTable}
+                                    WHERE Id = @id";
+
+        var dataTable = _dataExecutor.ExecuteQuery(
+            sqlCommand,
+            _dataExecutor.CreateGuidParameter("id", id));
+
+        return ToRedirects(dataTable).FirstOrDefault();
     }
 
     private IEnumerable<RegexRedirect> ToRedirects(DataTable table)

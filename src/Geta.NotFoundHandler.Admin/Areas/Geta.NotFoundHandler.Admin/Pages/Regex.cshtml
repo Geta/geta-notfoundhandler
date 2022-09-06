@@ -1,4 +1,5 @@
 ﻿@page
+@using Geta.NotFoundHandler.Core.Providers.RegexRedirects
 @using Microsoft.AspNetCore.Mvc.TagHelpers
 @model Geta.NotFoundHandler.Admin.Areas.Geta.NotFoundHandler.Admin.RegexModel
 
@@ -16,43 +17,77 @@
             </tr>
             </thead>
             <tbody>
-            <tr>
-                <td>
-                    <input type="text" class="form-control" asp-for="RegexRedirect.OrderNumber">
-                    <span asp-validation-for="RegexRedirect.OrderNumber" class="text-danger"></span>
-                </td>
-                <td>
-                    <input type="text" class="form-control" asp-for="RegexRedirect.OldUrlRegex">
-                    <span asp-validation-for="RegexRedirect.OldUrlRegex" class="text-danger"></span>
-                </td>
-                <td>
-                    <input type="text" class="form-control" asp-for="RegexRedirect.NewUrlFormat">
-                    <span asp-validation-for="RegexRedirect.NewUrlFormat" class="text-danger"></span>
-                </td>
-                <td>
-                    <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-primary"
-                                asp-page-handler="create">
-                            <span data-feather="plus"></span> add
-                        </button>
-                    </div>
-                </td>
-            </tr>
-            @foreach (var item in Model.Items)
+            @if (!Model.IsEditing())
             {
-                <tr class="align-middle">
-                    <td>@item.OrderNumber</td>
-                    <td>@item.OldUrlRegex</td>
-                    <td>@item.NewUrlFormat</td>
+                <tr>
+                    <td>
+                        <input type="text" class="form-control" asp-for="RegexRedirect.OrderNumber">
+                        <span asp-validation-for="RegexRedirect.OrderNumber" class="text-danger"></span>
+                    </td>
+                    <td>
+                        <input type="text" class="form-control" asp-for="RegexRedirect.OldUrlRegex">
+                        <span asp-validation-for="RegexRedirect.OldUrlRegex" class="text-danger"></span>
+                    </td>
+                    <td>
+                        <input type="text" class="form-control" asp-for="RegexRedirect.NewUrlFormat">
+                        <span asp-validation-for="RegexRedirect.NewUrlFormat" class="text-danger"></span>
+                    </td>
                     <td>
                         <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-danger"
-                                    asp-page-handler="delete" asp-route-id="@item.Id">
-                                <span data-feather="trash-2"></span> delete
+                            <button type="submit" class="btn btn-primary"
+                                    asp-page-handler="create">
+                                <span data-feather="plus"></span> add
                             </button>
                         </div>
                     </td>
                 </tr>
+            }
+            @foreach (var item in Model.Items)
+            {
+                @if (Model.IsEditing(item.Id))
+                {
+                    <tr>
+                        <td>
+                            <input type="text" class="form-control" asp-for="RegexRedirect.OrderNumber">
+                            <span asp-validation-for="RegexRedirect.OrderNumber" class="text-danger"></span>
+                        </td>
+                        <td>
+                            <input type="text" class="form-control" asp-for="RegexRedirect.OldUrlRegex">
+                            <span asp-validation-for="RegexRedirect.OldUrlRegex" class="text-danger"></span>
+                        </td>
+                        <td>
+                            <input type="text" class="form-control" asp-for="RegexRedirect.NewUrlFormat">
+                            <span asp-validation-for="RegexRedirect.NewUrlFormat" class="text-danger"></span>
+                        </td>
+                        <td>
+                            <button type="submit" class="btn btn-primary"
+                                    asp-page-handler="update" asp-route-id="@Model.RegexRedirect.Id">
+                                <span data-feather="edit-2"></span> Update
+                            </button>
+                        </td>
+                    </tr>
+                }
+                else
+                {
+                    <tr class="align-middle">
+                        <td>@item.OrderNumber</td>
+                        <td>@item.OldUrlRegex</td>
+                        <td>@item.NewUrlFormat</td>
+                        <td>
+                            @if (!Model.IsEditing())
+                            {
+                                <button type="submit" class="btn btn-primary"
+                                        asp-page-handler="edit" asp-route-id="@item.Id">
+                                    <span data-feather="edit"></span> Edit
+                                </button>
+                                <button type="submit" class="btn btn-danger"
+                                        asp-page-handler="delete" asp-route-id="@item.Id">
+                                    <span data-feather="trash-2"></span> delete
+                                </button>
+                            }
+                        </td>
+                    </tr>
+                }
             }
             </tbody>
         </table>
