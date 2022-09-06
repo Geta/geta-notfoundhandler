@@ -57,7 +57,7 @@ namespace Geta.NotFoundHandler.Admin.Areas.Geta.NotFoundHandler.Admin
         private void Load()
         {
             var items = FindRedirects();
-            Message = $"There are currently stored {items.Count()} custom Regex redirects.";
+            Message = $"There are currently stored {items.Count()} Regex redirects.";
             Items = items;
         }
 
