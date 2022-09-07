@@ -23,7 +23,7 @@ public class SqlRegexRedirectRepository : IRepository<RegexRedirect>, IRegexRedi
 
     public IEnumerable<RegexRedirect> GetAll()
     {
-        var sqlCommand = $@"SELECT {AllFields} FROM {RegexRedirectsTable}";
+        var sqlCommand = $@"SELECT {AllFields} FROM {RegexRedirectsTable} ORDER BY OrderNumber";
 
         var dataTable = _dataExecutor.ExecuteQuery(sqlCommand);
 
