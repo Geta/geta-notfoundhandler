@@ -13,6 +13,7 @@ namespace Geta.NotFoundHandler.Infrastructure.Configuration
         public int BufferSize { get; set; } = 30;
         public int ThreshHold { get; set; } = 5;
         public FileNotFoundMode HandlerMode { get; set; } = FileNotFoundMode.On;
+        public TimeSpan RegexTimeout { get; set; } = TimeSpan.FromMilliseconds(100);
 
         public string[] IgnoredResourceExtensions { get; set; } =
             {"jpg", "gif", "png", "css", "js", "ico", "swf", "woff"};

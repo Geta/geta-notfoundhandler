@@ -1,11 +1,18 @@
 ﻿using System;
 using System.Text.RegularExpressions;
+using Geta.NotFoundHandler.Infrastructure.Configuration;
+using Microsoft.Extensions.Options;
 
 namespace Geta.NotFoundHandler.Core.Providers.RegexRedirects;
 
 public class RegexRedirectFactory
 {
-    private const int Timeout = 100; // TODO: Read from configuration
+    private readonly NotFoundHandlerOptions _configuration;
+
+    public RegexRedirectFactory(IOptions<NotFoundHandlerOptions> options)
+    {
+        _configuration = options.Value;
+    }
 
     public virtual RegexRedirect Create(
         Guid id,
@@ -15,7 +22,7 @@ public class RegexRedirectFactory
         int? timeoutCount = null)
     {
         return new RegexRedirect(id,
-                                 new Regex(oldUrlRegex, RegexOptions.Compiled, TimeSpan.FromMilliseconds(Timeout)),
+                                 new Regex(oldUrlRegex, RegexOptions.Compiled, _configuration.RegexTimeout),
                                  newUrlFormat,
                                  orderNumber,
                                  timeoutCount);
@@ -24,7 +31,7 @@ public class RegexRedirectFactory
     public virtual RegexRedirect CreateNew(string oldUrlRegex, string newUrlFormat, int orderNumber)
     {
         return new RegexRedirect(null,
-                                 new Regex(oldUrlRegex, RegexOptions.Compiled, TimeSpan.FromMilliseconds(Timeout)),
+                                 new Regex(oldUrlRegex, RegexOptions.Compiled, _configuration.RegexTimeout),
                                  newUrlFormat,
                                  orderNumber,
                                  0);
