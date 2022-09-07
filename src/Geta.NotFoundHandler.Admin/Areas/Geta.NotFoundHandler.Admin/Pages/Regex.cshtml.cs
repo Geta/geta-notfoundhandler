@@ -79,6 +79,14 @@ public class RegexModel : PageModel
 
     public IActionResult OnPostUpdate(Guid id)
     {
+        if (!ModelState.IsValid)
+        {
+            Load();
+            EditItemId = id.ToString();
+            
+            return Page();
+        }
+        
         _regexRedirectsService.Update(id,
                                       RegexRedirect.OldUrlRegex,
                                       RegexRedirect.NewUrlFormat,
