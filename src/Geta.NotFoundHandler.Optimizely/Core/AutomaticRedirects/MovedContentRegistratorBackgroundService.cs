@@ -13,25 +13,25 @@ namespace Geta.NotFoundHandler.Optimizely.Core.AutomaticRedirects
     public class MovedContentRegistratorBackgroundService : BackgroundService
     {
         private readonly ChannelMovedContentRegistratorQueue _registratorQueue;
-        private readonly ContentKeyGenerator _contentKeyGenerator;
+        private readonly Func<ContentKeyGenerator> _contentKeyGeneratorFactory;
         private readonly IAutomaticRedirectsService _automaticRedirectsService;
         private readonly IContentUrlHistoryLoader _contentUrlHistoryLoader;
-        private readonly ContentUrlIndexer _contentUrlIndexer;
+        private readonly Func<ContentUrlIndexer> _contentUrlIndexerFactory;
         private readonly ILogger<MovedContentRegistratorBackgroundService> _logger;
 
         public MovedContentRegistratorBackgroundService(
             ChannelMovedContentRegistratorQueue registratorQueue,
-            ContentKeyGenerator contentKeyGenerator,
+            Func<ContentKeyGenerator> contentKeyGeneratorFactory,
             IAutomaticRedirectsService automaticRedirectsService,
             IContentUrlHistoryLoader contentUrlHistoryLoader,
-            ContentUrlIndexer contentUrlIndexer,
+            Func<ContentUrlIndexer> contentUrlIndexerFactory,
             ILogger<MovedContentRegistratorBackgroundService> logger)
         {
             _registratorQueue = registratorQueue;
-            _contentKeyGenerator = contentKeyGenerator;
+            _contentKeyGeneratorFactory = contentKeyGeneratorFactory;
             _automaticRedirectsService = automaticRedirectsService;
             _contentUrlHistoryLoader = contentUrlHistoryLoader;
-            _contentUrlIndexer = contentUrlIndexer;
+            _contentUrlIndexerFactory = contentUrlIndexerFactory;
             _logger = logger;
         }
 
@@ -53,7 +53,8 @@ namespace Geta.NotFoundHandler.Optimizely.Core.AutomaticRedirects
 
         private void CreateRedirects(ContentReference contentLink)
         {
-            var keyResult = _contentKeyGenerator.GetContentKey(contentLink);
+            var contentKeyGenerator = _contentKeyGeneratorFactory();
+            var keyResult = contentKeyGenerator.GetContentKey(contentLink);
             if (!keyResult.HasValue) return;
 
             var contentKey = keyResult.Key;
@@ -63,7 +64,8 @@ namespace Geta.NotFoundHandler.Optimizely.Core.AutomaticRedirects
 
         private void IndexContentUrls(ContentReference contentLink)
         {
-            _contentUrlIndexer.IndexContentUrls(contentLink);
+            var contentUrlIndexer = _contentUrlIndexerFactory();
+            contentUrlIndexer.IndexContentUrls(contentLink);
         }
     }
 }

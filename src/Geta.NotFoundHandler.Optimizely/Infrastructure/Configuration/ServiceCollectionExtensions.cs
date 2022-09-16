@@ -30,11 +30,13 @@ namespace Geta.NotFoundHandler.Optimizely.Infrastructure.Configuration
             services.AddTransient<Upgrader>();
             services.AddSingleton<ContentLinkLoader>();
             services.AddSingleton<ContentKeyGenerator>();
+            services.AddSingleton<Func<ContentKeyGenerator>>(x => x.GetService<ContentKeyGenerator>);
             services.AddSingleton<ContentUrlLoader>();
             services.AddSingleton<SqlContentUrlHistoryRepository>();
             services.AddSingleton<IRepository<ContentUrlHistory>, SqlContentUrlHistoryRepository>();
             services.AddSingleton<IContentUrlHistoryLoader, SqlContentUrlHistoryRepository>();
             services.AddSingleton<ContentUrlIndexer>();
+            services.AddSingleton<Func<ContentUrlIndexer>>(x => x.GetService<ContentUrlIndexer>);
             services.AddSingleton<RedirectBuilder>();
 
             // Background service
