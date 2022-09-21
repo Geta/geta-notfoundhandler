@@ -13,7 +13,7 @@ namespace Geta.NotFoundHandler.Optimizely.Infrastructure.Configuration
         public const int CurrentDbVersion = 1;
 
         public bool AutomaticRedirectsEnabled { get; set; }
-        public RedirectType AutomaticRedirectType { get; set; } = RedirectType.Permanent;
+        public RedirectType AutomaticRedirectType { get; set; } = RedirectType.Temporary;
 
         private readonly List<Type> _contentKeyProviders = new();
         public IEnumerable<Type> ContentKeyProviders => _contentKeyProviders;
