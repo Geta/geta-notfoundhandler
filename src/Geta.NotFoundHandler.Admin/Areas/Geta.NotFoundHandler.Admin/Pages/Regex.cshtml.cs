@@ -83,10 +83,10 @@ public class RegexModel : PageModel
         {
             Load();
             EditItemId = id.ToString();
-            
+
             return Page();
         }
-        
+
         _regexRedirectsService.Update(id,
                                       RegexRedirect.OldUrlRegex,
                                       RegexRedirect.NewUrlFormat,
@@ -99,7 +99,7 @@ public class RegexModel : PageModel
         var items = FindRedirects();
         Message = $"There are currently stored {items.Count()} Regex redirects.";
         Items = items;
-        RegexRedirect = new RegexRedirectModel { OrderNumber = items.Select(x => x.OrderNumber).Max() + 1 };
+        RegexRedirect = new RegexRedirectModel { OrderNumber = items.Select(x => x.OrderNumber).DefaultIfEmpty().Max() + 1 };
     }
 
     private IList<RegexRedirect> FindRedirects()
