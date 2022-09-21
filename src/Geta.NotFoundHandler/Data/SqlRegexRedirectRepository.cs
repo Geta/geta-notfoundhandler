@@ -6,7 +6,7 @@ using Geta.NotFoundHandler.Core.Providers.RegexRedirects;
 
 namespace Geta.NotFoundHandler.Data;
 
-public class SqlRegexRedirectRepository : IRepository<RegexRedirect>, IRegexRedirectLoader
+public class SqlRegexRedirectRepository : IRepository<RegexRedirect>, IRegexRedirectLoader, IRegexRedirectOrderUpdater
 {
     private const string RegexRedirectsTable = "[dbo].[NotFoundHandler.RegexRedirects]";
 
@@ -100,7 +100,7 @@ public class SqlRegexRedirectRepository : IRepository<RegexRedirect>, IRegexRedi
         var sqlCommand = $@"UPDATE {RegexRedirectsTable}
                                     SET OldUrlRegex = @oldurlregex
                                         ,NewUrlFormat = @newurlformat
-                                        ,OrderNumber = @ordernumber,
+                                        ,OrderNumber = @ordernumber
                                         ,ModifiedAt = @modifiedat
                                     WHERE Id = @id";
 
@@ -126,5 +126,19 @@ public class SqlRegexRedirectRepository : IRepository<RegexRedirect>, IRegexRedi
         _dataExecutor.ExecuteNonQuery(
             sqlCommand,
             _dataExecutor.CreateGuidParameter("id", entity.Id.Value));
+    }
+
+    public void Update()
+    {
+        var sqlCommand = $@"
+                UPDATE x
+                SET x.[OrderNumber] = x.[New_OrderNumber]
+                FROM (
+                      SELECT [OrderNumber], ROW_NUMBER() OVER (ORDER BY [OrderNumber], [ModifiedAt] DESC) AS [New_OrderNumber]
+                      FROM {RegexRedirectsTable}
+                      ) x
+                WHERE x.[OrderNumber] <> x.[New_OrderNumber]";
+
+        _dataExecutor.ExecuteNonQuery((sqlCommand));
     }
 }

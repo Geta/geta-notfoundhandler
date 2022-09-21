@@ -5,10 +5,11 @@ using Microsoft.Extensions.Caching.Memory;
 
 namespace Geta.NotFoundHandler.Core.Providers.RegexRedirects;
 
-public class MemoryCacheRegexRedirectRepository : IRepository<RegexRedirect>, IRegexRedirectLoader
+public class MemoryCacheRegexRedirectRepository : IRepository<RegexRedirect>, IRegexRedirectLoader, IRegexRedirectOrderUpdater
 {
     private readonly IRepository<RegexRedirect> _repository;
     private readonly IRegexRedirectLoader _redirectLoader;
+    private readonly IRegexRedirectOrderUpdater _orderUpdater;
     private readonly IMemoryCache _cache;
 
     private const string GetAllCacheKey = "RegexRedirects_GetAll";
@@ -16,10 +17,12 @@ public class MemoryCacheRegexRedirectRepository : IRepository<RegexRedirect>, IR
     public MemoryCacheRegexRedirectRepository(
         IRepository<RegexRedirect> repository,
         IRegexRedirectLoader redirectLoader,
+        IRegexRedirectOrderUpdater orderUpdater,
         IMemoryCache cache)
     {
         _repository = repository;
         _redirectLoader = redirectLoader;
+        _orderUpdater = orderUpdater;
         _cache = cache;
     }
 
@@ -47,6 +50,12 @@ public class MemoryCacheRegexRedirectRepository : IRepository<RegexRedirect>, IR
     public void Delete(RegexRedirect entity)
     {
         _repository.Delete(entity);
+        _cache.Remove(GetAllCacheKey);
+    }
+
+    public void Update()
+    {
+        _orderUpdater.Update();
         _cache.Remove(GetAllCacheKey);
     }
 }

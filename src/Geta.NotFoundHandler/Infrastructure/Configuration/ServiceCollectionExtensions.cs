@@ -58,8 +58,15 @@ namespace Geta.NotFoundHandler.Infrastructure.Configuration
             services.AddTransient<IRepository<RegexRedirect>>(
                 x => new MemoryCacheRegexRedirectRepository(x.GetRequiredService<SqlRegexRedirectRepository>(),
                                                             x.GetRequiredService<SqlRegexRedirectRepository>(),
+                                                            x.GetRequiredService<SqlRegexRedirectRepository>(),
                                                             x.GetRequiredService<IMemoryCache>()));
-            services.AddTransient<IRegexRedirectLoader>(x => new MemoryCacheRegexRedirectRepository(
+            services.AddTransient<IRegexRedirectLoader>(
+                x => new MemoryCacheRegexRedirectRepository(x.GetRequiredService<SqlRegexRedirectRepository>(),
+                                                            x.GetRequiredService<SqlRegexRedirectRepository>(),
+                                                            x.GetRequiredService<SqlRegexRedirectRepository>(),
+                                                            x.GetRequiredService<IMemoryCache>()));
+            services.AddTransient<IRegexRedirectOrderUpdater>(
+                x => new MemoryCacheRegexRedirectRepository(x.GetRequiredService<SqlRegexRedirectRepository>(),
                                                             x.GetRequiredService<SqlRegexRedirectRepository>(),
                                                             x.GetRequiredService<SqlRegexRedirectRepository>(),
                                                             x.GetRequiredService<IMemoryCache>()));
