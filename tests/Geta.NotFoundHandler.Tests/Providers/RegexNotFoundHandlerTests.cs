@@ -55,6 +55,8 @@ public class RegexNotFoundHandlerTests
                                  new Regex(oldUrlRegex, RegexOptions.Compiled, TimeSpan.FromMilliseconds(100)),
                                  newUrlFormat,
                                  orderNumber,
-                                 timoutCount);
+                                 timoutCount,
+                                 DateTime.UtcNow,
+                                 DateTime.UtcNow);
     }
 }

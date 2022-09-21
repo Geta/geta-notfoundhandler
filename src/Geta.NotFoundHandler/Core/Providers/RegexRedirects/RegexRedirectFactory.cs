@@ -19,13 +19,17 @@ public class RegexRedirectFactory
         string oldUrlRegex,
         string newUrlFormat,
         int orderNumber,
-        int? timeoutCount = null)
+        int? timeoutCount = null,
+        DateTime? createdAt = null,
+        DateTime? modifiedAt = null)
     {
         return new RegexRedirect(id,
                                  new Regex(oldUrlRegex, RegexOptions.Compiled, _configuration.RegexTimeout),
                                  newUrlFormat,
                                  orderNumber,
-                                 timeoutCount);
+                                 timeoutCount,
+                                 createdAt,
+                                 modifiedAt);
     }
 
     public virtual RegexRedirect CreateNew(string oldUrlRegex, string newUrlFormat, int orderNumber)
@@ -34,11 +38,13 @@ public class RegexRedirectFactory
                                  new Regex(oldUrlRegex, RegexOptions.Compiled, _configuration.RegexTimeout),
                                  newUrlFormat,
                                  orderNumber,
-                                 0);
+                                 0,
+                                 null,
+                                 null);
     }
 
     public virtual RegexRedirect CreateForDeletion(Guid id)
     {
-        return new RegexRedirect(id, null, string.Empty, 0, null);
+        return new RegexRedirect(id, null, string.Empty, 0, null, null, null);
     }
 }

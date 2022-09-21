@@ -10,7 +10,7 @@ public class SqlRegexRedirectRepository : IRepository<RegexRedirect>, IRegexRedi
 {
     private const string RegexRedirectsTable = "[dbo].[NotFoundHandler.RegexRedirects]";
 
-    private const string AllFields = "Id, OldUrlRegex, NewUrlFormat, OrderNumber, TimeoutCount";
+    private const string AllFields = "Id, OldUrlRegex, NewUrlFormat, OrderNumber, TimeoutCount, CreatedAt, ModifiedAt";
 
     private readonly IDataExecutor _dataExecutor;
     private readonly RegexRedirectFactory _regexRedirectFactory;
@@ -54,7 +54,9 @@ public class SqlRegexRedirectRepository : IRepository<RegexRedirect>, IRegexRedi
             x.Field<string>("OldUrlRegex"),
             x.Field<string>("NewUrlFormat"),
             x.Field<int>("OrderNumber"),
-            x.Field<int>("TimeoutCount"));
+            x.Field<int>("TimeoutCount"),
+            x.Field<DateTime>("CreatedAt"),
+            x.Field<DateTime>("ModifiedAt"));
     }
 
     public void Save(RegexRedirect entity)
@@ -71,9 +73,11 @@ public class SqlRegexRedirectRepository : IRepository<RegexRedirect>, IRegexRedi
     private void Create(RegexRedirect entity)
     {
         var sqlCommand = $@"INSERT INTO {RegexRedirectsTable}
-                                    (Id, OldUrlRegex, NewUrlFormat, OrderNumber, TimeoutCount)
+                                    (Id, OldUrlRegex, NewUrlFormat, OrderNumber, TimeoutCount, CreatedAt, ModifiedAt)
                                     VALUES
-                                    (@id, @oldurlregex, @newurlformat, @ordernumber, @timeoutcount)";
+                                    (@id, @oldurlregex, @newurlformat, @ordernumber, @timeoutcount, @createdat, @modifiedat)";
+
+        var now = DateTime.UtcNow;
 
         _dataExecutor.ExecuteNonQuery(
             sqlCommand,
@@ -81,7 +85,9 @@ public class SqlRegexRedirectRepository : IRepository<RegexRedirect>, IRegexRedi
             _dataExecutor.CreateStringParameter("oldurlregex", entity.OldUrlRegex.ToString()),
             _dataExecutor.CreateStringParameter("newurlformat", entity.NewUrlFormat),
             _dataExecutor.CreateIntParameter("ordernumber", entity.OrderNumber),
-            _dataExecutor.CreateIntParameter("timeoutcount", 0));
+            _dataExecutor.CreateIntParameter("timeoutcount", 0),
+            _dataExecutor.CreateDateTimeParameter("createdat", now),
+            _dataExecutor.CreateDateTimeParameter("modifiedat", now));
     }
 
     private void Update(RegexRedirect entity)
@@ -94,7 +100,8 @@ public class SqlRegexRedirectRepository : IRepository<RegexRedirect>, IRegexRedi
         var sqlCommand = $@"UPDATE {RegexRedirectsTable}
                                     SET OldUrlRegex = @oldurlregex
                                         ,NewUrlFormat = @newurlformat
-                                        ,OrderNumber = @ordernumber
+                                        ,OrderNumber = @ordernumber,
+                                        ,ModifiedAt = @modifiedat
                                     WHERE Id = @id";
 
         _dataExecutor.ExecuteNonQuery(
@@ -102,7 +109,8 @@ public class SqlRegexRedirectRepository : IRepository<RegexRedirect>, IRegexRedi
             _dataExecutor.CreateGuidParameter("id", entity.Id.Value),
             _dataExecutor.CreateStringParameter("oldurlregex", entity.OldUrlRegex.ToString()),
             _dataExecutor.CreateStringParameter("newurlformat", entity.NewUrlFormat),
-            _dataExecutor.CreateIntParameter("ordernumber", entity.OrderNumber));
+            _dataExecutor.CreateIntParameter("ordernumber", entity.OrderNumber),
+            _dataExecutor.CreateDateTimeParameter("modifiedat", DateTime.UtcNow));
     }
 
     public void Delete(RegexRedirect entity)
