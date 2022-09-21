@@ -53,9 +53,9 @@ public class MemoryCacheRegexRedirectRepository : IRepository<RegexRedirect>, IR
         _cache.Remove(GetAllCacheKey);
     }
 
-    public void Update()
+    public void UpdateOrder(bool isIncrease = false)
     {
-        _orderUpdater.Update();
+        _orderUpdater.UpdateOrder(isIncrease);
         _cache.Remove(GetAllCacheKey);
     }
 }

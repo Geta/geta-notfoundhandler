@@ -128,13 +128,14 @@ public class SqlRegexRedirectRepository : IRepository<RegexRedirect>, IRegexRedi
             _dataExecutor.CreateGuidParameter("id", entity.Id.Value));
     }
 
-    public void Update()
+    public void UpdateOrder(bool isIncrease = false)
     {
+        var modifiedOrder = isIncrease ? string.Empty : "DESC";
         var sqlCommand = $@"
                 UPDATE x
                 SET x.[OrderNumber] = x.[New_OrderNumber]
                 FROM (
-                      SELECT [OrderNumber], ROW_NUMBER() OVER (ORDER BY [OrderNumber], [ModifiedAt] DESC) AS [New_OrderNumber]
+                      SELECT [OrderNumber], ROW_NUMBER() OVER (ORDER BY [OrderNumber], [ModifiedAt] {modifiedOrder}) AS [New_OrderNumber]
                       FROM {RegexRedirectsTable}
                       ) x
                 WHERE x.[OrderNumber] <> x.[New_OrderNumber]";

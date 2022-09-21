@@ -2,5 +2,5 @@
 
 public interface IRegexRedirectOrderUpdater
 {
-    public void Update();
+    public void UpdateOrder(bool isIncrease = false);
 }
