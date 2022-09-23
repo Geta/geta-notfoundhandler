@@ -155,7 +155,7 @@ namespace Geta.NotFoundHandler.Core.Redirects
                 return redirectType;
             }
 
-            return Redirects.RedirectType.Permanent;
+            return Redirects.RedirectType.Temporary;
         }
     }
 }
