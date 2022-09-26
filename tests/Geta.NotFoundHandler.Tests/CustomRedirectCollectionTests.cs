@@ -60,7 +60,6 @@ namespace Geta.NotFoundHandler.Tests
 
             Assert.Equal(expected, actual.NewUrl);
         }
-                
 
         [Fact]
         public void Find_finds_redirect_when_not_found_url_starts_with_stored_url_and_WildCardSkipAppend_enabled()
@@ -256,8 +255,11 @@ namespace Geta.NotFoundHandler.Tests
         private void WithProvider(string oldUrl, string newUrl)
         {
             var provider = A.Fake<INotFoundHandler>();
-            A.CallTo(() => provider.RewriteUrl(A<string>._)).Returns(null);
-            A.CallTo(() => provider.RewriteUrl(oldUrl)).Returns(new RewriteResult(newUrl, RedirectType.Temporary));
+            A.CallTo(() => provider.RewriteUrl(A<string>._)).Returns(RewriteResult.Empty);
+            var rewriteResult = string.IsNullOrEmpty(newUrl)
+                ? RewriteResult.Empty
+                : new RewriteResult(newUrl, RedirectType.Temporary);
+            A.CallTo(() => provider.RewriteUrl(oldUrl)).Returns(rewriteResult);
             _providers.Add(provider);
         }
 
