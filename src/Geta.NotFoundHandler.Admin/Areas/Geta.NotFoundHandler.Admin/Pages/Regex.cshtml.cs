@@ -4,11 +4,14 @@ using System.Linq;
 using Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin.Models;
 using Geta.NotFoundHandler.Core.Providers.RegexRedirects;
 using Geta.NotFoundHandler.Data;
+using Geta.NotFoundHandler.Infrastructure;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace Geta.NotFoundHandler.Admin.Areas.Geta.NotFoundHandler.Admin;
 
+[Authorize(Constants.PolicyName)]
 public class RegexModel : PageModel
 {
     private readonly IRegexRedirectLoader _redirectLoader;

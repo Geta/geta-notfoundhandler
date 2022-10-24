@@ -2,75 +2,77 @@ using System.Collections.Generic;
 using System.Linq;
 using Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin.Models;
 using Geta.NotFoundHandler.Core.Redirects;
+using Geta.NotFoundHandler.Infrastructure;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using X.PagedList;
 
-namespace Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin
+namespace Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin;
+
+[Authorize(Constants.PolicyName)]
+public class IndexModel : PageModel
 {
-    public class IndexModel : PageModel
+    private readonly IRedirectsService _redirectsService;
+
+    public IndexModel(IRedirectsService redirectsService)
     {
-        private readonly IRedirectsService _redirectsService;
+        _redirectsService = redirectsService;
+    }
 
-        public IndexModel(IRedirectsService redirectsService)
-        {
-            _redirectsService = redirectsService;
-        }
+    public string Message { get; set; }
 
-        public string Message { get; set; }
+    public IPagedList<CustomRedirect> Items { get; set; } = Enumerable.Empty<CustomRedirect>().ToPagedList();
 
-        public IPagedList<CustomRedirect> Items { get; set; } = Enumerable.Empty<CustomRedirect>().ToPagedList();
+    [BindProperty]
+    public RedirectModel CustomRedirect { get; set; }
 
-        [BindProperty]
-        public RedirectModel CustomRedirect { get; set; }
+    [BindProperty(SupportsGet = true)]
+    public Paging Paging { get; set; }
 
-        [BindProperty(SupportsGet = true)]
-        public Paging Paging { get; set; }
+    [BindProperty(SupportsGet = true, Name = "q")]
+    public string Query { get; set; }
 
-        [BindProperty(SupportsGet = true, Name = "q")]
-        public string Query { get; set; }
+    public bool HasQuery => !string.IsNullOrEmpty(Query);
 
-        public bool HasQuery => !string.IsNullOrEmpty(Query);
+    public void OnGet()
+    {
+        Load();
+    }
 
-        public void OnGet()
+    public IActionResult OnPostCreate()
+    {
+        if (!ModelState.IsValid)
         {
             Load();
+            return Page();
         }
 
-        public IActionResult OnPostCreate()
-        {
-            if (!ModelState.IsValid)
-            {
-                Load();
-                return Page();
-            }
+        var customRedirect = new CustomRedirect(CustomRedirect.OldUrl,
+                                                CustomRedirect.NewUrl,
+                                                CustomRedirect.WildCardSkipAppend,
+                                                CustomRedirect.RedirectType);
 
-            var customRedirect = new CustomRedirect(CustomRedirect.OldUrl,
-                                                    CustomRedirect.NewUrl,
-                                                    CustomRedirect.WildCardSkipAppend,
-                                                    CustomRedirect.RedirectType);
+        _redirectsService.AddOrUpdate(customRedirect);
 
-            _redirectsService.AddOrUpdate(customRedirect);
+        return RedirectToPage();
+    }
 
-            return RedirectToPage();
-        }
+    public IActionResult OnPostDelete(string oldUrl)
+    {
+        _redirectsService.DeleteByOldUrl(oldUrl);
+        return RedirectToPage();
+    }
 
-        public IActionResult OnPostDelete(string oldUrl)
-        {
-            _redirectsService.DeleteByOldUrl(oldUrl);
-            return RedirectToPage();
-        }
+    private void Load()
+    {
+        var items = FindRedirects().ToPagedList(Paging.PageNumber, Paging.PageSize);
+        Message = $"There are currently stored {items.TotalItemCount} custom redirects.";
+        Items = items;
+    }
 
-        private void Load()
-        {
-            var items = FindRedirects().ToPagedList(Paging.PageNumber, Paging.PageSize);
-            Message = $"There are currently stored {items.TotalItemCount} custom redirects.";
-            Items = items;
-        }
-
-        private IEnumerable<CustomRedirect> FindRedirects()
-        {
-            return HasQuery ? _redirectsService.Search(Query) : _redirectsService.GetSaved();
-        }
+    private IEnumerable<CustomRedirect> FindRedirects()
+    {
+        return HasQuery ? _redirectsService.Search(Query) : _redirectsService.GetSaved();
     }
 }
