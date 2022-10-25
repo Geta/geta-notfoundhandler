@@ -34,9 +34,4 @@
     <None Include="..\..\images\icon.png" Pack="true" PackagePath="\" />
   </ItemGroup>
 
-  <ItemGroup>
-    <_ContentIncludedByDefault Remove="Pages\Geta.NotFoundHandler.Admin\Shared\_Layout.cshtml" />
-    <_ContentIncludedByDefault Remove="Pages\Geta.NotFoundHandler.Admin\Shared\_Logo.cshtml" />
-  </ItemGroup>
-
 </Project>
