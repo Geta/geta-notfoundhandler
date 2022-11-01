@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using EPiServer.Cms.Shell;
 using EPiServer.Commerce.Catalog.ContentTypes;
 using EPiServer.Commerce.Catalog.Linking;
 using EPiServer.Core;
@@ -42,7 +43,7 @@ public class EntryContentUrlProviderTests
 
         var results = _provider.GetUrls(entry);
 
-        var expected = new TypedUrl { Url = $"/{entry.SeoUri}", Type = UrlType.Seo, Language = "en" };
+        var expected = new TypedUrl { Url = $"/{entry.SeoUri}", Type = UrlType.Seo, Language = entry.LanguageBranch() };
         Assert.Contains(results, url => url == expected);
     }
 
@@ -59,7 +60,7 @@ public class EntryContentUrlProviderTests
 
         var results = _provider.GetUrls(entry);
 
-        var expected = new TypedUrl { Url = $"{primaryUrl}/{entry.RouteSegment}", Type = UrlType.Primary, Language = "en"};
+        var expected = new TypedUrl { Url = $"{primaryUrl}/{entry.RouteSegment}", Type = UrlType.Primary, Language = entry.LanguageBranch()};
         Assert.Contains(results, url => url == expected);
     }
 
