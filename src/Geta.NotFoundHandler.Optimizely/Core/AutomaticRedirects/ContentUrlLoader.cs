@@ -89,9 +89,11 @@ namespace Geta.NotFoundHandler.Optimizely.Core.AutomaticRedirects
 
         private TypedUrl GetFallbackUrl(IContent content)
         {
+            var language = content.LanguageBranch();
+
             return new TypedUrl
             {
-                Url = _urlResolver.GetUrl(content.ContentLink), Type = UrlType.Primary, Language = content.LanguageBranch()
+                Url = _urlResolver.GetUrl(content.ContentLink, language), Type = UrlType.Primary, Language = language
             };
         }
     }
