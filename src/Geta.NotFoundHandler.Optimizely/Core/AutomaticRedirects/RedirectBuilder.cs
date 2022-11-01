@@ -26,31 +26,49 @@ namespace Geta.NotFoundHandler.Optimizely.Core.AutomaticRedirects
             return ordered
                 .Skip(1)
                 .SelectMany(source => CreateRedirects(source, destination))
+                .DistinctBy(x => new
+                {
+                    x.OldUrl,
+                    x.NewUrl,
+                    x.WildCardSkipAppend,
+                    x.RedirectType
+                })
                 .Where(x => !string.IsNullOrEmpty(x.NewUrl));
         }
 
         private IEnumerable<CustomRedirect> CreateRedirects(ContentUrlHistory sourceHistory, ContentUrlHistory destinationHistory)
         {
-            var destinationPrimary = destinationHistory.Urls.FirstOrDefault(x => x.Type == UrlType.Primary);
-            if (destinationPrimary == null) yield break;
+            var languages = destinationHistory.Urls
+                .Select(x => x.Language)
+                .Distinct();
 
-            foreach (var source in sourceHistory.Urls)
+            foreach (var language in languages)
             {
-                var sourceUrl = source.Url;
-                var destinationUrl = GetDestinationUrl(source, destinationHistory, destinationPrimary);
+                var languageSpecificDestinationUrls = destinationHistory.Urls
+                    .Where(x => x.Language == language)
+                    .ToList();
+            
+                var destinationPrimary = languageSpecificDestinationUrls.FirstOrDefault(x => x.Type == UrlType.Primary);
+                if (destinationPrimary == null) yield break;
 
-                yield return new CustomRedirect(sourceUrl, destinationUrl, false, _configuration.AutomaticRedirectType);
+                foreach (var source in sourceHistory.Urls.Where(x => x.Language == language))
+                {
+                    var sourceUrl = source.Url;
+                    var destinationUrl = GetDestinationUrl(source, languageSpecificDestinationUrls, destinationPrimary);
+
+                    yield return new CustomRedirect(sourceUrl, destinationUrl, false, _configuration.AutomaticRedirectType);
+                }
             }
         }
 
-        private static string GetDestinationUrl(TypedUrl source, ContentUrlHistory destinationHistory, TypedUrl destinationPrimary)
+        private static string GetDestinationUrl(TypedUrl source, List<TypedUrl> destinationHistory, TypedUrl destinationPrimary)
         {
             switch (source.Type)
             {
                 case UrlType.Primary:
                     return destinationPrimary.Url;
                 case UrlType.Secondary:
-                    var hasChanged = !destinationHistory.Urls.Any(x => x.Type == source.Type && x.Url == source.Url);
+                    var hasChanged = !destinationHistory.Any(x => x.Type == source.Type && x.Url == source.Url);
                     if (hasChanged)
                     {
                         // Always redirect to Primary as we do not know what and if there is a destination Secondary
@@ -59,7 +77,7 @@ namespace Geta.NotFoundHandler.Optimizely.Core.AutomaticRedirects
 
                     break;
                 case UrlType.Seo:
-                    var destinationSeo = destinationHistory.Urls.FirstOrDefault(x => x.Type == UrlType.Seo);
+                    var destinationSeo = destinationHistory.FirstOrDefault(x => x.Type == UrlType.Seo);
                     if (destinationSeo != null)
                     {
                         return destinationSeo.Url;
