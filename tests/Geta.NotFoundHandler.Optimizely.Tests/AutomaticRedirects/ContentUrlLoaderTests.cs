@@ -18,6 +18,7 @@ public class ContentUrlLoaderTests
     private readonly IContentVersionRepository _fakeContentVersionRepository;
     private readonly IContentLoader _fakeContentLoader;
     private readonly IUrlResolver _fakeUrlResolver;
+    private readonly ILanguageBranchRepository _fakeLanguageBranchRepository;
     private readonly ContentUrlLoader _loader;
 
     public ContentUrlLoaderTests()
@@ -26,10 +27,12 @@ public class ContentUrlLoaderTests
         _fakeContentVersionRepository = A.Fake<IContentVersionRepository>();
         _fakeContentLoader = A.Fake<IContentLoader>();
         _fakeUrlResolver = A.Fake<IUrlResolver>();
+        _fakeLanguageBranchRepository = A.Fake<ILanguageBranchRepository>();
         _loader = new ContentUrlLoader(_fakeContentUrlProviders,
                                        _fakeContentVersionRepository,
                                        _fakeContentLoader,
-                                       _fakeUrlResolver);
+                                       _fakeUrlResolver,
+                                       _fakeLanguageBranchRepository);
 
         InitFakes();
     }
@@ -118,6 +121,13 @@ public class ContentUrlLoaderTests
         A.CallTo(() => _fakeContentUrlProviders[1].CanHandle(content)).Returns(true);
         A.CallTo(() => _fakeUrlResolver.GetUrl(content.ContentLink, A<string>._, A<UrlResolverArguments>._))
             .Returns(Guid.NewGuid().ToString());
+        A.CallTo(() => _fakeLanguageBranchRepository.ListEnabled())
+            .Returns(new List<LanguageBranch>
+            {
+                new("en"),
+                new("no"),
+                new("se")
+            });
     }
 
     private ContentReference CreateContentLink()
