@@ -380,5 +380,24 @@ namespace Geta.NotFoundHandler.Tests
 
             Assert.Equal(expected, actual.NewUrl);
         }
+
+        /// <summary>
+        /// https://github.com/Geta/geta-notfoundhandler/issues/54
+        /// </summary>
+        [Fact]
+        public void Find_decodes_plus_sign_correctly()
+        {
+            var collection = new CustomRedirectCollection
+            {
+                new("/search/ps_90/s_13?kw=oakley+radar+ev", "/search-page/?query=oakley+radar+ev")
+            };
+
+            var urlToFind = "/search/ps_90/s_13?kw=oakley+radar+ev";
+            var expected = "/search-page/?query=oakley+radar+ev";
+
+            var actual = collection.Find(urlToFind.ToUri());
+
+            Assert.Equal(expected, actual.NewUrl); 
+        }
     }
 }
