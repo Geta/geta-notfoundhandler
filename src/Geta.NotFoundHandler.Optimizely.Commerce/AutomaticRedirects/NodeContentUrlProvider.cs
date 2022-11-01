@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using EPiServer.Cms.Shell;
 using EPiServer.Commerce.Catalog.ContentTypes;
 using EPiServer.Commerce.Catalog.Linking;
 using EPiServer.Core;
@@ -55,11 +56,12 @@ namespace Geta.NotFoundHandler.Optimizely.Commerce.AutomaticRedirects
                 yield return new TypedUrl
                 {
                     Url = $"{_urlResolver.GetUrl(parentLink)}/{node.RouteSegment}",
-                    Type = parentLink == node.ParentLink ? UrlType.Primary : UrlType.Secondary
+                    Type = parentLink == node.ParentLink ? UrlType.Primary : UrlType.Secondary,
+                    Language = node.LanguageBranch()
                 };
             }
 
-            yield return new TypedUrl { Url = $"/{node.SeoUri}", Type = UrlType.Seo };
+            yield return new TypedUrl { Url = $"/{node.SeoUri}", Type = UrlType.Seo, Language = node.LanguageBranch()};
         }
     }
 }

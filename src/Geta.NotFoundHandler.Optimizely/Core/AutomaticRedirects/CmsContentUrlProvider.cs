@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using EPiServer;
+using EPiServer.Cms.Shell;
 using EPiServer.Core;
 using EPiServer.Web.Routing;
 
@@ -49,7 +50,7 @@ namespace Geta.NotFoundHandler.Optimizely.Core.AutomaticRedirects
 
         private IEnumerable<TypedUrl> GetPageUrls(PageData page)
         {
-            return new List<TypedUrl> { new() { Url = GetPageUrl(page), Type = UrlType.Primary } };
+            return new List<TypedUrl> { new() { Url = GetPageUrl(page), Type = UrlType.Primary, Language = page.LanguageBranch()} };
         }
 
         private string GetPageUrl(PageData page)
