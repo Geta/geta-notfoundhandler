@@ -42,7 +42,7 @@ public class NodeContentUrlProviderTests
 
         var results = _provider.GetUrls(node);
 
-        var expected = new TypedUrl { Url = $"/{node.SeoUri}", Type = UrlType.Seo };
+        var expected = new TypedUrl { Url = $"/{node.SeoUri}", Type = UrlType.Seo, Language = "en"};
         Assert.Contains(results, url => url == expected);
     }
 
@@ -58,7 +58,7 @@ public class NodeContentUrlProviderTests
 
         var results = _provider.GetUrls(node);
 
-        var expected = new TypedUrl { Url = $"{primaryUrl}/{node.RouteSegment}", Type = UrlType.Primary };
+        var expected = new TypedUrl { Url = $"{primaryUrl}/{node.RouteSegment}", Type = UrlType.Primary, Language = "en" };
         Assert.Contains(results, url => url == expected);
     }
 
