@@ -42,6 +42,8 @@ namespace Geta.NotFoundHandler.Optimizely.Commerce.AutomaticRedirects
 
         private IEnumerable<TypedUrl> GetNodeContentUrls(NodeContent node)
         {
+            var language = node.LanguageBranch();
+            
             var parentsLinks = _relationRepository
                 .GetParents<NodeRelation>(node.ContentLink)
                 .Select(x => x.Parent)
@@ -55,13 +57,13 @@ namespace Geta.NotFoundHandler.Optimizely.Commerce.AutomaticRedirects
             {
                 yield return new TypedUrl
                 {
-                    Url = $"{_urlResolver.GetUrl(parentLink)}/{node.RouteSegment}",
+                    Url = $"{_urlResolver.GetUrl(parentLink, language)}/{node.RouteSegment}",
                     Type = parentLink == node.ParentLink ? UrlType.Primary : UrlType.Secondary,
-                    Language = node.LanguageBranch()
+                    Language = language
                 };
             }
 
-            yield return new TypedUrl { Url = $"/{node.SeoUri}", Type = UrlType.Seo, Language = node.LanguageBranch()};
+            yield return new TypedUrl { Url = $"/{node.SeoUri}", Type = UrlType.Seo, Language = language};
         }
     }
 }
