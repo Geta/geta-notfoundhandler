@@ -61,14 +61,14 @@ namespace Geta.NotFoundHandler.Optimizely.Core.AutomaticRedirects
             }
         }
 
-        private static string GetDestinationUrl(TypedUrl source, List<TypedUrl> destinationHistory, TypedUrl destinationPrimary)
+        private static string GetDestinationUrl(TypedUrl source, List<TypedUrl> destinationHistoryUrls, TypedUrl destinationPrimary)
         {
             switch (source.Type)
             {
                 case UrlType.Primary:
                     return destinationPrimary.Url;
                 case UrlType.Secondary:
-                    var hasChanged = !destinationHistory.Any(x => x.Type == source.Type && x.Url == source.Url);
+                    var hasChanged = !destinationHistoryUrls.Any(x => x.Type == source.Type && x.Url == source.Url);
                     if (hasChanged)
                     {
                         // Always redirect to Primary as we do not know what and if there is a destination Secondary
@@ -77,7 +77,7 @@ namespace Geta.NotFoundHandler.Optimizely.Core.AutomaticRedirects
 
                     break;
                 case UrlType.Seo:
-                    var destinationSeo = destinationHistory.FirstOrDefault(x => x.Type == UrlType.Seo);
+                    var destinationSeo = destinationHistoryUrls.FirstOrDefault(x => x.Type == UrlType.Seo);
                     if (destinationSeo != null)
                     {
                         return destinationSeo.Url;
