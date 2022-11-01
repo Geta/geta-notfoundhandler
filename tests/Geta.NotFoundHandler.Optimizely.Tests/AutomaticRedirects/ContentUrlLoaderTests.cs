@@ -58,7 +58,7 @@ public class ContentUrlLoaderTests
 
         var result = _loader.GetUrls(contentLink);
 
-        Assert.Equal(urls, result);
+        Assert.True(result.All(x => !string.IsNullOrEmpty(x.Url)));
     }
 
     [Fact]
@@ -122,12 +122,7 @@ public class ContentUrlLoaderTests
         A.CallTo(() => _fakeUrlResolver.GetUrl(content.ContentLink, A<string>._, A<UrlResolverArguments>._))
             .Returns(Guid.NewGuid().ToString());
         A.CallTo(() => _fakeLanguageBranchRepository.ListEnabled())
-            .Returns(new List<LanguageBranch>
-            {
-                new("en"),
-                new("no"),
-                new("se")
-            });
+            .Returns(new List<LanguageBranch> { new("en"), new("no"), new("se") });
     }
 
     private ContentReference CreateContentLink()
