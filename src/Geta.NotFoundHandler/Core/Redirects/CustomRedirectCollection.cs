@@ -78,14 +78,15 @@ public class CustomRedirectCollection : IEnumerable<CustomRedirect>
 
     public void Add(CustomRedirect customRedirect)
     {
-        if (_quickLookupTable.ContainsKey(customRedirect.OldUrl))
+        var oldUrl = HttpUtility.UrlDecode(customRedirect.OldUrl);
+        if (_quickLookupTable.ContainsKey(oldUrl))
         {
-            _quickLookupTable[customRedirect.OldUrl] = customRedirect;
+            _quickLookupTable[oldUrl] = customRedirect;
             return;
         }
 
         // Add to quick look up table too
-        _quickLookupTable.Add(customRedirect.OldUrl, customRedirect);
+        _quickLookupTable.Add(oldUrl, customRedirect);
 
         // clean cache
         _redirectsZACache = null;
