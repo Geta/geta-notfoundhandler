@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using EPiServer.Cms.Shell;
 using EPiServer.Commerce.Catalog.ContentTypes;
 using EPiServer.Commerce.Catalog.Linking;
 using EPiServer.Core;
@@ -41,6 +42,8 @@ namespace Geta.NotFoundHandler.Optimizely.Commerce.AutomaticRedirects
 
         private IEnumerable<TypedUrl> GetNodeContentUrls(NodeContent node)
         {
+            var language = node.LanguageBranch();
+            
             var parentsLinks = _relationRepository
                 .GetParents<NodeRelation>(node.ContentLink)
                 .Select(x => x.Parent)
@@ -54,12 +57,13 @@ namespace Geta.NotFoundHandler.Optimizely.Commerce.AutomaticRedirects
             {
                 yield return new TypedUrl
                 {
-                    Url = $"{_urlResolver.GetUrl(parentLink)}/{node.RouteSegment}",
-                    Type = parentLink == node.ParentLink ? UrlType.Primary : UrlType.Secondary
+                    Url = $"{_urlResolver.GetUrl(parentLink, language)}/{node.RouteSegment}",
+                    Type = parentLink == node.ParentLink ? UrlType.Primary : UrlType.Secondary,
+                    Language = language
                 };
             }
 
-            yield return new TypedUrl { Url = $"/{node.SeoUri}", Type = UrlType.Seo };
+            yield return new TypedUrl { Url = $"/{node.SeoUri}", Type = UrlType.Seo, Language = language};
         }
     }
 }

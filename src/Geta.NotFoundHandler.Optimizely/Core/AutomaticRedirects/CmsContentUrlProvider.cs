@@ -3,8 +3,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using EPiServer;
+using EPiServer.Cms.Shell;
 using EPiServer.Core;
 using EPiServer.Web.Routing;
 
@@ -49,25 +51,31 @@ namespace Geta.NotFoundHandler.Optimizely.Core.AutomaticRedirects
 
         private IEnumerable<TypedUrl> GetPageUrls(PageData page)
         {
-            return new List<TypedUrl> { new() { Url = GetPageUrl(page), Type = UrlType.Primary } };
+            var language = page.LanguageBranch();
+            
+            return new List<TypedUrl> { new() { Url = GetPageUrl(page, language), Type = UrlType.Primary, Language = language} };
         }
 
-        private string GetPageUrl(PageData page)
+        private string GetPageUrl(PageData page, string language)
         {
             if (page.LinkType == PageShortcutType.External || page.LinkType == PageShortcutType.Shortcut)
             {
-                var lastPublishedVersion = _contentVersionRepository.LoadPublished(page.ParentLink);
-                var parent = _contentLoader.Get<IContent>(lastPublishedVersion.ContentLink);
-                if (parent is PageData parentPage)
+                var lastPublishedVersion = _contentVersionRepository.LoadPublished(page.ParentLink, language);
+
+                if (lastPublishedVersion != null)
                 {
-                    var parentUrl = GetPageUrl(parentPage);
-                    return $"{parentUrl}/{page.URLSegment}/";
+                    var parent = _contentLoader.Get<IContent>(lastPublishedVersion.ContentLink, new CultureInfo(language));
+                    if (parent is PageData parentPage)
+                    {
+                        var parentUrl = GetPageUrl(parentPage, language);
+                        return $"{parentUrl}/{page.URLSegment}/";
+                    }
                 }
 
                 return "/";
             }
 
-            return _urlResolver.GetUrl(page.ContentLink);
+            return _urlResolver.GetUrl(page.ContentLink, language);
         }
     }
 }

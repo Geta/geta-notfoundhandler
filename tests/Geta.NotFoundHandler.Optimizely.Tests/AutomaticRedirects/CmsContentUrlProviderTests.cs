@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.Linq;
 using EPiServer;
 using EPiServer.Core;
@@ -112,8 +113,8 @@ public class CmsContentUrlProviderTests
     private void MockParentLoading(ContentReference parentLink, IContent parent)
     {
         var contentVersion = A.Dummy<ContentVersion>();
-        A.CallTo(() => _fakeContentVersionRepository.LoadPublished(parentLink)).Returns(contentVersion);
-        A.CallTo(() => _fakeContentLoader.Get<IContent>(contentVersion.ContentLink)).Returns(parent);
+        A.CallTo(() => _fakeContentVersionRepository.LoadPublished(parentLink, A<string>._)).Returns(contentVersion);
+        A.CallTo(() => _fakeContentLoader.Get<IContent>(contentVersion.ContentLink, A<CultureInfo>._)).Returns(parent);
     }
 
     private static PageData CreatePage()
