@@ -43,6 +43,6 @@
                 }
             </tbody>
         </table>
-        @await Component.InvokeAsync("Pager", new { Model.Items })
+        @await Component.InvokeAsync(typeof(Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin.Components.Pager.PagerViewComponent), new { Model.Items })
     </div>
 </form>
