@@ -9,7 +9,6 @@ using Geta.NotFoundHandler.Core.Suggestions;
 using Geta.NotFoundHandler.Data;
 using Geta.NotFoundHandler.Infrastructure.Initialization;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -55,21 +54,23 @@ namespace Geta.NotFoundHandler.Infrastructure.Configuration
             services.AddTransient<RegexRedirectFactory>();
             services.AddTransient<INotFoundHandler, RegexRedirectNotFoundHandler>();
             services.AddTransient<SqlRegexRedirectRepository>();
+            services.AddTransient<IRegexRedirectCache, RegexRedirectCache>();
+
             services.AddTransient<IRepository<RegexRedirect>>(
                 x => new MemoryCacheRegexRedirectRepository(x.GetRequiredService<SqlRegexRedirectRepository>(),
                                                             x.GetRequiredService<SqlRegexRedirectRepository>(),
                                                             x.GetRequiredService<SqlRegexRedirectRepository>(),
-                                                            x.GetRequiredService<IMemoryCache>()));
+                                                            x.GetRequiredService<IRegexRedirectCache>()));
             services.AddTransient<IRegexRedirectLoader>(
                 x => new MemoryCacheRegexRedirectRepository(x.GetRequiredService<SqlRegexRedirectRepository>(),
                                                             x.GetRequiredService<SqlRegexRedirectRepository>(),
                                                             x.GetRequiredService<SqlRegexRedirectRepository>(),
-                                                            x.GetRequiredService<IMemoryCache>()));
+                                                            x.GetRequiredService<IRegexRedirectCache>()));
             services.AddTransient<IRegexRedirectOrderUpdater>(
                 x => new MemoryCacheRegexRedirectRepository(x.GetRequiredService<SqlRegexRedirectRepository>(),
                                                             x.GetRequiredService<SqlRegexRedirectRepository>(),
                                                             x.GetRequiredService<SqlRegexRedirectRepository>(),
-                                                            x.GetRequiredService<IMemoryCache>()));
+                                                            x.GetRequiredService<IRegexRedirectCache>()));
             services.AddTransient<IRegexRedirectsService, DefaultRegexRedirectsService>();
 
             var providerOptions = new NotFoundHandlerOptions();

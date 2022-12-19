@@ -3,6 +3,7 @@
 
 using System;
 using EPiServer.Events.Clients;
+using Geta.NotFoundHandler.Core.Providers.RegexRedirects;
 using Geta.NotFoundHandler.Core.Redirects;
 
 namespace Geta.NotFoundHandler.Optimizely.Core.Events
@@ -12,6 +13,7 @@ namespace Geta.NotFoundHandler.Optimizely.Core.Events
         private readonly RedirectsEvents _redirectsEvents;
         private readonly IEventRegistry _eventRegistry;
         private readonly RedirectsInitializer _redirectsInitializer;
+        private readonly IRegexRedirectCache _regexRedirectCache;
 
         private static readonly Guid EventId = new("{AC263F88-6C17-45A5-81E0-DCC28DF26AEF}");
         private static readonly Guid RaiserId = Guid.NewGuid();
@@ -19,11 +21,13 @@ namespace Geta.NotFoundHandler.Optimizely.Core.Events
         public OptimizelySyncEvents(
             RedirectsEvents redirectsEvents,
             IEventRegistry eventRegistry,
-            RedirectsInitializer redirectsInitializer)
+            RedirectsInitializer redirectsInitializer,
+            IRegexRedirectCache regexRedirectCache)
         {
             _redirectsEvents = redirectsEvents;
             _eventRegistry = eventRegistry;
             _redirectsInitializer = redirectsInitializer;
+            _regexRedirectCache = regexRedirectCache;
         }
 
         public void Initialize()
@@ -37,6 +41,7 @@ namespace Geta.NotFoundHandler.Optimizely.Core.Events
             if (e.RaiserId != RaiserId)
             {
                 _redirectsInitializer.Initialize();
+                _regexRedirectCache.Remove();
             }
         }
 
