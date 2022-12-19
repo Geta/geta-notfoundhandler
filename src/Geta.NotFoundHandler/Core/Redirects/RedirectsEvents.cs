@@ -7,11 +7,17 @@ namespace Geta.NotFoundHandler.Core.Redirects
 {
     public class RedirectsEvents
     {
-        public event EventHandler OnUpdated;
+        public event EventHandler OnRedirectsUpdated;
+        public event EventHandler OnRegexRedirectsUpdated;
 
         public void RedirectsUpdated()
         {
-            OnUpdated?.Invoke(new EventArgs());
+            OnRedirectsUpdated?.Invoke(new EventArgs());
+        }
+
+        public void RegexRedirectsUpdated()
+        {
+            OnRegexRedirectsUpdated?.Invoke(new EventArgs());
         }
     }
 

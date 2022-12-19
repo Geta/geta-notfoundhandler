@@ -8,7 +8,7 @@ using Microsoft.Extensions.Caching.Memory;
 
 namespace Geta.NotFoundHandler.Core.Providers.RegexRedirects;
 
-public class MemoryCacheRegexRedirectRepository : IRepository<RegexRedirect>, IRegexRedirectLoader, IRegexRedirectOrderUpdater
+public class MemoryCacheRegexRedirectRepository : IRepository<RegexRedirect>, IRegexRedirectLoader, IRegexRedirectOrderUpdater, IRegexRedirectCache
 {
     private readonly IRepository<RegexRedirect> _repository;
     private readonly IRegexRedirectLoader _redirectLoader;
@@ -47,18 +47,22 @@ public class MemoryCacheRegexRedirectRepository : IRepository<RegexRedirect>, IR
     public void Save(RegexRedirect entity)
     {
         _repository.Save(entity);
-        _cache.Remove(GetAllCacheKey);
+        Remove();
     }
 
     public void Delete(RegexRedirect entity)
     {
         _repository.Delete(entity);
-        _cache.Remove(GetAllCacheKey);
+        Remove();
     }
 
     public void UpdateOrder(bool isIncrease = false)
     {
         _orderUpdater.UpdateOrder(isIncrease);
+    }
+
+    public void Remove()
+    {
         _cache.Remove(GetAllCacheKey);
     }
 }
