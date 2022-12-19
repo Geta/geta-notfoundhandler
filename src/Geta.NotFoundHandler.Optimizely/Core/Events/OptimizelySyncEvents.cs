@@ -15,7 +15,8 @@ namespace Geta.NotFoundHandler.Optimizely.Core.Events
         private readonly RedirectsInitializer _redirectsInitializer;
         private readonly IRegexRedirectCache _regexRedirectCache;
 
-        private static readonly Guid EventId = new("{AC263F88-6C17-45A5-81E0-DCC28DF26AEF}");
+        private static readonly Guid UpdateEventId = new("{AC263F88-6C17-45A5-81E0-DCC28DF26AEF}");
+        private static readonly Guid RegexUpdateEventId = new("{334DF0A0-793C-4B19-A0CC-8AD63F705FDD}");
         private static readonly Guid RaiserId = Guid.NewGuid();
 
         public OptimizelySyncEvents(
@@ -32,22 +33,36 @@ namespace Geta.NotFoundHandler.Optimizely.Core.Events
 
         public void Initialize()
         {
-            _redirectsEvents.OnUpdated += OnRedirectsUpdated;
-            _eventRegistry.Get(EventId).Raised += SyncEventRaised;
+            _redirectsEvents.OnRedirectsUpdated += OnRedirectsUpdated;
+            _redirectsEvents.OnRegexRedirectsUpdated += OnRegexRedirectsUpdated;
+            _eventRegistry.Get(UpdateEventId).Raised += SyncUpdateEventRaised;
+            _eventRegistry.Get(RegexUpdateEventId).Raised += SyncRegexUpdateEventRaised;
         }
 
-        private void SyncEventRaised(object sender, EPiServer.Events.EventNotificationEventArgs e)
+        private void SyncUpdateEventRaised(object sender, EPiServer.Events.EventNotificationEventArgs e)
         {
             if (e.RaiserId != RaiserId)
             {
                 _redirectsInitializer.Initialize();
+            }
+        }
+
+        private void SyncRegexUpdateEventRaised(object sender, EPiServer.Events.EventNotificationEventArgs e)
+        {
+            if (e.RaiserId != RaiserId)
+            {
                 _regexRedirectCache.Remove();
             }
         }
 
         private void OnRedirectsUpdated(EventArgs e)
         {
-            _eventRegistry.Get(EventId).Raise(RaiserId, EventId);
+            _eventRegistry.Get(UpdateEventId).Raise(RaiserId, UpdateEventId);
+        }
+
+        private void OnRegexRedirectsUpdated(EventArgs e)
+        {
+            _eventRegistry.Get(RegexUpdateEventId).Raise(RaiserId, RegexUpdateEventId);
         }
     }
 }
