@@ -21,7 +21,7 @@ namespace Geta.NotFoundHandler.Core.Redirects
             _redirectHandler = redirectHandler;
             _redirectsServiceFactory = redirectsServiceFactory;
             _providers = providers;
-            redirectsEvents.OnUpdated += OnRedirectsUpdated;
+            redirectsEvents.OnRedirectsUpdated += OnRedirectsUpdated;
         }
 
         private void OnRedirectsUpdated(EventArgs e)

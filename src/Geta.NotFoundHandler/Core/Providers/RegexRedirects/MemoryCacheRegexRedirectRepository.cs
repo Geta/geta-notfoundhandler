@@ -47,11 +47,13 @@ public class MemoryCacheRegexRedirectRepository : IRepository<RegexRedirect>, IR
     public void Save(RegexRedirect entity)
     {
         _repository.Save(entity);
+        Remove();
     }
 
     public void Delete(RegexRedirect entity)
     {
         _repository.Delete(entity);
+        Remove();
     }
 
     public void UpdateOrder(bool isIncrease = false)
