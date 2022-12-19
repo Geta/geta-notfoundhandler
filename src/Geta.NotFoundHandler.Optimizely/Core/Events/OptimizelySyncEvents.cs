@@ -35,11 +35,11 @@ namespace Geta.NotFoundHandler.Optimizely.Core.Events
         {
             _redirectsEvents.OnRedirectsUpdated += OnRedirectsUpdated;
             _redirectsEvents.OnRegexRedirectsUpdated += OnRegexRedirectsUpdated;
-            _eventRegistry.Get(UpdateEventId).Raised += SyncUpdateEventRaised;
-            _eventRegistry.Get(RegexUpdateEventId).Raised += SyncRegexUpdateEventRaised;
+            _eventRegistry.Get(UpdateEventId).Raised += SyncRedirectsUpdateEventRaised;
+            _eventRegistry.Get(RegexUpdateEventId).Raised += SyncRegexRedirectsUpdateEventRaised;
         }
 
-        private void SyncUpdateEventRaised(object sender, EPiServer.Events.EventNotificationEventArgs e)
+        private void SyncRedirectsUpdateEventRaised(object sender, EPiServer.Events.EventNotificationEventArgs e)
         {
             if (e.RaiserId != RaiserId)
             {
@@ -47,7 +47,7 @@ namespace Geta.NotFoundHandler.Optimizely.Core.Events
             }
         }
 
-        private void SyncRegexUpdateEventRaised(object sender, EPiServer.Events.EventNotificationEventArgs e)
+        private void SyncRegexRedirectsUpdateEventRaised(object sender, EPiServer.Events.EventNotificationEventArgs e)
         {
             if (e.RaiserId != RaiserId)
             {
