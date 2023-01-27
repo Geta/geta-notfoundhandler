@@ -123,7 +123,7 @@ namespace Geta.NotFoundHandler.Optimizely.Data
                 sqlCommand,
                 _dataExecutor.CreateGuidParameter("id", entity.Id),
                 _dataExecutor.CreateStringParameter("contentKey", entity.ContentKey),
-                _dataExecutor.CreateStringParameter("urls", ToJson(entity.Urls)),
+                _dataExecutor.CreateStringParameter("urls", ToJson(entity.Urls), -1),
                 _dataExecutor.CreateDateTimeParameter("createdUtc", entity.CreatedUtc));
         }
 
@@ -144,7 +144,7 @@ namespace Geta.NotFoundHandler.Optimizely.Data
                 sqlCommand,
                 _dataExecutor.CreateGuidParameter("id", entity.Id),
                 _dataExecutor.CreateStringParameter("contentKey", entity.ContentKey),
-                _dataExecutor.CreateStringParameter("urls", ToJson(entity.Urls)),
+                _dataExecutor.CreateStringParameter("urls", ToJson(entity.Urls), -1),
                 _dataExecutor.CreateDateTimeParameter("createdUtc", entity.CreatedUtc));
         }
 
