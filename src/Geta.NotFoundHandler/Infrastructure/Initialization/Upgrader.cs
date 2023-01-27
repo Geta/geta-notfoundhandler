@@ -9,9 +9,9 @@ namespace Geta.NotFoundHandler.Infrastructure.Initialization;
 
 public class Upgrader
 {
-    private const string SuggestionsTable = "[dbo].[NotFoundHandler.Suggestions]";
-    private const string RedirectsTable = "[dbo].[NotFoundHandler.Redirects]";
-    private const string RegexRedirectsTable = "[dbo].[NotFoundHandler.RegexRedirects]";
+    private const string SuggestionsTableName = "NotFoundHandler.Suggestions";
+    private const string RedirectsTableName = "NotFoundHandler.Redirects";
+    private const string RegexRedirectsTableName = "NotFoundHandler.RegexRedirects";
     private readonly IDataExecutor _dataExecutor;
     private readonly ILogger<Upgrader> _logger;
 
@@ -70,7 +70,7 @@ public class Upgrader
     private bool CreateRedirectsTable()
     {
         _logger.LogInformation("Create NotFoundHandler redirects table START");
-        var createTableScript = @$"CREATE TABLE {RedirectsTable} (
+        var createTableScript = @$"CREATE TABLE {GetFullTableName(RedirectsTableName)} (
                                         [Id] [uniqueidentifier] NOT NULL,
                                         [OldUrl] [nvarchar](2000) NOT NULL,
                                         [NewUrl] [nvarchar](2000) NOT NULL,
@@ -88,7 +88,7 @@ public class Upgrader
     private bool CreateSuggestionsTable()
     {
         _logger.LogInformation("Create NotFoundHandler suggestions table START");
-        var createTableScript = @$"CREATE TABLE {SuggestionsTable} (
+        var createTableScript = @$"CREATE TABLE {GetFullTableName(SuggestionsTableName)} (
                                         [ID] [int] IDENTITY(1,1) NOT NULL,
                                         [OldUrl] [nvarchar](2000) NOT NULL,
                                         [Requested] [datetime] NULL,
@@ -109,7 +109,7 @@ public class Upgrader
     {
         _logger.LogInformation("Create suggestions table clustered index START");
         var clusteredIndex =
-            $"CREATE CLUSTERED INDEX NotFoundHandlerSuggestions_ID ON {SuggestionsTable} (ID)";
+            $"CREATE CLUSTERED INDEX NotFoundHandlerSuggestions_ID ON {GetFullTableName(SuggestionsTableName)} (ID)";
 
         var created = _dataExecutor.ExecuteNonQuery(clusteredIndex);
         if (!created)
@@ -125,7 +125,7 @@ public class Upgrader
     private bool CreateRegexRedirectsTable()
     {
         _logger.LogInformation("Create NotFoundHandler regex redirects table START");
-        var createTableScript = @$"CREATE TABLE {RegexRedirectsTable} (
+        var createTableScript = @$"CREATE TABLE {GetFullTableName(RegexRedirectsTableName)} (
                                         [Id] [uniqueidentifier] NOT NULL,
                                         [OldUrlRegex] [nvarchar](2000) NOT NULL,
                                         [NewUrlFormat] [nvarchar](2000) NOT NULL,
@@ -153,7 +153,7 @@ public class Upgrader
 
     private bool UpdateRegexRedirectsTable()
     {
-        return TableExists(RegexRedirectsTable) || CreateRegexRedirectsTable();
+        return TableExists(RegexRedirectsTableName) || CreateRegexRedirectsTable();
     }
 
     private void CreateVersionNumberSp()
@@ -188,7 +188,7 @@ public class Upgrader
 
     private bool TableExists(string tableName)
     {
-        var cmd = $@"SELECT *
+        var cmd = $@"SELECT 1
                  FROM INFORMATION_SCHEMA.TABLES
                  WHERE TABLE_SCHEMA = 'dbo'
                  AND  TABLE_NAME = '{tableName}'";
@@ -204,5 +204,10 @@ public class Upgrader
                         AND  Object_ID = Object_ID(N'dbo.[{tableName}]')";
         var num = _dataExecutor.ExecuteScalar(cmd);
         return num != 0;
+    }
+
+    private static string GetFullTableName(string tableName)
+    {
+        return $"[dbo].[{tableName}]";
     }
 }

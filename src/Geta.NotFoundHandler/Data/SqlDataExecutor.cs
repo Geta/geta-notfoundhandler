@@ -79,7 +79,9 @@ namespace Geta.NotFoundHandler.Data
                 connection.Open();
 
                 using var command = CreateCommand(connection, sqlCommand);
-                result = (int)command.ExecuteScalar();
+                var queryResult = command.ExecuteScalar();
+                if (queryResult == null) return 0;
+                result = (int)queryResult;
             }
             catch (Exception ex)
             {
