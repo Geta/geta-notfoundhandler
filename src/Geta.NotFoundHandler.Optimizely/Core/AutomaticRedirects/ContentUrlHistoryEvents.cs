@@ -1,6 +1,7 @@
 // Copyright (c) Geta Digital. All rights reserved.
 // Licensed under Apache-2.0. See the LICENSE file in the project root for more information
 
+using System.Linq;
 using EPiServer;
 using EPiServer.Core;
 using Geta.NotFoundHandler.Optimizely.Infrastructure.Configuration;
@@ -38,6 +39,11 @@ namespace Geta.NotFoundHandler.Optimizely.Core.AutomaticRedirects
 
         private void OnMovedContent(object sender, ContentEventArgs e)
         {
+            if (e is MoveContentEventArgs mcea &&
+                new[] { mcea.OriginalParent, mcea.TargetLink }.Any(t => t.CompareToIgnoreWorkID(ContentReference.WasteBasket)))
+            {
+                return;
+            }
             _movedContentRegistratorQueue.Enqueue(e.ContentLink);
         }
 
