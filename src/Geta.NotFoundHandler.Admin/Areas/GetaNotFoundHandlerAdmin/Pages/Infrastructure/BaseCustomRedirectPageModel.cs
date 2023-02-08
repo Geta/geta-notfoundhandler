@@ -23,7 +23,7 @@ public abstract class BaseCustomRedirectPageModel : BaseRedirectPageModel
     {
         Params.SortBy ??= nameof(CustomRedirect.OldUrl);
         Params.QueryState = _redirectState;
-        Params.PageSize ??= 5;
+        Params.PageSize ??= 50;
         var results = RedirectsService.GetRedirects(Params);
         Message = string.Format(_messageFormat, results.UnfilteredCount);
         if (results.TotalCount < results.UnfilteredCount)
