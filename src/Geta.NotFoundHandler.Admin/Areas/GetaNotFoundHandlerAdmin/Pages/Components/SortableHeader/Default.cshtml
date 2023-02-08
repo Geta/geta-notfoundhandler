@@ -12,13 +12,13 @@
     <a role="button" title="Sort @Model.DisplayName @nextSortDirection.ToString().ToLower()">
         @Model.DisplayName
 
-        @if (nextSortDirection == SortOrder.Ascending)
+        @if (isCurrent && nextSortDirection == SortOrder.Ascending)
         {
-            <span data-feather="arrow-down"></span>
+            <span data-feather="arrow-up"></span>
         }
         else
         {
-            <span data-feather="arrow-up"></span>
+            <span data-feather="arrow-down"></span>
         }
     </a>
 </th>

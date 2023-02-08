@@ -10,7 +10,12 @@
     <script>
         function resizeIframe(obj) {
             obj.style.height = 0;
-            obj.style.height = obj.contentWindow.document.documentElement.scrollHeight + 'px';
+            var innerDoc = obj.contentWindow.document;
+            var newHeight = Math.max(
+                Math.max(innerDoc.body.scrollHeight, innerDoc.documentElement.scrollHeight),
+                Math.max(document.body.clientHeight, document.documentElement.clientHeight)
+            )
+            obj.style.height = newHeight + 'px';
         }
     </script>
     <title>NotFound handler</title>

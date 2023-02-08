@@ -1,4 +1,5 @@
 ﻿@page
+@using Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin.Models;
 @model Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin.SuggestionsModel
 
 @await Component.InvokeAsync("Card", new { message = Model.Message })
@@ -8,7 +9,7 @@
         <table class="table table-hover table-sm" aria-label="Suggestions">
             <thead>
                 <tr>
-                    <th>Old URL</th>
+                    @await Component.InvokeAsync("SortableHeader", new { DisplayName = "Old URL", InternalName = nameof(SuggestionRedirectModel.OldUrl), Model.Params })
                     <th>New URL</th>
                     <th class="col-1"></th>
                     <th class="col-1"></th>
@@ -19,22 +20,18 @@
                 @for (var i = 0; i < Model.Items.Count; i++)
                 {
                     var item = Model.Items[i];
-                    var formId = $"redirect{i}";
                     <tr class="align-middle">
                         <td>
-                            <form method="post" id="@formId">
-                                <input type="hidden" asp-for="Items[i].OldUrl" value="@item.OldUrl">
-                            </form>
+                            <input type="hidden" asp-for="Items[i].OldUrl" value="@item.OldUrl">
                             @item.OldUrl (@item.Count errors)
                         </td>
                         <td>
-                            <input type="text" class="form-control" form="@formId" asp-for="Items[i].NewUrl">
-                            <span form="@formId" asp-validation-for="Items[i].NewUrl" class="text-danger"></span>
+                            <input type="text" class="form-control" asp-for="Items[i].NewUrl">
+                            <span asp-validation-for="Items[i].NewUrl" class="text-danger"></span>
                         </td>
                         <td>
                             <div class="d-grid gap-2">
-                                <button type="submit" class="btn btn-primary" form="@formId"
-                                    asp-page-handler="create">
+                                <button type="submit" class="btn btn-primary" asp-page-handler="create" asp-route-index="@i">
                                     <span data-feather="plus"></span> add
                                 </button>
                             </div>
@@ -82,22 +79,17 @@
                                 </div>
                             </div>
                             <div class="d-grid gap-2">
-                                <button type="submit" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#@referersModalId">
+                                <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#@referersModalId">
                                     <span data-feather="file-text"></span> referrers (@item.Referers.Count)
                                 </button>
                             </div>
                         </td>
                         <td>
-                            @{
-                                var ignoreFormId = $"ignore{i}";
-                            }
                             <div class="d-grid gap-2">
-                                <form method="post" id="@ignoreFormId">
-                                    <button type="submit" class="btn btn-danger"
-                                        asp-page-handler="ignore" asp-route-oldurl="@item.OldUrl">
-                                        <span data-feather="eye-off"></span> ignore
-                                    </button>
-                                </form>
+                                <button type="submit" class="btn btn-danger"
+                                    asp-page-handler="ignore" asp-route-oldurl="@item.OldUrl">
+                                    <span data-feather="eye-off"></span> ignore
+                                </button>
                             </div>
                         </td>
                     </tr>
@@ -106,4 +98,7 @@
         </table>
         @await Component.InvokeAsync(typeof(Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin.Components.Pager.PagerViewComponent), new { Model.Params.Page, Model.Params.PageSize, Model.Results.TotalCount })
     </div>
+    <input type="hidden" name="page" value="@Model.Params.Page">
+    <input type="hidden" name="sort-by" value="@Model.Params.SortBy">
+    <input type="hidden" name="sort-direction" value="@Model.Params.SortDirection">
 </form>

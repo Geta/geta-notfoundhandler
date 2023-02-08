@@ -124,13 +124,13 @@
 }
 
 .sortable-header svg {
-    color: gray;
+    color: lightgray;
 }
 
-.sortable-header.current {
+.sortable-header.current, .sortable-header:hover {
     text-decoration: underline;
 }
 
-.sortable-header.current svg {
+.sortable-header.current svg, .sortable-header:hover svg  {
     color: black;
 }

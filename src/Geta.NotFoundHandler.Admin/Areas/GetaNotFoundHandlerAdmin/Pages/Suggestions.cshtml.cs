@@ -3,16 +3,14 @@ using System.Linq;
 using Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin.Models;
 using Geta.NotFoundHandler.Core;
 using Geta.NotFoundHandler.Core.Suggestions;
-using Geta.NotFoundHandler.Data;
 using Geta.NotFoundHandler.Infrastructure;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin;
 
 [Authorize(Constants.PolicyName)]
-public class SuggestionsModel : PageModel
+public class SuggestionsModel : BaseRedirectPageModel
 {
     private readonly ISuggestionService _suggestionService;
 
@@ -21,45 +19,35 @@ public class SuggestionsModel : PageModel
         _suggestionService = suggestionService;
     }
 
-    public string Message { get; set; }
-
     public SuggestionRedirectsResult Results { get; set; }
 
     public IList<SuggestionRedirectModel> Items { get; set; } = Enumerable.Empty<SuggestionRedirectModel>().ToList();
 
-    [BindProperty(SupportsGet = true)]
-    public QueryParams Params { get; set; }
-
-    public void OnGet()
+    public IActionResult OnPostCreate(Dictionary<int, SuggestionRedirectModel> items, int index)
     {
-        Load();
-    }
-
-    public IActionResult OnPostCreate(Dictionary<int, SuggestionRedirectModel> items)
-    {
-        if (!ModelState.IsValid)
+        ModelState.Clear();
+        if (items.ContainsKey(index))
         {
-            Load();
-            return Page();
+            var item = items[index];
+            if (TryValidateModel(item, $"{nameof(items)}[{index}]"))
+            {
+                _suggestionService.AddRedirect(new SuggestionRedirect(item.OldUrl, item.NewUrl));
+            }
         }
 
-        var item = items.First().Value;
-
-        _suggestionService.AddRedirect(new SuggestionRedirect(item.OldUrl, item.NewUrl));
-
-        return RedirectToPage();
+        return LoadPage();
     }
 
     public IActionResult OnPostIgnore(string oldUrl)
     {
         _suggestionService.IgnoreSuggestion(oldUrl);
-
-        return RedirectToPage();
+        return LoadPage(true);
     }
 
-    private void Load()
+    protected override void Load()
     {
-        Params.PageSize ??= 50;
+        Params.SortBy ??= nameof(SuggestionRedirectModel.OldUrl);
+        Params.PageSize ??= 5;
         var results = _suggestionService.GetSummaries(Params);
         var redirectModels = results.Suggestions.Select(x => new SuggestionRedirectModel
         {
