@@ -1,24 +1,23 @@
 ﻿@page
+@using Geta.NotFoundHandler.Admin.Areas.GetaNotFoundHandlerAdmin.Pages.Infrastructure;
 @using Geta.NotFoundHandler.Core.Redirects
 @model Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin.IndexModel
 
 @await Component.InvokeAsync("Card", new { message = Model.Message })
 
-<form method="get">
+<form method="post">
     <div class="search-container input-group flex-nowrap">
-        <input class="form-control w-100 border-end-0" type="text" placeholder="Search" aria-label="Search" id="search" name="q" value="@Model.Query">
+        <input class="form-control w-100 border-end-0" type="text" placeholder="Search" aria-label="Search" id="search" name="q" value="@Model.Params.QueryText">
         <span class="input-group-append">
             <button class="btn btn-outline-secondary border-start-0 border" type="button" data-clear="#search">
                 <span data-feather="x"></span>
             </button>
         </span>
-        <button type="submit" class="btn btn-outline-secondary search-button">
+        <button type="submit" class="btn btn-outline-secondary search-button" formnovalidate2="formnovalidate">
             <span data-feather="search"></span> search
         </button>
     </div>
-</form>
 
-<form method="post">
     <div class="table-responsive mt-3">
         <table class="table table-hover table-sm" aria-label="Redirects">
             <thead>
@@ -58,7 +57,7 @@
                     </div>
                 </td>
             </tr>
-            @foreach (var item in Model.Items)
+            @foreach (var item in Model.Results.Redirects)
             {
                 <tr class="align-middle">
                     <td>@item.OldUrl</td>
@@ -79,6 +78,6 @@
             }
             </tbody>
         </table>
-        @await Component.InvokeAsync(typeof(Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin.Components.Pager.PagerViewComponent), new { Model.Items })
+        @await Component.InvokeAsync(typeof(Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin.Components.Pager.PagerViewComponent), new { Model.Params.Page, Model.Params.PageSize, Model.Results.TotalCount })
     </div>
 </form>

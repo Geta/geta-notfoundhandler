@@ -4,7 +4,9 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.SqlClient;
 using System.Linq;
+using Geta.NotFoundHandler.Core;
 using Geta.NotFoundHandler.Core.Redirects;
 
 namespace Geta.NotFoundHandler.Data
@@ -104,36 +106,41 @@ namespace Geta.NotFoundHandler.Data
 
         public IEnumerable<CustomRedirect> GetAll()
         {
-            var sqlCommand = $@"SELECT {AllFields} FROM {RedirectsTable}";
+            var sqlCommand = $"SELECT {AllFields} FROM {RedirectsTable}";
 
             var dataTable = _dataExecutor.ExecuteQuery(sqlCommand);
 
             return ToCustomRedirects(dataTable);
         }
 
-        public IEnumerable<CustomRedirect> GetByState(RedirectState state)
+        public CustomRedirectsResult GetRedirects(QueryParams query)
         {
-            var sqlCommand = $@"SELECT {AllFields} FROM {RedirectsTable}
-                                    WHERE State = @state";
+            var parameters = new List<IDbDataParameter>();
+
+            var whereString = GetWhereString(query, parameters);
+
+            var suffixString = GetSuffixString(query, parameters, out var isPaginated);
 
             var dataTable = _dataExecutor.ExecuteQuery(
-                sqlCommand,
-                _dataExecutor.CreateIntParameter("state", (int)state));
+                $"SELECT {AllFields} FROM {RedirectsTable}{whereString}{suffixString}",
+                parameters.ToArray());
 
-            return ToCustomRedirects(dataTable);
-        }
+            var items = ToCustomRedirects(dataTable);
+            var totalCount = items.Count;
+            if (isPaginated)
+            {
+                var whereState = query.QueryState != null ? @"
+                    WHERE state = @state" : "";
+                totalCount = _dataExecutor.ExecuteScalar($"SELECT COUNT(*) FROM {RedirectsTable}{whereState}",
+                    _dataExecutor.CreateIntParameter("state", (int)query.QueryState));
+            }
+            var filteredCount = totalCount;
+            if (!string.IsNullOrWhiteSpace(whereString))
+            {
+                filteredCount = _dataExecutor.ExecuteScalar($"SELECT COUNT(*) FROM {RedirectsTable}{whereString}", parameters.ToArray());
+            }
 
-        public IEnumerable<CustomRedirect> Find(string searchText)
-        {
-            var sqlCommand = $@"SELECT {AllFields} FROM {RedirectsTable}
-                                    WHERE OldUrl like '%' + @searchText + '%'
-                                    OR NewUrl like '%' + @searchText + '%'";
-
-            var dataTable = _dataExecutor.ExecuteQuery(
-                sqlCommand,
-                _dataExecutor.CreateStringParameter("searchText", searchText));
-
-            return ToCustomRedirects(dataTable);
+            return new CustomRedirectsResult(items, totalCount, filteredCount);
         }
 
         public CustomRedirect Get(Guid id)
@@ -148,9 +155,9 @@ namespace Geta.NotFoundHandler.Data
             return ToCustomRedirects(dataTable).FirstOrDefault();
         }
 
-        private static IEnumerable<CustomRedirect> ToCustomRedirects(DataTable table)
+        private static IList<CustomRedirect> ToCustomRedirects(DataTable table)
         {
-            return table.AsEnumerable().Select(ToCustomRedirect);
+            return table.AsEnumerable().Select(ToCustomRedirect).ToList();
         }
 
         private static CustomRedirect ToCustomRedirect(DataRow x)
@@ -159,7 +166,65 @@ namespace Geta.NotFoundHandler.Data
                 x.Field<string>("OldUrl"),
                 x.Field<string>("NewUrl"),
                 x.Field<bool>("WildCardSkipAppend"),
-                x.Field<RedirectType>("RedirectType")) { Id = x.Field<Guid>("Id"), State = x.Field<int>("State") };
+                x.Field<RedirectType>("RedirectType"))
+            { Id = x.Field<Guid>("Id"), State = x.Field<int>("State") };
+        }
+
+        private string GetWhereString(QueryParams query, IList<IDbDataParameter> parameters)
+        {
+            var conditions = new List<string>();
+            if (!string.IsNullOrEmpty(query?.QueryText))
+            {
+                parameters.Add(_dataExecutor.CreateStringParameter("searchText", query.QueryText));
+                conditions.Add(@"(OldUrl like '%' + @searchText + '%'
+                            OR NewUrl like '%' + @searchText + '%')");
+            }
+
+            if (query.QueryState != null)
+            {
+                parameters.Add(_dataExecutor.CreateIntParameter("state", (int)query.QueryState));
+                conditions.Add("State = @state");
+            }
+
+            var hasFilter = conditions.Any();
+            if (hasFilter)
+            {
+                return $@"
+                    WHERE {string.Join(" AND ", conditions)}";
+            }
+
+            return "";
+        }
+
+        private string GetSuffixString(QueryParams query, IList<IDbDataParameter> parameters, out bool isPaginated)
+        {
+            var suffixString = "";
+            var hasSortBy = !string.IsNullOrWhiteSpace(query.SortBy);
+            if (hasSortBy)
+            {
+                parameters.Add(_dataExecutor.CreateStringParameter("sortBy", query.SortBy));
+                suffixString += $@"
+                    ORDER BY @sortBy {(query.SortDirection == SortOrder.Ascending ? "ASC" : "DESC")}";
+            }
+
+            isPaginated = false;
+            if (query.PageSize is int ps && ps > 0)
+            {
+                isPaginated = true;
+                if (!hasSortBy)
+                {
+                    // Adds dummy ORDER BY for pagination
+                    suffixString += @"
+                        ORDER BY(SELECT NULL)";
+                }
+                parameters.Add(_dataExecutor.CreateIntParameter("pageSize", ps));
+                parameters.Add(_dataExecutor.CreateIntParameter("skip", (query.Page - 1) * ps));
+                suffixString += $@"
+                    OFFSET {(query.Page - 1) * ps} ROWS
+                    FETCH NEXT @pageSize ROWS ONLY";
+            }
+
+            return suffixString;
         }
     }
 }

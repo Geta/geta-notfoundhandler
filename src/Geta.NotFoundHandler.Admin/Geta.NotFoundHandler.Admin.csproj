@@ -24,10 +24,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="X.PagedList" Version="8.4.3" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\Geta.NotFoundHandler\Geta.NotFoundHandler.csproj" />
   </ItemGroup>
 

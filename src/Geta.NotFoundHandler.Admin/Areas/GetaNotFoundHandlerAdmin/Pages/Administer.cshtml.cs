@@ -49,7 +49,8 @@ public class AdministerModel : PageModel
         Message = $"All {count} ignored suggestions permanently removed";
         CardType = CardType.Success;
 
-        return RedirectToPage(new {
+        return RedirectToPage(new
+        {
             Message,
             CardType
         });
@@ -168,7 +169,7 @@ public class AdministerModel : PageModel
 
     public IActionResult OnPostExportRedirects()
     {
-        var redirects = _redirectsService.GetSaved().ToList();
+        var redirects = _redirectsService.GetRedirects(new Data.QueryParams() { QueryState = RedirectState.Saved }).Redirects.ToList();
         var document = _redirectsXmlParser.Export(redirects);
 
         var memoryStream = new MemoryStream();
@@ -208,5 +209,6 @@ public class AdministerModel : PageModel
 public class DeleteSuggestionsModel
 {
     public int MaxErrors { get; set; } = 5;
+
     public int MinimumDays { get; set; } = 30;
 }

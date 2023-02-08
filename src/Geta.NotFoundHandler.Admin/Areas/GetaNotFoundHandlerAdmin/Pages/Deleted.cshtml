@@ -27,7 +27,7 @@
                         </div>
                     </td>
                 </tr>
-                @foreach (var item in Model.Items)
+                @foreach (var item in Model.Results.Redirects)
                 {
                     <tr class="align-middle">
                         <td>@item.OldUrl</td>
@@ -43,6 +43,6 @@
                 }
             </tbody>
         </table>
-        @await Component.InvokeAsync(typeof(Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin.Components.Pager.PagerViewComponent), new { Model.Items })
+        @await Component.InvokeAsync(typeof(Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin.Components.Pager.PagerViewComponent), new { Model.Params.Page, Model.Params.PageSize, Model.Results.TotalCount })
     </div>
 </form>

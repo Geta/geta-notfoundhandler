@@ -1,12 +1,11 @@
-using System.Collections.Generic;
-using System.Linq;
 using Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin.Models;
+using Geta.NotFoundHandler.Core;
 using Geta.NotFoundHandler.Core.Redirects;
+using Geta.NotFoundHandler.Data;
 using Geta.NotFoundHandler.Infrastructure;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using X.PagedList;
 
 namespace Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin;
 
@@ -22,57 +21,62 @@ public class IndexModel : PageModel
 
     public string Message { get; set; }
 
-    public IPagedList<CustomRedirect> Items { get; set; } = Enumerable.Empty<CustomRedirect>().ToPagedList();
+    public CustomRedirectsResult Results { get; set; }
 
     [BindProperty]
     public RedirectModel CustomRedirect { get; set; }
 
     [BindProperty(SupportsGet = true)]
-    public Paging Paging { get; set; }
-
-    [BindProperty(SupportsGet = true, Name = "q")]
-    public string Query { get; set; }
-
-    public bool HasQuery => !string.IsNullOrEmpty(Query);
+    public QueryParams Params { get; set; }
 
     public void OnGet()
     {
         Load();
     }
 
+    public IActionResult OnPost()
+    {
+        ModelState.Clear();
+        return LoadPage();
+    }
+
     public IActionResult OnPostCreate()
     {
-        if (!ModelState.IsValid)
+        if (ModelState.IsValid)
         {
-            Load();
-            return Page();
+            var customRedirect = new CustomRedirect(CustomRedirect.OldUrl,
+                                                    CustomRedirect.NewUrl,
+                                                    CustomRedirect.WildCardSkipAppend,
+                                                    CustomRedirect.RedirectType);
+
+            _redirectsService.AddOrUpdate(customRedirect);
         }
 
-        var customRedirect = new CustomRedirect(CustomRedirect.OldUrl,
-                                                CustomRedirect.NewUrl,
-                                                CustomRedirect.WildCardSkipAppend,
-                                                CustomRedirect.RedirectType);
-
-        _redirectsService.AddOrUpdate(customRedirect);
-
-        return RedirectToPage();
+        return LoadPage();
     }
 
     public IActionResult OnPostDelete(string oldUrl)
     {
         _redirectsService.DeleteByOldUrl(oldUrl);
-        return RedirectToPage();
+        return LoadPage();
+    }
+
+    public IActionResult LoadPage()
+    {
+        Load();
+        return Page();
     }
 
     private void Load()
     {
-        var items = FindRedirects().ToPagedList(Paging.PageNumber, Paging.PageSize);
-        Message = $"There are currently stored {items.TotalItemCount} custom redirects.";
-        Items = items;
-    }
-
-    private IEnumerable<CustomRedirect> FindRedirects()
-    {
-        return HasQuery ? _redirectsService.Search(Query) : _redirectsService.GetSaved();
+        Params.QueryState = RedirectState.Saved;
+        Params.PageSize ??= 50;
+        var results = _redirectsService.GetRedirects(Params);
+        Message = $"There are currently stored {results.UnfilteredCount} custom redirects. ";
+        if (results.TotalCount < results.UnfilteredCount)
+        {
+            Message += $"Current filter gives {results.TotalCount}.";
+        }
+        Results = results;
     }
 }

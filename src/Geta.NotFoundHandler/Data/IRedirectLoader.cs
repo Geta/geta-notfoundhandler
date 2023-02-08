@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using Geta.NotFoundHandler.Core;
 using Geta.NotFoundHandler.Core.Redirects;
 
 namespace Geta.NotFoundHandler.Data
@@ -10,9 +11,11 @@ namespace Geta.NotFoundHandler.Data
     public interface IRedirectLoader
     {
         CustomRedirect GetByOldUrl(string oldUrl);
+
         IEnumerable<CustomRedirect> GetAll();
-        IEnumerable<CustomRedirect> GetByState(RedirectState state);
-        IEnumerable<CustomRedirect> Find(string searchText);
+
+        CustomRedirectsResult GetRedirects(QueryParams query);
+
         CustomRedirect Get(Guid id);
     }
 }

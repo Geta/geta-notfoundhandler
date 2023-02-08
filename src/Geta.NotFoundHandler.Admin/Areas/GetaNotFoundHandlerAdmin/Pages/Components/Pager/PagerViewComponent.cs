@@ -1,6 +1,6 @@
+using System;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using X.PagedList;
 
 namespace Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin.Components.Pager
 {
@@ -13,15 +13,16 @@ namespace Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin.Components
             _contextAccessor = contextAccessor;
         }
 
-        public IViewComponentResult Invoke(IPagedList items)
+        public IViewComponentResult Invoke(int page, int pageSize, int totalCount)
         {
             var context = _contextAccessor.HttpContext;
+            var pageCount = pageSize is int ps && ps > 0 ? (int)Math.Ceiling((decimal)totalCount / ps) : 1;
             return View(new PagerViewModel
             {
-                HasPreviousPage = items.HasPreviousPage,
-                HasNextPage = items.HasNextPage,
-                PageNumber = items.PageNumber,
-                PageCount = items.PageCount,
+                HasPreviousPage = page > 1,
+                HasNextPage = pageCount > page,
+                PageNumber = page,
+                PageCount = pageCount,
                 QueryString = context.Request.QueryString.ToString()
             });
         }

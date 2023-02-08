@@ -3,105 +3,107 @@
 
 @await Component.InvokeAsync("Card", new { message = Model.Message })
 
-<div class="table-responsive mt-3">
-    <table class="table table-hover table-sm" aria-label="Suggestions">
-        <thead>
-        <tr>
-            <th>Old URL</th>
-            <th>New URL</th>
-            <th class="col-1"></th>
-            <th class="col-1"></th>
-            <th class="col-1"></th>
-        </tr>
-        </thead>
-        <tbody>
-        @for (var i = 0; i < Model.Items.Count; i++)
-        {
-            var item = Model.Items[i];
-            var formId = $"redirect{i}";
-            <tr class="align-middle">
-                <td>
-                    <form method="post" id="@formId">
-                        <input type="hidden" asp-for="Items[i].OldUrl" value="@item.OldUrl">
-                    </form>
-                    @item.OldUrl (@item.Count errors)
-                </td>
-                <td>
-                    <input type="text" class="form-control" form="@formId" asp-for="Items[i].NewUrl">
-                    <span form="@formId" asp-validation-for="Items[i].NewUrl" class="text-danger"></span>
-                </td>
-                <td>
-                    <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-primary" form="@formId"
-                                asp-page-handler="create">
-                            <span data-feather="plus"></span> add
-                        </button>
-                    </div>
-                </td>
-                <td>
-                    @{
-                        var referersModalId = $"referers{i}";
-                        var modalTitleId = $"modalTitle{i}";
-                    }
-                    <div class="modal fade" id="@referersModalId" tabindex="-1" aria-labelledby="@modalTitleId" aria-hidden="true">
-                        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="@modalTitleId">Referrers</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                </div>
-                                <div class="modal-body">
-                                    @if (item.Referers.Any())
-                                    {
-                                        <ul>
-                                            @foreach (var referer in item.Referers)
+<form method="post">
+    <div class="table-responsive mt-3">
+        <table class="table table-hover table-sm" aria-label="Suggestions">
+            <thead>
+                <tr>
+                    <th>Old URL</th>
+                    <th>New URL</th>
+                    <th class="col-1"></th>
+                    <th class="col-1"></th>
+                    <th class="col-1"></th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (var i = 0; i < Model.Items.Count; i++)
+                {
+                    var item = Model.Items[i];
+                    var formId = $"redirect{i}";
+                    <tr class="align-middle">
+                        <td>
+                            <form method="post" id="@formId">
+                                <input type="hidden" asp-for="Items[i].OldUrl" value="@item.OldUrl">
+                            </form>
+                            @item.OldUrl (@item.Count errors)
+                        </td>
+                        <td>
+                            <input type="text" class="form-control" form="@formId" asp-for="Items[i].NewUrl">
+                            <span form="@formId" asp-validation-for="Items[i].NewUrl" class="text-danger"></span>
+                        </td>
+                        <td>
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary" form="@formId"
+                                    asp-page-handler="create">
+                                    <span data-feather="plus"></span> add
+                                </button>
+                            </div>
+                        </td>
+                        <td>
+                            @{
+                                var referersModalId = $"referers{i}";
+                                var modalTitleId = $"modalTitle{i}";
+                            }
+                            <div class="modal fade" id="@referersModalId" tabindex="-1" aria-labelledby="@modalTitleId" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="@modalTitleId">Referrers</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            @if (item.Referers.Any())
                                             {
-                                                <li class="list-group-item">
-                                                    @if (referer.Unknown)
+                                                <ul>
+                                                    @foreach (var referer in item.Referers)
                                                     {
-                                                        <text>Unknown (@referer.Count)</text>
+                                                        <li class="list-group-item">
+                                                            @if (referer.Unknown)
+                                                            {
+                                                                <text>Unknown (@referer.Count)</text>
+                                                            }
+                                                            else
+                                                            {
+                                                                <a href="@referer.Url" target="_blank">@referer.Url (@referer.Count)</a>
+                                                            }
+                                                        </li>
                                                     }
-                                                    else
-                                                    {
-                                                        <a href="@referer.Url" target="_blank">@referer.Url (@referer.Count)</a>
-                                                    }
-                                                </li>
+                                                </ul>
                                             }
-                                        </ul>
-                                    }
-                                    else
-                                    {
-                                        <text>This suggestion does not have any referrers.</text>
-                                    }
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                            else
+                                            {
+                                                <text>This suggestion does not have any referrers.</text>
+                                            }
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                    <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#@referersModalId">
-                            <span data-feather="file-text"></span> referrers (@item.Referers.Count)
-                        </button>
-                    </div>
-                </td>
-                <td>
-                    @{
-                        var ignoreFormId = $"ignore{i}";
-                    }
-                    <div class="d-grid gap-2">
-                        <form method="post" id="@ignoreFormId">
-                            <button type="submit" class="btn btn-danger"
-                                    asp-page-handler="ignore" asp-route-oldurl="@item.OldUrl">
-                                <span data-feather="eye-off"></span> ignore
-                            </button>
-                        </form>
-                    </div>
-                </td>
-            </tr>
-        }
-        </tbody>
-    </table>
-    @await Component.InvokeAsync(typeof(Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin.Components.Pager.PagerViewComponent), new { Model.Items })
-</div>
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#@referersModalId">
+                                    <span data-feather="file-text"></span> referrers (@item.Referers.Count)
+                                </button>
+                            </div>
+                        </td>
+                        <td>
+                            @{
+                                var ignoreFormId = $"ignore{i}";
+                            }
+                            <div class="d-grid gap-2">
+                                <form method="post" id="@ignoreFormId">
+                                    <button type="submit" class="btn btn-danger"
+                                        asp-page-handler="ignore" asp-route-oldurl="@item.OldUrl">
+                                        <span data-feather="eye-off"></span> ignore
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        @await Component.InvokeAsync(typeof(Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin.Components.Pager.PagerViewComponent), new { Model.Params.Page, Model.Params.PageSize, Model.Results.TotalCount })
+    </div>
+</form>

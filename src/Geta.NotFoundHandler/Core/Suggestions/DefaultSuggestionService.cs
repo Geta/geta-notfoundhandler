@@ -3,7 +3,6 @@
 
 using Geta.NotFoundHandler.Core.Redirects;
 using Geta.NotFoundHandler.Data;
-using X.PagedList;
 
 namespace Geta.NotFoundHandler.Core.Suggestions
 {
@@ -23,9 +22,9 @@ namespace Geta.NotFoundHandler.Core.Suggestions
             _suggestionRepository = suggestionRepository;
         }
 
-        public IPagedList<SuggestionSummary> GetSummaries(int page, int pageSize)
+        public SuggestionRedirectsResult GetSummaries(QueryParams query)
         {
-            return _suggestionLoader.GetSummaries(page, pageSize);
+            return _suggestionLoader.GetSummaries(query);
         }
 
         public void AddRedirect(SuggestionRedirect suggestionRedirect)

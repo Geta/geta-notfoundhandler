@@ -1,11 +1,10 @@
-using System.Linq;
-using Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin.Models;
+using Geta.NotFoundHandler.Core;
 using Geta.NotFoundHandler.Core.Redirects;
+using Geta.NotFoundHandler.Data;
 using Geta.NotFoundHandler.Infrastructure;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using X.PagedList;
 
 namespace Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin;
 
@@ -21,10 +20,10 @@ public class IgnoredModel : PageModel
 
     public string Message { get; set; }
 
-    public IPagedList<CustomRedirect> Items { get; set; } = Enumerable.Empty<CustomRedirect>().ToPagedList();
+    public CustomRedirectsResult Results { get; set; }
 
     [BindProperty(SupportsGet = true)]
-    public Paging Paging { get; set; }
+    public QueryParams Params { get; set; }
 
     public void OnGet()
     {
@@ -40,8 +39,14 @@ public class IgnoredModel : PageModel
 
     private void Load()
     {
-        var items = _redirectsService.GetIgnored().ToPagedList(Paging.PageNumber, Paging.PageSize);
-        Message = $"There are currently {items.TotalItemCount} ignored suggestions stored.";
-        Items = items;
+        Params.QueryState = RedirectState.Ignored;
+        Params.PageSize ??= 50;
+        var results = _redirectsService.GetRedirects(Params);
+        Message = $"There are currently {results.UnfilteredCount} ignored suggestions stored. ";
+        if (results.TotalCount < results.UnfilteredCount)
+        {
+            Message += $"Current filter gives {results.TotalCount}.";
+        }
+        Results = results;
     }
 }

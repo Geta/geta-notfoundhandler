@@ -1,12 +1,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin.Models;
+using Geta.NotFoundHandler.Core;
 using Geta.NotFoundHandler.Core.Suggestions;
+using Geta.NotFoundHandler.Data;
 using Geta.NotFoundHandler.Infrastructure;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using X.PagedList;
 
 namespace Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin;
 
@@ -22,10 +23,12 @@ public class SuggestionsModel : PageModel
 
     public string Message { get; set; }
 
-    public IPagedList<SuggestionRedirectModel> Items { get; set; } = Enumerable.Empty<SuggestionRedirectModel>().ToPagedList();
+    public SuggestionRedirectsResult Results { get; set; }
+
+    public IList<SuggestionRedirectModel> Items { get; set; } = Enumerable.Empty<SuggestionRedirectModel>().ToList();
 
     [BindProperty(SupportsGet = true)]
-    public Paging Paging { get; set; }
+    public QueryParams Params { get; set; }
 
     public void OnGet()
     {
@@ -56,15 +59,17 @@ public class SuggestionsModel : PageModel
 
     private void Load()
     {
-        var summaries = _suggestionService.GetSummaries(Paging.PageNumber, Paging.PageSize);
-        var redirectModels = summaries.Select(x => new SuggestionRedirectModel
+        Params.PageSize ??= 50;
+        var results = _suggestionService.GetSummaries(Params);
+        var redirectModels = results.Suggestions.Select(x => new SuggestionRedirectModel
         {
             OldUrl = x.OldUrl,
             Count = x.Count,
             Referers = x.Referers
         });
 
-        Message = $"Based on the logged 404 errors, there are {summaries.TotalItemCount} custom redirect suggestions.";
-        Items = new StaticPagedList<SuggestionRedirectModel>(redirectModels, summaries);
+        Message = $"Based on the logged 404 errors, there are {results.TotalCount} custom redirect suggestions.";
+        Results = results;
+        Items = redirectModels.ToList();
     }
 }

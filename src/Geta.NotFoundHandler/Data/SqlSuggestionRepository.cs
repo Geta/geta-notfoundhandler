@@ -4,9 +4,10 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.SqlClient;
 using System.Linq;
+using Geta.NotFoundHandler.Core;
 using Geta.NotFoundHandler.Core.Suggestions;
-using X.PagedList;
 
 namespace Geta.NotFoundHandler.Data
 {
@@ -21,16 +22,35 @@ namespace Geta.NotFoundHandler.Data
             _dataExecutor = dataExecutor;
         }
 
-        public IPagedList<SuggestionSummary> GetSummaries(int page, int pageSize)
+        public SuggestionRedirectsResult GetSummaries(QueryParams query)
         {
-            var table = GetSuggestionsPaged(page, pageSize);
-            var summaries = CreateSuggestionSummaries(table);
-            var count = CountSummaries();
+            var parameters = new List<IDbDataParameter>();
 
-            return new StaticPagedList<SuggestionSummary>(summaries, page, pageSize, count);
+            var whereString = GetWhereString(query, parameters);
+
+            var suffixString = GetSuffixString(query, parameters, out var isPaginated);
+
+            var dataTable = _dataExecutor.ExecuteQuery(
+                $@"SELECT [OldUrl], COUNT(*) as Requests FROM {SuggestionsTable}{whereString}
+                    GROUP BY [OldUrl]{suffixString}",
+                parameters.ToArray());
+
+            var items = CreateSuggestionSummaries(dataTable);
+            var totalCount = items.Count;
+            if (isPaginated)
+            {
+                totalCount = _dataExecutor.ExecuteScalar($"SELECT COUNT(*) FROM {SuggestionsTable}");
+            }
+            var filteredCount = totalCount;
+            if (!string.IsNullOrWhiteSpace(whereString))
+            {
+                filteredCount = _dataExecutor.ExecuteScalar($"SELECT COUNT(*) FROM {SuggestionsTable}{whereString}", parameters.ToArray());
+            }
+
+            return new SuggestionRedirectsResult(items, totalCount, filteredCount);
         }
 
-        private IEnumerable<SuggestionSummary> CreateSuggestionSummaries(DataTable table)
+        private IList<SuggestionSummary> CreateSuggestionSummaries(DataTable table)
         {
             var summaries = new List<SuggestionSummary>();
 
@@ -83,7 +103,7 @@ namespace Geta.NotFoundHandler.Data
 
         public void DeleteAll()
         {
-            var sqlCommand = $@"delete from {SuggestionsTable}";
+            var sqlCommand = $"delete from {SuggestionsTable}";
             _dataExecutor.ExecuteNonQuery(sqlCommand);
         }
 
@@ -131,29 +151,6 @@ namespace Geta.NotFoundHandler.Data
             _dataExecutor.ExecuteNonQuery(sqlCommand, requestedParam, refererParam, oldUrlParam);
         }
 
-        private DataTable GetSuggestionsPaged(int? page, int? pageSize)
-        {
-            var sqlCommand =
-                $"SELECT [OldUrl], COUNT(*) as Requests FROM {SuggestionsTable} GROUP BY [OldUrl] order by Requests desc";
-
-            if (page.HasValue && pageSize.HasValue)
-            {
-                page = Math.Max(1, page.Value);
-                var skip = (page.Value - 1) * pageSize.Value;
-
-                sqlCommand += $" OFFSET {skip} ROWS FETCH NEXT {pageSize.Value} ROWS ONLY";
-            }
-
-            return _dataExecutor.ExecuteQuery(sqlCommand);
-        }
-
-        private int CountSummaries()
-        {
-            var sqlCommand = $"SELECT COUNT([ID]) FROM {SuggestionsTable}";
-
-            return _dataExecutor.ExecuteScalar(sqlCommand);
-        }
-
         public DataTable GetSuggestionReferers(string url)
         {
             var sqlCommand =
@@ -163,6 +160,49 @@ namespace Geta.NotFoundHandler.Data
             oldUrlParam.Value = url;
 
             return _dataExecutor.ExecuteQuery(sqlCommand, oldUrlParam);
+        }
+
+        private string GetWhereString(QueryParams query, IList<IDbDataParameter> parameters)
+        {
+            if (!string.IsNullOrEmpty(query?.QueryText))
+            {
+                parameters.Add(_dataExecutor.CreateStringParameter("searchText", query.QueryText));
+                return @"
+                    WHERE OldUrl like '%' + @searchText + '%'";
+            }
+
+            return "";
+        }
+
+        private string GetSuffixString(QueryParams query, IList<IDbDataParameter> parameters, out bool isPaginated)
+        {
+            var suffixString = "";
+            var hasSortBy = !string.IsNullOrWhiteSpace(query.SortBy);
+            if (hasSortBy)
+            {
+                parameters.Add(_dataExecutor.CreateStringParameter("sortBy", query.SortBy));
+                suffixString += $@"
+                    ORDER BY @sortBy {(query.SortDirection == SortOrder.Ascending ? "ASC" : "DESC")}";
+            }
+
+            isPaginated = false;
+            if (query.PageSize is int ps && ps > 0)
+            {
+                isPaginated = true;
+                if (!hasSortBy)
+                {
+                    // Adds dummy ORDER BY for pagination
+                    suffixString += @"
+                        ORDER BY(SELECT NULL)";
+                }
+                parameters.Add(_dataExecutor.CreateIntParameter("pageSize", ps));
+                parameters.Add(_dataExecutor.CreateIntParameter("skip", (query.Page - 1) * ps));
+                suffixString += $@"
+                    OFFSET {(query.Page - 1) * ps} ROWS
+                    FETCH NEXT @pageSize ROWS ONLY";
+            }
+
+            return suffixString;
         }
     }
 }

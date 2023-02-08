@@ -29,24 +29,9 @@ namespace Geta.NotFoundHandler.Core.Redirects
             return _redirectLoader.GetAll();
         }
 
-        public IEnumerable<CustomRedirect> GetSaved()
+        public CustomRedirectsResult GetRedirects(QueryParams query)
         {
-            return _redirectLoader.GetByState(RedirectState.Saved);
-        }
-
-        public IEnumerable<CustomRedirect> GetIgnored()
-        {
-            return _redirectLoader.GetByState(RedirectState.Ignored);
-        }
-
-        public IEnumerable<CustomRedirect> GetDeleted()
-        {
-            return _redirectLoader.GetByState(RedirectState.Deleted);
-        }
-
-        public IEnumerable<CustomRedirect> Search(string searchText)
-        {
-            return _redirectLoader.Find(searchText);
+            return _redirectLoader.GetRedirects(query);
         }
 
         public void AddOrUpdate(CustomRedirect redirect)
@@ -91,7 +76,9 @@ namespace Geta.NotFoundHandler.Core.Redirects
         {
             var redirect = new CustomRedirect
             {
-                OldUrl = oldUrl, NewUrl = string.Empty, State = Convert.ToInt32(RedirectState.Deleted)
+                OldUrl = oldUrl,
+                NewUrl = string.Empty,
+                State = Convert.ToInt32(RedirectState.Deleted)
             };
             AddOrUpdate(redirect, notifyUpdated: true);
         }
@@ -141,7 +128,7 @@ namespace Geta.NotFoundHandler.Core.Redirects
         public int DeleteAllIgnored()
         {
             // In order to avoid a database timeout, we delete the items one by one.
-            var ignoredRedirects = GetIgnored().ToList();
+            var ignoredRedirects = GetRedirects(new QueryParams() { QueryState = RedirectState.Ignored }).Redirects.ToList();
             foreach (var redirect in ignoredRedirects)
             {
                 _repository.Delete(redirect);
