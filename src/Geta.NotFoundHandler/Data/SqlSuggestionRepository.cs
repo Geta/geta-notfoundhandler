@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Geta.NotFoundHandler.Core;
 using Geta.NotFoundHandler.Core.Suggestions;
 
@@ -177,12 +178,12 @@ namespace Geta.NotFoundHandler.Data
         private string GetSuffixString(QueryParams query, IList<IDbDataParameter> parameters, out bool isPaginated)
         {
             var suffixString = "";
-            var hasSortBy = !string.IsNullOrWhiteSpace(query.SortBy);
+            var safeSortBy = Regex.Replace(query.SortBy ?? string.Empty, "[^A-Za-z]", "", RegexOptions.IgnoreCase);
+            var hasSortBy = !string.IsNullOrWhiteSpace(safeSortBy);
             if (hasSortBy)
             {
-                parameters.Add(_dataExecutor.CreateStringParameter("sortBy", query.SortBy));
                 suffixString += $@"
-                    ORDER BY @sortBy {(query.SortDirection == SortOrder.Ascending ? "ASC" : "DESC")}";
+                    ORDER BY [{safeSortBy}] {(query.SortDirection == SortOrder.Ascending ? "ASC" : "DESC")}";
             }
 
             isPaginated = false;
