@@ -36,6 +36,24 @@
         });
     }
 
+    function addSortableHeaders() {
+        var buttons = document.querySelectorAll('form .sortable-header a');
+        buttons.forEach(function (button) {
+            button.addEventListener('click',
+                function (e) {
+                    e.preventDefault();
+                    var header = button.closest(".sortable-header");
+                    var form = header.closest("form");
+                    var sortBy = form.querySelector("input[name='sort-by']");
+                    var sortDirection = form.querySelector("input[name='sort-direction']");
+                    if (sortBy) sortBy.value = header.dataset.sortBy;
+                    if (sortDirection) sortDirection.value = header.dataset.sortDirection;
+                    form.submit();
+                });
+        });
+    }
+
     clearInput();
     confirmSubmit();
+    addSortableHeaders();
 })()

@@ -1,0 +1,24 @@
+﻿@using System.Data.SqlClient;
+@model Geta.NotFoundHandler.Admin.Areas.GetaNotFoundHandlerAdmin.Pages.Components.SortableHeader.SortableHeaderViewModel
+
+@{
+    var sortBy = Model.InternalName;
+    var isCurrent = Model.Params.SortBy == Model.InternalName;
+    var nextSortDirection = isCurrent && Model.Params.SortDirection == SortOrder.Ascending ? SortOrder.Descending : SortOrder.Ascending;
+}
+
+<th class="sortable-header@(isCurrent ? " current" : "")@(Model.AdditionalClass != null ? $" {Model.AdditionalClass}" : "")" 
+    data-sort-by="@sortBy" data-sort-direction="@nextSortDirection">
+    <a role="button" title="Sort @Model.DisplayName @nextSortDirection.ToString().ToLower()">
+        @Model.DisplayName
+
+        @if (nextSortDirection == SortOrder.Ascending)
+        {
+            <span data-feather="arrow-down"></span>
+        }
+        else
+        {
+            <span data-feather="arrow-up"></span>
+        }
+    </a>
+</th>

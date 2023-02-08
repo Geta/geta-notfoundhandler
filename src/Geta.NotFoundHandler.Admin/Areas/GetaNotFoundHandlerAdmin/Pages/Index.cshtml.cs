@@ -50,6 +50,7 @@ public class IndexModel : PageModel
                                                     CustomRedirect.RedirectType);
 
             _redirectsService.AddOrUpdate(customRedirect);
+            CustomRedirect = new RedirectModel();
         }
 
         return LoadPage();
