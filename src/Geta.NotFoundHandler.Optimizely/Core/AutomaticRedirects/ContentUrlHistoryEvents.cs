@@ -39,8 +39,8 @@ namespace Geta.NotFoundHandler.Optimizely.Core.AutomaticRedirects
 
         private void OnMovedContent(object sender, ContentEventArgs e)
         {
-            if (e is MoveContentEventArgs mcea &&
-                new[] { mcea.OriginalParent, mcea.TargetLink }.Any(t => t.CompareToIgnoreWorkID(ContentReference.WasteBasket)))
+            if (e is MoveContentEventArgs me
+                && new[] { me.OriginalParent, me.TargetLink }.Any(x => x.CompareToIgnoreWorkID(ContentReference.WasteBasket)))
             {
                 return;
             }
