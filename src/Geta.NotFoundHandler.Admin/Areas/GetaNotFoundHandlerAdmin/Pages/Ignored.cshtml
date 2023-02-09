@@ -5,6 +5,8 @@
 @await Component.InvokeAsync("Card", new { message = Model.OperationMessage, cardType = CardType.Success })
 
 <form method="post">
+    <input type="hidden" name="sort-by" value="@Model.Params.SortBy">
+    <input type="hidden" name="sort-direction" value="@Model.Params.SortDirection">
     <div class="table-responsive mt-3">
         <table class="table table-hover table-sm" aria-label="Ignored redirects">
             <thead>
@@ -32,7 +34,4 @@
         </table>
         @await Component.InvokeAsync(typeof(Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin.Components.Pager.PagerViewComponent), new { Model.Params.Page, Model.Params.PageSize, Model.Results.TotalCount })
     </div>
-    <input type="hidden" name="page" value="@Model.Params.Page">
-    <input type="hidden" name="sort-by" value="@Model.Params.SortBy">
-    <input type="hidden" name="sort-direction" value="@Model.Params.SortDirection">
 </form>
