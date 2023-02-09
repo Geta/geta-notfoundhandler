@@ -16,6 +16,7 @@ public class IgnoredModel : BaseCustomRedirectPageModel
     public IActionResult OnPostUnignore(string oldUrl)
     {
         RedirectsService.DeleteByOldUrl(oldUrl);
+        OperationMessage = $"Removed {oldUrl} from the ignore list";
         return LoadPage(true);
     }
 }

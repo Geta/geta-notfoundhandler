@@ -1,16 +1,15 @@
 /* globals feather:false */
 
-(function() {
+(function () {
     'use strict';
 
     feather.replace();
 
-
     function clearInput() {
         var initiators = document.querySelectorAll('[data-clear]');
-        initiators.forEach(function(initiator) {
+        initiators.forEach(function (initiator) {
             initiator.addEventListener('click',
-                function(e) {
+                function (e) {
                     var target = e.currentTarget;
                     var selector = target.getAttribute('data-clear');
                     var input = document.querySelector(selector);
@@ -21,7 +20,7 @@
 
     function confirmSubmit() {
         var initiators = document.querySelectorAll('[data-confirm]');
-        initiators.forEach(function(initiator) {
+        initiators.forEach(function (initiator) {
             var form = initiator.form;
             form.addEventListener('submit',
                 function (e) {
@@ -37,7 +36,7 @@
     }
 
     function addSortableHeaders() {
-        var buttons = document.querySelectorAll('form .sortable-header a');
+        var buttons = document.querySelectorAll('form .sortable-header button');
         buttons.forEach(function (button) {
             button.addEventListener('click',
                 function (e) {
@@ -48,6 +47,7 @@
                     var sortDirection = form.querySelector("input[name='sort-direction']");
                     if (sortBy) sortBy.value = header.dataset.sortBy;
                     if (sortDirection) sortDirection.value = header.dataset.sortDirection;
+                    form.action = button.formAction;
                     form.submit();
                 });
         });

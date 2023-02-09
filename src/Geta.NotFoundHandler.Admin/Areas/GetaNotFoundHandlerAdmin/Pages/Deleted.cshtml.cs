@@ -22,6 +22,9 @@ public class DeletedModel : BaseCustomRedirectPageModel
         if (ModelState.IsValid)
         {
             RedirectsService.AddDeletedRedirect(DeletedRedirect.OldUrl);
+            OperationMessage = $"Added delete redirect for {DeletedRedirect.OldUrl}";
+            DeletedRedirect = new DeletedRedirectModel();
+            return LoadPage(true);
         }
 
         return LoadPage();
@@ -30,6 +33,7 @@ public class DeletedModel : BaseCustomRedirectPageModel
     public IActionResult OnPostDelete(string oldUrl)
     {
         RedirectsService.DeleteByOldUrl(oldUrl);
+        OperationMessage = $"Removed {oldUrl}";
         return LoadPage(true);
     }
 }

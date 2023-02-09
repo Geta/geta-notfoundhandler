@@ -1,8 +1,8 @@
 ﻿@page
-@using Geta.NotFoundHandler.Core.Redirects;
-@model Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin.IgnoredModel
+@model IgnoredModel
 
 @await Component.InvokeAsync("Card", new { message = Model.Message })
+@await Component.InvokeAsync("Card", new { message = Model.OperationMessage, cardType = CardType.Success })
 
 <form method="post">
     <div class="table-responsive mt-3">

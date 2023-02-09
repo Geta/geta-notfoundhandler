@@ -123,11 +123,19 @@
     white-space: nowrap;
 }
 
+.sortable-header button {
+    padding: 0;
+    margin: 0;
+    border: none;
+    background-color: transparent;
+    font-weight: bold;
+}
+
 .sortable-header svg {
     color: lightgray;
 }
 
-.sortable-header.current, .sortable-header:hover {
+.sortable-header.current button, .sortable-header:hover button {
     text-decoration: underline;
 }
 

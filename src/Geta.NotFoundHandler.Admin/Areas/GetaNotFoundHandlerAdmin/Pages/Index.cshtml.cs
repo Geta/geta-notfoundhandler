@@ -27,7 +27,9 @@ public class IndexModel : BaseCustomRedirectPageModel
                                                     CustomRedirect.RedirectType);
 
             RedirectsService.AddOrUpdate(customRedirect);
+            OperationMessage = $"Added/updated redirect from {CustomRedirect.OldUrl} to {CustomRedirect.NewUrl}";
             CustomRedirect = new RedirectModel();
+            return LoadPage(true);
         }
 
         return LoadPage();
@@ -36,6 +38,7 @@ public class IndexModel : BaseCustomRedirectPageModel
     public IActionResult OnPostDelete(string oldUrl)
     {
         RedirectsService.DeleteByOldUrl(oldUrl);
+        OperationMessage = $"Removed redirect for {oldUrl}";
         return LoadPage(true);
     }
 }

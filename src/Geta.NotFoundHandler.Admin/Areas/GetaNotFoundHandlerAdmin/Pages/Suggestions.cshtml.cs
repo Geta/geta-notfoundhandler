@@ -32,6 +32,7 @@ public class SuggestionsModel : BaseRedirectPageModel
             if (TryValidateModel(item, $"{nameof(items)}[{index}]"))
             {
                 _suggestionService.AddRedirect(new SuggestionRedirect(item.OldUrl, item.NewUrl));
+                OperationMessage = $"Added redirect from {item.OldUrl} to {item.NewUrl}";
             }
         }
 
@@ -41,6 +42,7 @@ public class SuggestionsModel : BaseRedirectPageModel
     public IActionResult OnPostIgnore(string oldUrl)
     {
         _suggestionService.IgnoreSuggestion(oldUrl);
+        OperationMessage = $"Added {oldUrl} to ignore list";
         return LoadPage(true);
     }
 

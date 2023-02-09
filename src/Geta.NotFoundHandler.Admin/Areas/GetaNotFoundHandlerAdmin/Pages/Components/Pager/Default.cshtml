@@ -3,7 +3,7 @@
 <nav aria-label="Table pagination">
     <ul class="pagination">
         <li class="page-item @(Model.HasPreviousPage ? string.Empty : "disabled")">
-            <button type="submit" class="page-link" name="page" value="@(Model.PageNumber-1)" aria-label="Previous">
+            <button type="submit" class="page-link" name="page" value="@(Model.PageNumber-1)" aria-label="Previous" asp-page-handler="">
                 <span aria-hidden="true">&laquo;</span>
             </button>
         </li>
@@ -11,13 +11,13 @@
         @for (int i = 1; i <= Model.PageCount; i++)
         {
             <li class="page-item">
-                <button type="submit" class="page-link" name="page" value="@i">
+                <button type="submit" class="page-link" name="page" value="@i" asp-page-handler="">
                     @i
                 </button>
             </li>
         }
         <li class="page-item @(Model.HasNextPage ? string.Empty : "disabled")">
-            <button type="submit" class="page-link" name="page" value="@(Model.PageNumber+1)" aria-label="Next">
+            <button type="submit" class="page-link" name="page" value="@(Model.PageNumber+1)" aria-label="Next" asp-page-handler="">
                 <span aria-hidden="true">&raquo;</span>
             </button>
         </li>

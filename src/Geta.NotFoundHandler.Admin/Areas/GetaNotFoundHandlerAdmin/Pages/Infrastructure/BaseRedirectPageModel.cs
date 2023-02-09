@@ -7,6 +7,7 @@ namespace Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin;
 public abstract class BaseRedirectPageModel : PageModel
 {
     public string Message { get; set; }
+    public string OperationMessage { get; set; }
 
     [BindProperty(SupportsGet = true)]
     public QueryParams Params { get; set; }
