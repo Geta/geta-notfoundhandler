@@ -53,11 +53,6 @@ namespace Geta.NotFoundHandler.Core.Suggestions
                 }
             }
 
-            EnqueueRequest(oldUrl, referer);
-        }
-
-        private static void EnqueueRequest(string oldUrl, string referer)
-        {
             LogQueue.Enqueue(new LogEvent(oldUrl, DateTime.UtcNow, referer));
         }
 
