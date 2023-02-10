@@ -20,6 +20,7 @@ namespace Geta.NotFoundHandler.Core.Suggestions
         private readonly ISuggestionRepository _suggestionRepository;
         private readonly IRedirectsService _redirectsService;
         private readonly NotFoundHandlerOptions _configuration;
+        private static object _lockObject = new object();
 
         public RequestLogger(
             IOptions<NotFoundHandlerOptions> options,
@@ -37,7 +38,7 @@ namespace Geta.NotFoundHandler.Core.Suggestions
         {
             if (AllowLogOfRequests())
             {
-                lock (LogQueue)
+                lock (_lockObject)
                 {
                     try
                     {
