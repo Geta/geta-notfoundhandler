@@ -56,13 +56,6 @@ namespace Geta.NotFoundHandler.Core.Suggestions
             LogQueue.Enqueue(new LogEvent(oldUrl, DateTime.UtcNow, referer));
         }
 
-        private bool AllowLogOfRequests()
-        {
-            var bufferSize = _configuration.BufferSize;
-            var threshold = _configuration.ThreshHold;
-            return !LogQueue.IsEmpty && ((threshold > 0 && (DateTime.UtcNow - LogQueue.Last().Requested).TotalSeconds >= threshold) || LogQueue.Count >= bufferSize);
-        }
-
         private void LogRequests(ConcurrentQueue<LogEvent> logEvents)
         {
             _logger.LogDebug("Logging 404 errors to database");
@@ -91,6 +84,19 @@ namespace Geta.NotFoundHandler.Core.Suggestions
                 _logger.LogWarning(
                     "404 requests have been made too frequents (exceeded the threshold). Requests not logged to database");
             }
+        }
+
+        private bool AllowLogOfRequests()
+        {
+            if (LogQueue.IsEmpty)
+                return false;
+
+            var bufferSize = _configuration.BufferSize;
+            var threshold = _configuration.ThreshHold;
+            if (threshold > 0 && bufferSize > 0 && (bufferSize / (DateTime.UtcNow - LogQueue.Last().Requested).TotalSeconds) <= threshold)
+                return true;
+
+            return LogQueue.Count >= bufferSize;
         }
 
         private static bool IgnoreSuggestion(LogEvent logEvent, IEnumerable<string> ignored)
