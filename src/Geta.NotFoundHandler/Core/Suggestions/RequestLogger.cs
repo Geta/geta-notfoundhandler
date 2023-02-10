@@ -70,7 +70,7 @@ namespace Geta.NotFoundHandler.Core.Suggestions
             var threshold = _configuration.ThreshHold;
             var start = logEvents.First().Requested;
             var end = logEvents.Last().Requested;
-            var diff = (end - start).TotalSeconds;
+            var diff = (int)Math.Floor((end - start).TotalSeconds);
 
             if ((diff != 0 && bufferSize / diff <= threshold)
                 || bufferSize == 0)
