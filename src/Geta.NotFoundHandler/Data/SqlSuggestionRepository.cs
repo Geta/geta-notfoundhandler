@@ -31,23 +31,23 @@ namespace Geta.NotFoundHandler.Data
 
             var suffixString = GetSuffixString(query, parameters, out var isPaginated);
 
-            const string groupBy = @"
+            const string GroupByOldUrl = @"
                 GROUP BY [OldUrl]";
 
             var dataTable = _dataExecutor.ExecuteQuery(
-                $"SELECT [OldUrl], COUNT(*) as Requests FROM {SuggestionsTable}{whereString}{groupBy}{suffixString}",
+                $"SELECT [OldUrl], COUNT(*) as Requests FROM {SuggestionsTable}{whereString}{GroupByOldUrl}{suffixString}",
                 parameters.ToArray());
 
             var items = CreateSuggestionSummaries(dataTable);
             var totalCount = items.Count;
             if (isPaginated)
             {
-                totalCount = _dataExecutor.ExecuteScalar($@"SELECT COUNT(*) FROM {SuggestionsTable}{groupBy}");
+                totalCount = _dataExecutor.ExecuteScalar($"SELECT DISTINCT COUNT(*) OVER () FROM {SuggestionsTable}{GroupByOldUrl}");
             }
             var filteredCount = totalCount;
             if (!string.IsNullOrWhiteSpace(whereString))
             {
-                filteredCount = _dataExecutor.ExecuteScalar($@"SELECT COUNT(*) FROM {SuggestionsTable}{whereString}{groupBy}", parameters.ToArray());
+                filteredCount = _dataExecutor.ExecuteScalar($"SELECT DISTINCT COUNT(*) OVER () FROM {SuggestionsTable}{whereString}{GroupByOldUrl}", parameters.ToArray());
             }
 
             return new SuggestionRedirectsResult(items, totalCount, filteredCount);

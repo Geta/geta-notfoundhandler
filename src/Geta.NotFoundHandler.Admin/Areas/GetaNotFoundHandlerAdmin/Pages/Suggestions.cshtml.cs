@@ -49,7 +49,7 @@ public class SuggestionsModel : BaseRedirectPageModel
     protected override void Load()
     {
         Params.SortBy ??= nameof(SuggestionRedirectModel.OldUrl);
-        Params.PageSize ??= 5;
+        Params.PageSize ??= 50;
         var results = _suggestionService.GetSummaries(Params);
         var redirectModels = results.Suggestions.Select(x => new SuggestionRedirectModel
         {
