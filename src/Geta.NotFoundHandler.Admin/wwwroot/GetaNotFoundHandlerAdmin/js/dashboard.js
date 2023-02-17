@@ -36,20 +36,18 @@
     }
 
     function adjustModalPosition() {
-        var modalTriggers = document.querySelectorAll('.modal-trigger');
+        var modalTriggers = document.querySelectorAll('.modal-trigger[data-bs-target]');
         modalTriggers.forEach(function (modalTrigger) {
-            modalTrigger.addEventListener('click',
-                function () {
-                    if (modalTrigger.dataset.bsTarget) {
-                        var modalDialog = document.querySelector(modalTrigger.dataset.bsTarget + " .modal-dialog");
-                        if (modalDialog) {
-                            modalDialog.style = "position: fixed;" +
-                                "top: " + modalTrigger.getBoundingClientRect().top + "px;" +
-                                "left: 50%;" +
-                                "transform: translate(-50%, -50%);";
-                        }
-                    }
-                });
+            modalTrigger.addEventListener('click', function () {
+                var modalDialog = document.querySelector(modalTrigger.dataset.bsTarget + " .modal-dialog");
+                if (!modalDialog) { return; }
+
+                modalDialog.style = "position: fixed;" +
+                    "top: " + modalTrigger.getBoundingClientRect().top + "px;" +
+                    "left: 50%;" +
+                    "min-width: 500px;" +
+                    "transform: translate(-50%, -50%);";
+            });
         });
     }
 
