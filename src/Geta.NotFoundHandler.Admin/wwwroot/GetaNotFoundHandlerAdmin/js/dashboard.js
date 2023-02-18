@@ -35,25 +35,43 @@
         });
     }
 
-    function addSortableHeaders() {
-        var buttons = document.querySelectorAll('form .sortable-header button');
+    function addFormTriggers() {
+        var form = document.getElementById("tableQueryState");
+        if (!form) { return; }
+
+        var buttons = form.parentElement.querySelectorAll('.sortable-header button');
         buttons.forEach(function (button) {
-            button.addEventListener('click',
-                function (e) {
-                    e.preventDefault();
-                    var header = button.closest(".sortable-header");
-                    var form = header.closest("form");
-                    var sortBy = form.querySelector("input[name='sort-by']");
-                    var sortDirection = form.querySelector("input[name='sort-direction']");
-                    if (sortBy) sortBy.value = header.dataset.sortBy;
-                    if (sortDirection) sortDirection.value = header.dataset.sortDirection;
-                    form.action = button.formAction;
-                    form.submit();
-                });
+            button.addEventListener('click', function (e) {
+                e.preventDefault();
+                var header = button.closest(".sortable-header");
+                var sortBy = form.querySelector("input[name='sb']");
+                var sortDirection = form.querySelector("input[name='sd']");
+                if (sortBy) sortBy.value = header.dataset.sortBy;
+                if (sortDirection) sortDirection.value = header.dataset.sortDirection;
+                form.submit();
+            });
         });
+
+        var pageLinks = form.parentElement.querySelectorAll('.page-link[name="p"]');
+        pageLinks.forEach(function (pageLink) {
+            pageLink.addEventListener('click',  function (e) {
+                e.preventDefault();
+                var page = form.querySelector("input[name='p']");
+                if (page) page.value = pageLink.value;
+                form.submit();
+            });
+        });
+
+        var searchButton = form.querySelector(".search-button");
+        if (searchButton) {
+            var page = form.querySelector("input[name='p']");
+            if (page) {
+                page.value = 1;
+            }
+        }
     }
 
     clearInput();
     confirmSubmit();
-    addSortableHeaders();
+    addFormTriggers();
 })()

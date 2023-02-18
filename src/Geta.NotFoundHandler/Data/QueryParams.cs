@@ -9,21 +9,21 @@ namespace Geta.NotFoundHandler.Data
 {
     public class QueryParams
     {
-        [FromForm(Name = "q")]
+        [BindProperty(Name = "q", SupportsGet = true)]
         public string QueryText { get; set; } = string.Empty;
 
         public RedirectState? QueryState { get; set; }
 
-        [FromForm(Name = "page")]
+        [BindProperty(Name = "p", SupportsGet = true)]
         public int Page { get; set; } = 1;
 
-        [FromForm(Name = "page-size")]
+        [BindProperty(Name = "ps", SupportsGet = true)]
         public int? PageSize { get; set; }
 
-        [FromForm(Name = "sort-by")]
+        [BindProperty(Name = "sb", SupportsGet = true)]
         public string SortBy { get; set; }
 
-        [FromForm(Name = "sort-direction")]
+        [BindProperty(Name = "sd", SupportsGet = true)]
         public SortOrder SortDirection { get; set; } = SortOrder.Ascending;
     }
 }

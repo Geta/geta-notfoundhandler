@@ -9,7 +9,7 @@
 
 <th class="sortable-header@(isCurrent ? " current" : "")@(Model.AdditionalClass != null ? $" {Model.AdditionalClass}" : "")" 
     data-sort-by="@sortBy" data-sort-direction="@nextSortDirection">
-    <button type="button" title="Sort @Model.DisplayName @nextSortDirection.ToString().ToLower()" asp-page-handler="">
+    <button type="button" title="Sort @Model.DisplayName @nextSortDirection.ToString().ToLower()">
         @Model.DisplayName
 
         @if (isCurrent && nextSortDirection == SortOrder.Ascending)

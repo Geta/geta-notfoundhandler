@@ -4,34 +4,37 @@
 @await Component.InvokeAsync("Card", new { message = Model.Message })
 @await Component.InvokeAsync("Card", new { message = Model.OperationMessage, cardType = CardType.Success })
 
-<form method="post">
-    <input type="hidden" name="sort-by" value="@Model.Params.SortBy">
-    <input type="hidden" name="sort-direction" value="@Model.Params.SortDirection">
-    <div class="table-responsive mt-3">
-        <table class="table table-hover table-sm" aria-label="Ignored redirects">
-            <thead>
+<form id="tableQueryState" method="get">
+
+    @Html.HiddenForQueryParams()
+</form>
+
+<div class="table-responsive mt-3">
+    <table class="table table-hover table-sm" aria-label="Ignored redirects">
+        <thead>
             <tr>
                 @await Component.InvokeAsync("SortableHeader", new { DisplayName = "URL", InternalName = nameof(CustomRedirect.OldUrl), Model.Params })
                 <th class="col-1"></th>
             </tr>
-            </thead>
-            <tbody>
-            @foreach (var item in Model.Results.Redirects)
-            {
-                <tr class="align-middle">
-                    <td>@item.OldUrl</td>
-                    <td>
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-warning"
-                                    asp-page-handler="unignore" asp-route-oldurl="@item.OldUrl">
-                                <span data-feather="eye"></span> unignore
-                            </button>
-                        </div>
-                    </td>
-                </tr>
-            }
-            </tbody>
-        </table>
-        @await Component.InvokeAsync(typeof(Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin.Components.Pager.PagerViewComponent), new { Model.Params.Page, Model.Params.PageSize, Model.Results.TotalCount })
-    </div>
-</form>
+        </thead>
+        <form method="post">
+            @Html.HiddenForQueryParams()
+        <tbody>
+        @foreach (var item in Model.Results.Redirects)
+        {
+            <tr class="align-middle">
+                <td>@item.OldUrl</td>
+                <td>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-warning" asp-page-handler="unignore" asp-route-oldurl="@item.OldUrl">
+                            <span data-feather="eye"></span> unignore
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        }
+        </tbody>
+        </form>
+    </table>
+    @await Component.InvokeAsync(typeof(Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin.Components.Pager.PagerViewComponent), new { Model.Params.Page, Model.Params.PageSize, Model.Results.TotalCount })
+</div>
