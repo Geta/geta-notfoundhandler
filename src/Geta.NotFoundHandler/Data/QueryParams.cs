@@ -3,27 +3,27 @@
 
 using System.Data.SqlClient;
 using Geta.NotFoundHandler.Core.Redirects;
-using Microsoft.AspNetCore.Mvc;
+using Geta.NotFoundHandler.Infrastructure.Web;
 
 namespace Geta.NotFoundHandler.Data
 {
     public class QueryParams
     {
-        [BindProperty(Name = "q", SupportsGet = true)]
+        [FromFormOrQuery(Name = "q")]
         public string QueryText { get; set; } = string.Empty;
 
         public RedirectState? QueryState { get; set; }
 
-        [BindProperty(Name = "p", SupportsGet = true)]
+        [FromFormOrQuery(Name = "page")]
         public int Page { get; set; } = 1;
 
-        [BindProperty(Name = "ps", SupportsGet = true)]
+        [FromFormOrQuery(Name = "page-size")]
         public int? PageSize { get; set; }
 
-        [BindProperty(Name = "sb", SupportsGet = true)]
+        [FromFormOrQuery(Name = "sort-by")]
         public string SortBy { get; set; }
 
-        [BindProperty(Name = "sd", SupportsGet = true)]
+        [FromFormOrQuery(Name = "sort-direction")]
         public SortOrder SortDirection { get; set; } = SortOrder.Ascending;
     }
 }

@@ -3,21 +3,21 @@
 <nav aria-label="Table pagination">
     <ul class="pagination">
         <li class="page-item @(Model.HasPreviousPage ? string.Empty : "disabled")">
-            <button type="button" class="page-link" name="p" value="@(Model.PageNumber-1)" aria-label="Previous page">
+            <button type="button" class="page-link" name="page" value="@(Model.PageNumber-1)" aria-label="Previous page">
                 <span aria-hidden="true">&laquo;</span>
             </button>
         </li>
 
         @for (int i = 1; i <= Model.PageCount; i++)
         {
-            <li class="page-item @(Model.PageNumber != i ? string.Empty : "disabled")">
-                <button type="button" class="page-link" name="p" value="@i" aria-label="Goto page @i">
+            <li class="page-item @(Model.PageNumber != i ? string.Empty : "disabled text-decoration-underline")">
+                <button type="button" class="page-link" name="page" value="@i" aria-label="Goto page @i">
                     @i
                 </button>
             </li>
         }
         <li class="page-item @(Model.HasNextPage ? string.Empty : "disabled")">
-            <button type="button" class="page-link" name="p" value="@(Model.PageNumber+1)" aria-label="Next page">
+            <button type="button" class="page-link" name="page" value="@(Model.PageNumber+1)" aria-label="Next page">
                 <span aria-hidden="true">&raquo;</span>
             </button>
         </li>

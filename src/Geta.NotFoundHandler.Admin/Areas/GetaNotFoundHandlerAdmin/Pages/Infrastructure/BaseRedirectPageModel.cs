@@ -7,6 +7,7 @@ namespace Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin;
 public abstract class BaseRedirectPageModel : PageModel
 {
     public string Message { get; set; }
+
     public string OperationMessage { get; set; }
 
     [BindProperty(SupportsGet = true)]
@@ -15,11 +16,6 @@ public abstract class BaseRedirectPageModel : PageModel
     public void OnGet()
     {
         Load();
-    }
-
-    public IActionResult OnPost()
-    {
-        return LoadPage(true);
     }
 
     protected virtual IActionResult LoadPage(bool clearModelState = false)
