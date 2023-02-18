@@ -10,7 +10,7 @@
 
         @for (int i = 1; i <= Model.PageCount; i++)
         {
-            <li class="page-item @(Model.PageNumber != i ? string.Empty : "disabled text-decoration-underline")">
+            <li class="page-item @(Model.PageNumber != i ? string.Empty : "disabled")">
                 <button type="button" class="page-link" name="page" value="@i" aria-label="Goto page @i">
                     @i
                 </button>
