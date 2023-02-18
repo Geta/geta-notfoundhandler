@@ -14,6 +14,12 @@ namespace Geta.NotFoundHandler.Data
 
         IEnumerable<CustomRedirect> GetAll();
 
+        [Obsolete($"Use {nameof(GetRedirects)} instead")]
+        IEnumerable<CustomRedirect> GetByState(RedirectState state);
+
+        [Obsolete($"Use {nameof(GetRedirects)} instead")]
+        IEnumerable<CustomRedirect> Find(string searchText);
+
         CustomRedirectsResult GetRedirects(QueryParams query);
 
         CustomRedirect Get(Guid id);

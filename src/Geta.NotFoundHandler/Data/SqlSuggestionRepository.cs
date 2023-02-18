@@ -9,6 +9,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using Geta.NotFoundHandler.Core;
 using Geta.NotFoundHandler.Core.Suggestions;
+using X.PagedList;
 
 namespace Geta.NotFoundHandler.Data
 {
@@ -21,6 +22,12 @@ namespace Geta.NotFoundHandler.Data
         public SqlSuggestionRepository(IDataExecutor dataExecutor)
         {
             _dataExecutor = dataExecutor;
+        }
+
+        public IPagedList<SuggestionSummary> GetSummaries(int page, int pageSize)
+        {
+            var result = GetSummaries(new QueryParams() { Page = page, PageSize = pageSize });
+            return new StaticPagedList<SuggestionSummary>(result.Suggestions, page, pageSize, result.TotalCount);
         }
 
         public SuggestionRedirectsResult GetSummaries(QueryParams query)

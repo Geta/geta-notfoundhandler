@@ -114,6 +114,16 @@ namespace Geta.NotFoundHandler.Data
             return ToCustomRedirects(dataTable);
         }
 
+        public IEnumerable<CustomRedirect> GetByState(RedirectState state)
+        {
+            return GetRedirects(new QueryParams() { QueryState = state }).Redirects;
+        }
+
+        public IEnumerable<CustomRedirect> Find(string searchText)
+        {
+            return GetRedirects(new QueryParams() { QueryText = searchText }).Redirects;
+        }
+
         public CustomRedirectsResult GetRedirects(QueryParams query)
         {
             var parameters = new List<IDbDataParameter>();

@@ -5,10 +5,8 @@ using Geta.NotFoundHandler.Data;
 
 namespace Geta.NotFoundHandler.Core.Suggestions
 {
-    public interface ISuggestionService
+    public interface ISuggestionService : ISuggestionLoader
     {
-        SuggestionRedirectsResult GetSummaries(QueryParams query);
-
         void AddRedirect(SuggestionRedirect suggestionRedirect);
 
         void IgnoreSuggestion(string oldUrl);

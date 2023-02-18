@@ -29,6 +29,26 @@ namespace Geta.NotFoundHandler.Core.Redirects
             return _redirectLoader.GetAll();
         }
 
+        public IEnumerable<CustomRedirect> GetSaved()
+        {
+            return GetRedirects(new QueryParams() { QueryState = RedirectState.Saved }).Redirects;
+        }
+
+        public IEnumerable<CustomRedirect> GetIgnored()
+        {
+            return GetRedirects(new QueryParams() { QueryState = RedirectState.Ignored }).Redirects;
+        }
+
+        public IEnumerable<CustomRedirect> GetDeleted()
+        {
+            return GetRedirects(new QueryParams() { QueryState = RedirectState.Deleted }).Redirects;
+        }
+
+        public IEnumerable<CustomRedirect> Search(string searchText)
+        {
+            return GetRedirects(new QueryParams() { QueryText = searchText }).Redirects;
+        }
+
         public CustomRedirectsResult GetRedirects(QueryParams query)
         {
             return _redirectLoader.GetRedirects(query);
