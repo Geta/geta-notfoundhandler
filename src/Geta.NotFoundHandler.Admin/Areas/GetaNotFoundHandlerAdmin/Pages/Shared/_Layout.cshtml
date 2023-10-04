@@ -1,5 +1,8 @@
 ﻿@using System.Reflection
+@using Geta.NotFoundHandler.Infrastructure.Configuration;
 @using Microsoft.AspNetCore.Mvc.TagHelpers
+@using Microsoft.Extensions.Options;
+@inject IOptions<NotFoundHandlerOptions> options;
 @{
     var version = GetType().Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
     version = version == null ? string.Empty : $"v{version}";
@@ -11,7 +14,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"]</title>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
+    <link href="@options.Value.BootstrapCssUrl" rel="stylesheet" integrity="@options.Value.BootstrapCssIntegrity" crossorigin="anonymous">
     <link href="/_content/GetaNotFoundHandlerAdmin/css/dashboard.css" rel="stylesheet">
 </head>
 <body>
@@ -87,8 +90,8 @@
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/feather-icons@4.29.0/dist/feather.min.js" integrity="sha256-7kKJWwCLNN8n5rT1MNUpVPkeLxbwe1EZU73jiLdssrI=" crossorigin="anonymous"></script>
+<script src="@options.Value.BootstrapJsUrl" integrity="@options.Value.BootstrapJsIntegrity" crossorigin="anonymous"></script>
+<script src="@options.Value.FeatherJsUrl" integrity="@options.Value.FeatherJsIntegrity" crossorigin="anonymous"></script>
 <script src="/_content/GetaNotFoundHandlerAdmin/js/dashboard.js"></script>
 @RenderSection("Scripts", required: false)
 </body>
