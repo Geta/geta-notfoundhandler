@@ -10,15 +10,25 @@ namespace Geta.NotFoundHandler.Data
     public interface IDataExecutor
     {
         DataTable ExecuteQuery(string sqlCommand, params IDbDataParameter[] parameters);
+
         bool ExecuteNonQuery(string sqlCommand, params IDbDataParameter[] parameters);
-        int ExecuteScalar(string sqlCommand);
+
+        int ExecuteScalar(string sqlCommand, params IDbDataParameter[] parameters);
+
         int ExecuteStoredProcedure(string sqlCommand, int defaultReturnValue = -1);
+
         DbParameter CreateParameter(string parameterName, DbType dbType);
+
         DbParameter CreateParameter(string parameterName, DbType dbType, int size);
+
         DbParameter CreateGuidParameter(string name, Guid value);
+
         DbParameter CreateStringParameter(string name, string value, int size = 2000);
+
         DbParameter CreateIntParameter(string name, int value);
+
         DbParameter CreateBoolParameter(string name, bool value);
+
         DbParameter CreateDateTimeParameter(string name, DateTime value);
     }
 }

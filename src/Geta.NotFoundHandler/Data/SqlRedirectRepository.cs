@@ -4,7 +4,10 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.SqlClient;
 using System.Linq;
+using System.Text.RegularExpressions;
+using Geta.NotFoundHandler.Core;
 using Geta.NotFoundHandler.Core.Redirects;
 
 namespace Geta.NotFoundHandler.Data
@@ -104,7 +107,7 @@ namespace Geta.NotFoundHandler.Data
 
         public IEnumerable<CustomRedirect> GetAll()
         {
-            var sqlCommand = $@"SELECT {AllFields} FROM {RedirectsTable}";
+            var sqlCommand = $"SELECT {AllFields} FROM {RedirectsTable}";
 
             var dataTable = _dataExecutor.ExecuteQuery(sqlCommand);
 
@@ -113,27 +116,42 @@ namespace Geta.NotFoundHandler.Data
 
         public IEnumerable<CustomRedirect> GetByState(RedirectState state)
         {
-            var sqlCommand = $@"SELECT {AllFields} FROM {RedirectsTable}
-                                    WHERE State = @state";
-
-            var dataTable = _dataExecutor.ExecuteQuery(
-                sqlCommand,
-                _dataExecutor.CreateIntParameter("state", (int)state));
-
-            return ToCustomRedirects(dataTable);
+            return GetRedirects(new QueryParams() { QueryState = state }).Redirects;
         }
 
         public IEnumerable<CustomRedirect> Find(string searchText)
         {
-            var sqlCommand = $@"SELECT {AllFields} FROM {RedirectsTable}
-                                    WHERE OldUrl like '%' + @searchText + '%'
-                                    OR NewUrl like '%' + @searchText + '%'";
+            return GetRedirects(new QueryParams() { QueryText = searchText }).Redirects;
+        }
+
+        public CustomRedirectsResult GetRedirects(QueryParams query)
+        {
+            var parameters = new List<IDbDataParameter>();
+
+            var whereString = GetWhereString(query, parameters);
+
+            var suffixString = GetSuffixString(query, parameters, out var isPaginated);
 
             var dataTable = _dataExecutor.ExecuteQuery(
-                sqlCommand,
-                _dataExecutor.CreateStringParameter("searchText", searchText));
+                $"SELECT {AllFields} FROM {RedirectsTable}{whereString}{suffixString}",
+                parameters.ToArray());
 
-            return ToCustomRedirects(dataTable);
+            var items = ToCustomRedirects(dataTable);
+            var totalCount = items.Count;
+            if (isPaginated)
+            {
+                var whereState = query.QueryState != null ? @"
+                    WHERE state = @state" : "";
+                totalCount = _dataExecutor.ExecuteScalar($"SELECT COUNT(*) FROM {RedirectsTable}{whereState}",
+                    _dataExecutor.CreateIntParameter("state", (int)query.QueryState));
+            }
+            var filteredCount = totalCount;
+            if (!string.IsNullOrWhiteSpace(whereString))
+            {
+                filteredCount = _dataExecutor.ExecuteScalar($"SELECT COUNT(*) FROM {RedirectsTable}{whereString}", parameters.ToArray());
+            }
+
+            return new CustomRedirectsResult(items, totalCount, filteredCount);
         }
 
         public CustomRedirect Get(Guid id)
@@ -148,9 +166,9 @@ namespace Geta.NotFoundHandler.Data
             return ToCustomRedirects(dataTable).FirstOrDefault();
         }
 
-        private static IEnumerable<CustomRedirect> ToCustomRedirects(DataTable table)
+        private static IList<CustomRedirect> ToCustomRedirects(DataTable table)
         {
-            return table.AsEnumerable().Select(ToCustomRedirect);
+            return table.AsEnumerable().Select(ToCustomRedirect).ToList();
         }
 
         private static CustomRedirect ToCustomRedirect(DataRow x)
@@ -159,7 +177,65 @@ namespace Geta.NotFoundHandler.Data
                 x.Field<string>("OldUrl"),
                 x.Field<string>("NewUrl"),
                 x.Field<bool>("WildCardSkipAppend"),
-                x.Field<RedirectType>("RedirectType")) { Id = x.Field<Guid>("Id"), State = x.Field<int>("State") };
+                x.Field<RedirectType>("RedirectType"))
+            { Id = x.Field<Guid>("Id"), State = x.Field<int>("State") };
+        }
+
+        private string GetWhereString(QueryParams query, IList<IDbDataParameter> parameters)
+        {
+            var conditions = new List<string>();
+            if (!string.IsNullOrEmpty(query?.QueryText))
+            {
+                parameters.Add(_dataExecutor.CreateStringParameter("searchText", query.QueryText));
+                conditions.Add(@"(OldUrl like '%' + @searchText + '%'
+                            OR NewUrl like '%' + @searchText + '%')");
+            }
+
+            if (query.QueryState != null)
+            {
+                parameters.Add(_dataExecutor.CreateIntParameter("state", (int)query.QueryState));
+                conditions.Add("State = @state");
+            }
+
+            var hasFilter = conditions.Any();
+            if (hasFilter)
+            {
+                return $@"
+                    WHERE {string.Join(" AND ", conditions)}";
+            }
+
+            return "";
+        }
+
+        private string GetSuffixString(QueryParams query, IList<IDbDataParameter> parameters, out bool isPaginated)
+        {
+            var suffixString = "";
+            var safeSortBy = Regex.Replace(query.SortBy ?? string.Empty, "[^A-Za-z]", "", RegexOptions.IgnoreCase);
+            var hasSortBy = !string.IsNullOrWhiteSpace(safeSortBy);
+            if (hasSortBy)
+            {
+                suffixString += $@"
+                    ORDER BY [{safeSortBy}] {(query.SortDirection == SortOrder.Ascending ? "ASC" : "DESC")}";
+            }
+
+            isPaginated = false;
+            if (query.PageSize is int ps && ps > 0)
+            {
+                isPaginated = true;
+                if (!hasSortBy)
+                {
+                    // Adds dummy ORDER BY for pagination
+                    suffixString += @"
+                        ORDER BY(SELECT NULL)";
+                }
+                parameters.Add(_dataExecutor.CreateIntParameter("pageSize", ps));
+                parameters.Add(_dataExecutor.CreateIntParameter("skip", (query.Page - 1) * ps));
+                suffixString += $@"
+                    OFFSET {(query.Page - 1) * ps} ROWS
+                    FETCH NEXT @pageSize ROWS ONLY";
+            }
+
+            return suffixString;
         }
     }
 }

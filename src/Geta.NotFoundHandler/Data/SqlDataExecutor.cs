@@ -4,9 +4,9 @@
 using System;
 using System.Data;
 using System.Data.Common;
+using System.Data.SqlClient;
 using System.Globalization;
 using Geta.NotFoundHandler.Infrastructure.Configuration;
-using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -70,7 +70,7 @@ namespace Geta.NotFoundHandler.Data
             return success;
         }
 
-        public int ExecuteScalar(string sqlCommand)
+        public int ExecuteScalar(string sqlCommand, params IDbDataParameter[] parameters)
         {
             int result;
             try
@@ -78,7 +78,7 @@ namespace Geta.NotFoundHandler.Data
                 using var connection = new SqlConnection(_connectionString);
                 connection.Open();
 
-                using var command = CreateCommand(connection, sqlCommand);
+                using var command = CreateCommand(connection, sqlCommand, parameters);
                 var queryResult = command.ExecuteScalar();
                 if (queryResult == null) return 0;
                 result = (int)queryResult;
@@ -125,7 +125,9 @@ namespace Geta.NotFoundHandler.Data
         {
             var parameter = new SqlParameter
             {
-                ParameterName = parameterName, DbType = dbType, Direction = ParameterDirection.Input
+                ParameterName = parameterName,
+                DbType = dbType,
+                Direction = ParameterDirection.Input
             };
             return parameter;
         }
@@ -187,7 +189,9 @@ namespace Geta.NotFoundHandler.Data
         {
             var parameter = new SqlParameter
             {
-                ParameterName = "@ReturnValue", DbType = DbType.Int32, Direction = ParameterDirection.ReturnValue,
+                ParameterName = "@ReturnValue",
+                DbType = DbType.Int32,
+                Direction = ParameterDirection.ReturnValue,
             };
             return parameter;
         }
@@ -202,7 +206,7 @@ namespace Geta.NotFoundHandler.Data
                 foreach (var dbDataParameter in parameters)
                 {
                     var parameter = (SqlParameter)dbDataParameter;
-                    command.Parameters.Add(parameter);
+                    command.Parameters.Add((parameter as ICloneable).Clone());
                 }
             }
 

@@ -31,22 +31,27 @@ namespace Geta.NotFoundHandler.Core.Redirects
 
         public IEnumerable<CustomRedirect> GetSaved()
         {
-            return _redirectLoader.GetByState(RedirectState.Saved);
+            return GetRedirects(new QueryParams() { QueryState = RedirectState.Saved }).Redirects;
         }
 
         public IEnumerable<CustomRedirect> GetIgnored()
         {
-            return _redirectLoader.GetByState(RedirectState.Ignored);
+            return GetRedirects(new QueryParams() { QueryState = RedirectState.Ignored }).Redirects;
         }
 
         public IEnumerable<CustomRedirect> GetDeleted()
         {
-            return _redirectLoader.GetByState(RedirectState.Deleted);
+            return GetRedirects(new QueryParams() { QueryState = RedirectState.Deleted }).Redirects;
         }
 
         public IEnumerable<CustomRedirect> Search(string searchText)
         {
-            return _redirectLoader.Find(searchText);
+            return GetRedirects(new QueryParams() { QueryText = searchText }).Redirects;
+        }
+
+        public CustomRedirectsResult GetRedirects(QueryParams query)
+        {
+            return _redirectLoader.GetRedirects(query);
         }
 
         public void AddOrUpdate(CustomRedirect redirect)
@@ -91,7 +96,9 @@ namespace Geta.NotFoundHandler.Core.Redirects
         {
             var redirect = new CustomRedirect
             {
-                OldUrl = oldUrl, NewUrl = string.Empty, State = Convert.ToInt32(RedirectState.Deleted)
+                OldUrl = oldUrl,
+                NewUrl = string.Empty,
+                State = Convert.ToInt32(RedirectState.Deleted)
             };
             AddOrUpdate(redirect, notifyUpdated: true);
         }
@@ -141,7 +148,7 @@ namespace Geta.NotFoundHandler.Core.Redirects
         public int DeleteAllIgnored()
         {
             // In order to avoid a database timeout, we delete the items one by one.
-            var ignoredRedirects = GetIgnored().ToList();
+            var ignoredRedirects = GetRedirects(new QueryParams() { QueryState = RedirectState.Ignored }).Redirects.ToList();
             foreach (var redirect in ignoredRedirects)
             {
                 _repository.Delete(redirect);

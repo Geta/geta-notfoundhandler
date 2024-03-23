@@ -1,12 +1,12 @@
 ﻿@page "{handler?}"
-@using Geta.NotFoundHandler.Core.Redirects
-@model Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin.IndexModel
+@model IndexModel
 
 @await Component.InvokeAsync("Card", new { message = Model.Message })
+@await Component.InvokeAsync("Card", new { message = Model.OperationMessage, cardType = CardType.Success })
 
-<form method="get">
+<form id="tableQueryState" method="get">
     <div class="search-container input-group flex-nowrap">
-        <input class="form-control w-100 border-end-0" type="text" placeholder="Search" aria-label="Search" id="search" name="q" value="@Model.Query">
+        <input class="form-control w-100 border-end-0" type="text" placeholder="Search" aria-label="Search" id="search" name="q" value="@Model.Params.QueryText">
         <span class="input-group-append">
             <button class="btn btn-outline-secondary border-start-0 border" type="button" data-clear="#search">
                 <span data-feather="x"></span>
@@ -16,21 +16,23 @@
             <span data-feather="search"></span> search
         </button>
     </div>
+    @Html.HiddenForQueryParams()
 </form>
 
-<form method="post">
-    <div class="table-responsive mt-3">
-        <table class="table table-hover table-sm" aria-label="Redirects">
-            <thead>
+<div class="table-responsive mt-3">
+    <table class="table table-hover table-sm" aria-label="Redirects">
+        <thead>
             <tr>
-                <th>Old URL</th>
-                <th>New URL</th>
-                <th class="col-1 text-center">Wildcard</th>
-                <th class="col-1">Redirect Type</th>
+                @await Component.InvokeAsync("SortableHeader", new { DisplayName = "Old URL", InternalName = nameof(CustomRedirect.OldUrl), Model.Params })
+                @await Component.InvokeAsync("SortableHeader", new { DisplayName = "New URL", InternalName = nameof(CustomRedirect.NewUrl), Model.Params })
+                @await Component.InvokeAsync("SortableHeader", new { DisplayName = "Wildcard", InternalName = nameof(CustomRedirect.WildCardSkipAppend), Model.Params, AdditionalClass = "col-1 text-center" })
+                @await Component.InvokeAsync("SortableHeader", new { DisplayName = "Redirect type", InternalName = nameof(CustomRedirect.RedirectType), Model.Params, AdditionalClass = "col-1" })
                 <th class="col-1"></th>
             </tr>
-            </thead>
-            <tbody>
+        </thead>
+        <form method="post">
+            @Html.HiddenForQueryParams()
+        <tbody>
             <tr>
                 <td>
                     <input type="text" class="form-control" asp-for="CustomRedirect.OldUrl">
@@ -51,14 +53,13 @@
                 </td>
                 <td>
                     <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-primary"
-                                asp-page-handler="create">
+                        <button type="submit" class="btn btn-primary" asp-page-handler="create">
                             <span data-feather="plus"></span> add
                         </button>
                     </div>
                 </td>
             </tr>
-            @foreach (var item in Model.Items)
+            @foreach (var item in Model.Results.Redirects)
             {
                 <tr class="align-middle">
                     <td>@item.OldUrl</td>
@@ -69,16 +70,15 @@
                     <td>@item.RedirectType</td>
                     <td>
                         <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-danger"
-                                    asp-page-handler="delete" asp-route-oldurl="@item.OldUrl">
+                            <button type="submit" class="btn btn-danger" asp-page-handler="delete" asp-route-oldurl="@item.OldUrl">
                                 <span data-feather="trash-2"></span> delete
                             </button>
                         </div>
                     </td>
                 </tr>
             }
-            </tbody>
-        </table>
-        @await Component.InvokeAsync(typeof(Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin.Components.Pager.PagerViewComponent), new { Model.Items })
-    </div>
-</form>
+        </tbody>
+        </form>
+    </table>
+    @await Component.InvokeAsync(typeof(Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin.Components.Pager.PagerViewComponent), new { Model.Params.Page, Model.Params.PageSize, Model.Results.TotalCount })
+</div>
