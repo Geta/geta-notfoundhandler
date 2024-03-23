@@ -1,5 +1,6 @@
-﻿@page
+﻿@page "{handler?}"
 @model IndexModel
+
 @await Component.InvokeAsync("Card", new { message = Model.Message })
 @await Component.InvokeAsync("Card", new { message = Model.OperationMessage, cardType = CardType.Success })
 
