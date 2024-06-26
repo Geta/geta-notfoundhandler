@@ -1,3 +1,7 @@
+// Copyright (c) Geta Digital. All rights reserved.
+// Functionality added by Jacob Spencer 06/2024
+// Licensed under Apache-2.0. See the LICENSE file in the project root for more information
+
 namespace Geta.NotFoundHandler.Models;
 
 using CsvHelper.Configuration.Attributes;

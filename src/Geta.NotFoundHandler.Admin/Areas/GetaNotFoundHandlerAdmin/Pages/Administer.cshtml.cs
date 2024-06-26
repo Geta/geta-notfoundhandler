@@ -16,8 +16,6 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin;
 
-using System.Collections;
-
 [Authorize(Constants.PolicyName)]
 public class AdministerModel : PageModel
 {

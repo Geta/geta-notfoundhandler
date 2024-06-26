@@ -1,5 +1,5 @@
 // Copyright (c) Geta Digital. All rights reserved.
-// Functionality added by JSpencer 06/2024
+// Functionality added by Jacob Spencer 06/2024
 // Licensed under Apache-2.0. See the LICENSE file in the project root for more information
 
 using System.Globalization;
@@ -12,7 +12,6 @@ namespace Geta.NotFoundHandler.Core.Redirects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Xml;
 using Models;
 
 public class RedirectsCsvParser
