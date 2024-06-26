@@ -1,7 +1,9 @@
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml;
+using CsvHelper;
 using Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin.Components.Card;
 using Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin.Infrastructure;
 using Geta.NotFoundHandler.Core.Redirects;
@@ -14,21 +16,26 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin;
 
+using System.Collections;
+
 [Authorize(Constants.PolicyName)]
 public class AdministerModel : PageModel
 {
     private readonly IRedirectsService _redirectsService;
     private readonly ISuggestionService _suggestionService;
     private readonly RedirectsXmlParser _redirectsXmlParser;
+    private readonly RedirectsCsvParser _redirectsCsvParser;
 
     public AdministerModel(
         IRedirectsService redirectsService,
         ISuggestionService suggestionService,
-        RedirectsXmlParser redirectsXmlParser)
+        RedirectsXmlParser redirectsXmlParser,
+        RedirectsCsvParser redirectsCsvParser)
     {
         _redirectsService = redirectsService;
         _suggestionService = suggestionService;
         _redirectsXmlParser = redirectsXmlParser;
+        _redirectsCsvParser = redirectsCsvParser;
     }
 
     [BindProperty(SupportsGet = true)]
@@ -98,9 +105,9 @@ public class AdministerModel : PageModel
 
     public IActionResult OnPostImportRedirects()
     {
-        if (ImportFile == null || !ImportFile.IsXml())
+        if (ImportFile == null)
         {
-            Message = "The uploaded file is not a valid XML file. Please upload a valid XML file.";
+            Message = "The uploaded file is not a valid XML or CSV file. Please upload a valid XML/CSV file.";
             CardType = CardType.Warning;
 
             return RedirectToPage(new
@@ -110,19 +117,53 @@ public class AdministerModel : PageModel
             });
         }
 
-        var redirects = _redirectsXmlParser.LoadFromStream(ImportFile.OpenReadStream());
+        if (ImportFile.IsXml())
+        {
+            var redirects = _redirectsXmlParser.LoadFromStream(ImportFile.OpenReadStream());
 
-        if (redirects.Any())
-        {
-            _redirectsService.AddOrUpdate(redirects);
-            Message = $"{redirects.Count()} urls successfully imported.";
-            CardType = CardType.Success;
+            if (redirects.Any())
+            {
+                _redirectsService.AddOrUpdate(redirects);
+                Message = $"{redirects.Count()} urls successfully imported.";
+                CardType = CardType.Success;
+            }
+            else
+            {
+                Message = "No redirects could be imported";
+                CardType = CardType.Warning;
+            }
+
+            return RedirectToPage(new
+            {
+                Message,
+                CardType
+            });
         }
-        else
+
+        if (ImportFile.IsCsv())
         {
-            Message = "No redirects could be imported";
-            CardType = CardType.Warning;
+            var redirects = _redirectsCsvParser.LoadFromStream(ImportFile.OpenReadStream());
+            if (redirects.Any())
+            {
+                _redirectsService.AddOrUpdate(redirects);
+                Message = $"{redirects.Count()} urls successfully imported.";
+                CardType = CardType.Success;
+            }
+            else
+            {
+                Message = "No redirects could be imported";
+                CardType = CardType.Warning;
+            }
+
+            return RedirectToPage(new
+            {
+                Message,
+                CardType
+            });
         }
+
+        Message = "The uploaded file is not a valid. Please upload a file.";
+        CardType = CardType.Warning;
 
         return RedirectToPage(new
         {
@@ -166,21 +207,43 @@ public class AdministerModel : PageModel
         });
     }
 
-    public IActionResult OnPostExportRedirects()
+    public IActionResult OnPostExportRedirects(string TypeId)
     {
-        var redirects = _redirectsService.GetSaved().ToList();
-        var document = _redirectsXmlParser.Export(redirects);
-
-        var memoryStream = new MemoryStream();
-        var writer = new XmlTextWriter(memoryStream, Encoding.UTF8)
+        if (!string.IsNullOrEmpty(TypeId) && TypeId == "xml")
         {
-            Formatting = Formatting.Indented
-        };
-        document.WriteTo(writer);
-        writer.Flush();
-        memoryStream.Seek(0, SeekOrigin.Begin);
+            var redirects = _redirectsService.GetSaved().ToList();
+            var document = _redirectsXmlParser.Export(redirects);
 
-        return File(memoryStream, "text/xml", "customRedirects.xml");
+            var memoryStream = new MemoryStream();
+            var writer = new XmlTextWriter(memoryStream, Encoding.UTF8)
+            {
+                Formatting = Formatting.Indented
+            };
+            document.WriteTo(writer);
+            writer.Flush();
+            memoryStream.Seek(0, SeekOrigin.Begin);
+
+            return File(memoryStream, "text/xml", "customRedirects.xml");
+        }
+        else if(!string.IsNullOrEmpty(TypeId) && TypeId == "csv")
+        {
+            var redirects = _redirectsService.GetSaved().ToList();
+            var documents = _redirectsCsvParser.Export(redirects);
+            using var memoryStream = new MemoryStream();
+            using (var tw = new StreamWriter(memoryStream))
+            using (var csv = new CsvWriter(tw, CultureInfo.InvariantCulture))
+            {
+                csv.WriteRecords(documents);
+            }
+
+            return File(memoryStream.ToArray(), "text/csv", "customRedirects.csv");
+        }
+
+        return RedirectToPage(new
+        {
+            Message = $"Failed to Export",
+            CardType.Warning,
+        });
     }
 
     private CustomRedirectCollection ReadDeletedRedirectsFromImportFile()
