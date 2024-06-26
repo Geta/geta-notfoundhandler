@@ -2,17 +2,16 @@
 // Functionality added by Jacob Spencer 06/2024
 // Licensed under Apache-2.0. See the LICENSE file in the project root for more information
 
+using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using CsvHelper;
+using Geta.NotFoundHandler.Models;
 using Microsoft.Extensions.Logging;
 
 namespace Geta.NotFoundHandler.Core.Redirects;
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using Models;
 
 public class RedirectsCsvParser
 {
