@@ -119,6 +119,10 @@
  * Table
  */
 
+td {
+    word-break: break-all;
+}
+
 .sortable-header {
     white-space: nowrap;
 }
