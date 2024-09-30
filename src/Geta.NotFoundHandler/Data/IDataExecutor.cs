@@ -20,5 +20,6 @@ namespace Geta.NotFoundHandler.Data
         DbParameter CreateIntParameter(string name, int value);
         DbParameter CreateBoolParameter(string name, bool value);
         DbParameter CreateDateTimeParameter(string name, DateTime value);
+        DbParameter CreateBinaryParameter(string name, byte[] value, int size = 8000);
     }
 }
