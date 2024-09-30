@@ -125,9 +125,9 @@ namespace Geta.NotFoundHandler.Optimizely.Infrastructure.Initialization
                 BEGIN TRANSACTION;
                 IF NOT EXISTS (
                     SELECT 1
-                    FROM INFORMATION_SCHEMA.COLUMNS
-                    WHERE TABLE_NAME = '{ContentUrlHistoryTable}' 
-                    AND COLUMN_NAME = 'md5_ContentKey'
+                    FROM sys.columns
+                    WHERE object_id = OBJECT_ID('{ContentUrlHistoryTable}')
+                    AND name = 'md5_ContentKey'
                 )
                 BEGIN
                     ALTER TABLE {ContentUrlHistoryTable} ADD md5_ContentKey AS HASHBYTES('MD5', [ContentKey]);
