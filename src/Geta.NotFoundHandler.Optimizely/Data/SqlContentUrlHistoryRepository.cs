@@ -38,7 +38,7 @@ namespace Geta.NotFoundHandler.Optimizely.Data
             }
         }
         
-        private byte[] CalculateMd5Hash(string input)
+        private static byte[] CalculateMd5Hash(string input)
         {
             using var md5 = MD5.Create();
             var inputBytes = Encoding.Unicode.GetBytes(input);
