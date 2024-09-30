@@ -69,14 +69,14 @@ namespace Geta.NotFoundHandler.Optimizely.Data
 
         public IEnumerable<(string contentKey, IReadOnlyCollection<ContentUrlHistory> histories)> GetAllMoved()
         {
-            var sqlCommand = $@"SELECT h.Id, h.ContentKey, h.Urls, h.CreatedUtc
+            var sqlCommand = $@"SELECT h.Id, h.ContentKey, h.Urls, h.CreatedUtc, h.md5_ContentKey
                                 FROM {ContentUrlHistoryTable} h
                                 INNER JOIN 
-                                    (SELECT ContentKey
+                                    (SELECT ContentKey, md5_ContentKey
                                     FROM {ContentUrlHistoryTable}
-                                    GROUP BY ContentKey
+                                    GROUP BY ContentKey, md5_ContentKey
                                     HAVING COUNT(*) > 1) k
-                                ON h.ContentKey = k.ContentKey
+                                ON h.ContentKey = k.ContentKey AND h.md5_ContentKey = k.md5_ContentKey
                                 ORDER BY h.ContentKey, h.CreatedUtc DESC";
 
             var dataTable = _dataExecutor.ExecuteQuery(sqlCommand);
@@ -90,7 +90,7 @@ namespace Geta.NotFoundHandler.Optimizely.Data
         {
             var contentKeyHash = CalculateMd5Hash(contentKey);
             
-            var sqlCommand = $@"SELECT h.Id, h.ContentKey, h.Urls, h.CreatedUtc 
+            var sqlCommand = $@"SELECT h.Id, h.ContentKey, h.Urls, h.CreatedUtc, h.md5_ContentKey
                                 FROM {ContentUrlHistoryTable} h
                                 INNER JOIN 
                                     (SELECT ContentKey
@@ -99,7 +99,7 @@ namespace Geta.NotFoundHandler.Optimizely.Data
                                     GROUP BY ContentKey
                                     HAVING COUNT(*) > 1) k
                                 ON h.ContentKey = k.ContentKey
-                                WHERE h.ContentKey = @contentKey AND md5_ContentKey = @contentKeyHash
+                                WHERE h.ContentKey = @contentKey AND h.md5_ContentKey = @contentKeyHash
                                 ORDER BY h.ContentKey, h.CreatedUtc DESC";
 
             var dataTable = _dataExecutor.ExecuteQuery(sqlCommand, 
