@@ -46,6 +46,8 @@ namespace Geta.NotFoundHandler.Infrastructure.Configuration
             services.AddTransient<IRepository<CustomRedirect>, SqlRedirectRepository>();
             services.AddTransient<IRedirectLoader, SqlRedirectRepository>();
             services.AddTransient<RedirectsXmlParser>();
+            services.AddTransient<RedirectsCsvParser>();
+            services.AddTransient<RedirectsTxtParser>();
 
             services.AddTransient<IRequestLogger, RequestLogger>();
             services.AddTransient<ISuggestionService, DefaultSuggestionService>();
