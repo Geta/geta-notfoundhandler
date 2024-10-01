@@ -28,6 +28,11 @@ namespace Geta.NotFoundHandler.Core.Suggestions
             return _suggestionLoader.GetSummaries(page, pageSize);
         }
 
+        public SuggestionRedirectsResult GetSummaries(QueryParams query)
+        {
+            return _suggestionLoader.GetSummaries(query);
+        }
+
         public void AddRedirect(SuggestionRedirect suggestionRedirect)
         {
             SaveRedirect(suggestionRedirect);
