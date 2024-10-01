@@ -131,6 +131,11 @@ namespace Geta.NotFoundHandler.Core
 
             if (redirect != null)
             {
+                if (redirect.State.Equals((int)RedirectState.Ignored))
+                {
+                    return false;
+                }
+
                 // Url has been deleted from this site
                 if (redirect.State.Equals((int)RedirectState.Deleted))
                 {
