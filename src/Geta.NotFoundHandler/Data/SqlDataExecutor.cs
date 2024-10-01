@@ -183,6 +183,13 @@ namespace Geta.NotFoundHandler.Data
             return parameter;
         }
 
+        public DbParameter CreateBinaryParameter(string name, byte[] value, int size = 8000)
+        {
+            var parameter = CreateParameter(name, DbType.Binary, size);
+            parameter.Value = value;
+            return parameter;
+        }
+
         private static SqlParameter CreateReturnParameter()
         {
             var parameter = new SqlParameter
