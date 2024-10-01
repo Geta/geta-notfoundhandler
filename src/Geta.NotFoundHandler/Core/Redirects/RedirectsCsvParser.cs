@@ -13,7 +13,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Geta.NotFoundHandler.Core.Redirects;
 
-public class RedirectsCsvParser
+public class RedirectsCsvParser : IRedirectsParser
 {
     private readonly ILogger<RedirectsCsvParser> _logger;
 
