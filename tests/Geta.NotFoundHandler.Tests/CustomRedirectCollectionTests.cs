@@ -399,5 +399,24 @@ namespace Geta.NotFoundHandler.Tests
 
             Assert.Equal(expected, actual.NewUrl); 
         }
+        
+        /// <summary>
+        /// https://github.com/Geta/geta-notfoundhandler/issues/137
+        /// </summary>
+        [Fact]
+        public void Find_does_add_slash_when_new_url_is_missing_trailing_slash()
+        {
+            var collection = new CustomRedirectCollection
+            {
+                new CustomRedirect("/content", "/legacy"),
+            };
+
+            var urlToFind = "/content/file/";
+            var expected = "/legacy/file/";
+
+            var actual = collection.Find(urlToFind.ToUri());
+
+            Assert.Equal(expected, actual.NewUrl);
+        }
     }
 }

@@ -222,7 +222,7 @@ public class CustomRedirectCollection : IEnumerable<CustomRedirect>
 
         builder.Append(path);
 
-        if (hasAppendSegment && !pathHasTrailingSlash)
+        if (hasAppendSegment && !path.EndsWith("/"))
         {
             builder.Append('/');
         }
