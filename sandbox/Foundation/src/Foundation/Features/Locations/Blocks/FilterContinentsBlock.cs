@@ -1,19 +1,12 @@
-﻿using EPiServer.DataAnnotations;
-using EPiServer.Find;
+﻿using EPiServer.Find;
 using EPiServer.Find.Framework;
-using Foundation.Features.Shared;
-using Foundation.Infrastructure;
-using Microsoft.AspNetCore.Http;
-using System;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
 
 namespace Foundation.Features.Locations.Blocks
 {
     [ContentType(DisplayName = "Filter Continents Block",
         GUID = "9103a763-4c9c-431e-bc11-f2794c3b4b80",
         Description = "Continent facets for locations",
-        GroupName = TabNames.Location)]
+        GroupName = GroupNames.LocationBlocks)]
     [ImageUrl("/icons/cms/blocks/map.png")]
     [AvailableContentTypes(Include = new Type[] { typeof(LocationListPage.LocationListPage) })]
     public class FilterContinentsBlock : FoundationBlockData, IFilterBlock

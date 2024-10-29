@@ -1,18 +1,11 @@
-﻿using EPiServer.DataAnnotations;
-using EPiServer.Find;
-using Foundation.Features.Shared;
-using Foundation.Infrastructure;
-using Microsoft.AspNetCore.Http;
-using System;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
+﻿using EPiServer.Find;
 
 namespace Foundation.Features.Locations.Blocks
 {
     [ContentType(DisplayName = "Filter Temperatures Block",
         GUID = "28629b4b-9475-4c44-9c15-31961391f166",
         Description = "Temperature slider for locations",
-        GroupName = TabNames.Location)]
+        GroupName = GroupNames.LocationBlocks)]
     [ImageUrl("/icons/cms/blocks/map.png")]
     [AvailableContentTypes(Include = new Type[] { typeof(LocationListPage.LocationListPage) })]
     public class FilterTemperaturesBlock : FoundationBlockData, IFilterBlock
