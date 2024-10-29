@@ -45,7 +45,6 @@
     <PackageReference Include="EPiServer.Labs.ContentManager" Version="1.1.0" />
     <PackageReference Include="EPiServer.Labs.LanguageManager" Version="5.3.0" />
     <PackageReference Include="EPiServer.PdfPreview" Version="2.1.3" />
-    <PackageReference Include="Geta.NotFoundHandler.Optimizely" Version="5.0.8" />
     <PackageReference Include="Geta.Optimizely.Categories" Version="1.1.1" />
     <PackageReference Include="Geta.Optimizely.Categories.Find" Version="1.1.1" />
     <PackageReference Include="Optimizely.Labs.MarketingAutomationIntegration.ODP" Version="1.0.2" />
@@ -99,5 +98,12 @@
 	  <Compile Remove="Infrastructure\Kpi\FilledInFormKpi.cs" />
 	  <Folder Include="Infrastructure\Kpi\" />
 	  <Folder Include="wwwroot\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\src\Geta.NotFoundHandler.Optimizely\Geta.NotFoundHandler.Optimizely.csproj" />
+    <ProjectReference Include="..\..\..\..\src\Geta.NotFoundHandler\Geta.NotFoundHandler.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\src\Geta.NotFoundHandler\Geta.NotFoundHandler.csproj" />
   </ItemGroup>
 </Project>
