@@ -61,12 +61,21 @@
                             <span asp-validation-for="RegexRedirect.NewUrlFormat" class="text-danger"></span>
                         </td>
                         <td>
-                            <button type="submit" class="btn btn-primary"
-                                    asp-page-handler="update" asp-route-id="@Model.RegexRedirect.Id">
-                                <span data-feather="edit-2"></span> update
-                            </button>
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary"
+                                        asp-page-handler="update" asp-route-id="@Model.RegexRedirect.Id">
+                                    <span data-feather="save"></span> update
+                                </button>
+                            </div>
                         </td>
-                        <td></td>
+                        <td>
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-danger"
+                                        asp-page-handler="cancel" asp-route-id="@Model.RegexRedirect.Id">
+                                    <span data-feather="x"></span> cancel
+                                </button>
+                            </div>
+                        </td>
                     </tr>
                 }
                 else

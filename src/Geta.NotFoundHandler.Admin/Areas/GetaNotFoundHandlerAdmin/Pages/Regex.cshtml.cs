@@ -96,6 +96,11 @@ public class RegexModel : PageModel
                                       RegexRedirect.OrderNumber);
         return RedirectToPage();
     }
+    
+    public IActionResult OnPostCancel(Guid id)
+    {
+        return RedirectToPage();
+    }
 
     private void Load()
     {
