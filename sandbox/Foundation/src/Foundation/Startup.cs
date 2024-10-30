@@ -23,6 +23,7 @@ using Foundation.Infrastructure.Display;
 using Geta.NotFoundHandler.Infrastructure.Configuration;
 using Geta.NotFoundHandler.Infrastructure.Initialization;
 using Geta.NotFoundHandler.Optimizely.Infrastructure.Configuration;
+using Geta.NotFoundHandler.Optimizely.Infrastructure.Initialization;
 using Geta.Optimizely.Categories.Configuration;
 using Geta.Optimizely.Categories.Find.Infrastructure.Initialization;
 using Geta.Optimizely.Categories.Infrastructure.Initialization;
@@ -264,6 +265,7 @@ namespace Foundation
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             app.UseNotFoundHandler();
+            app.UseOptimizelyNotFoundHandler();
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
