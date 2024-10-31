@@ -1,4 +1,6 @@
 ﻿@page "{handler?}"
+@using Geta.NotFoundHandler.Core.Redirects
+@using Microsoft.AspNetCore.Mvc.TagHelpers
 @model Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin.IgnoredModel
 
 @await Component.InvokeAsync("Card", new { message = Model.Message })
@@ -8,7 +10,12 @@
         <table class="table table-hover table-sm" aria-label="Ignored redirects">
             <thead>
             <tr>
-                <th>URL</th>
+                <th>
+                    @await Component.InvokeAsync(
+                         "SortableHeaderCell",
+                         Model.CreateHeaderCellViewModel("URL", nameof(CustomRedirect.OldUrl))
+                     )
+                </th>
                 <th class="col-1"></th>
             </tr>
             </thead>

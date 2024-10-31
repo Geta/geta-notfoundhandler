@@ -1,18 +1,19 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Geta.NotFoundHandler.Admin.Areas.GetaNotFoundHandlerAdmin.Pages.Base;
+using Geta.NotFoundHandler.Admin.Areas.GetaNotFoundHandlerAdmin.Pages.Models;
 using Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin.Models;
 using Geta.NotFoundHandler.Core.Providers.RegexRedirects;
 using Geta.NotFoundHandler.Data;
 using Geta.NotFoundHandler.Infrastructure;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace Geta.NotFoundHandler.Admin.Areas.Geta.NotFoundHandler.Admin;
 
 [Authorize(Constants.PolicyName)]
-public class RegexModel : PageModel
+public class RegexModel : AbstractSortablePageModel
 {
     private readonly IRegexRedirectLoader _redirectLoader;
     private readonly IRegexRedirectsService _regexRedirectsService;
@@ -34,8 +35,10 @@ public class RegexModel : PageModel
     [BindProperty]
     public RegexRedirectModel RegexRedirect { get; set; }
 
-    public void OnGet()
+    public void OnGet(string sortColumn, SortDirection sortDirection)
     {
+        ApplySort(sortColumn, sortDirection);
+        
         Load();
     }
 
@@ -107,7 +110,11 @@ public class RegexModel : PageModel
 
     private IList<RegexRedirect> FindRedirects()
     {
-        return _redirectLoader.GetAll().ToList();
+        var result = _redirectLoader.GetAll();
+
+        result = Sort(result);
+
+        return result.ToList();
     }
 
     public bool IsEditing(Guid? id)

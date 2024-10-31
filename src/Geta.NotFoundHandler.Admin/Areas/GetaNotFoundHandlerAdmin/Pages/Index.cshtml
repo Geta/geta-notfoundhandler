@@ -23,10 +23,30 @@
         <table class="table table-hover table-sm" aria-label="Redirects">
             <thead>
             <tr>
-                <th>Old URL</th>
-                <th>New URL</th>
-                <th class="col-1 text-center">Wildcard</th>
-                <th class="col-1">Redirect Type</th>
+                <th>
+                    @await Component.InvokeAsync(
+                         "SortableHeaderCell",
+                         Model.CreateHeaderCellViewModel("New URL", nameof(CustomRedirect.NewUrl))
+                     )
+                </th>
+                <th>
+                    @await Component.InvokeAsync(
+                         "SortableHeaderCell",
+                         Model.CreateHeaderCellViewModel("Old URL", nameof(CustomRedirect.OldUrl))
+                     )
+                </th>
+                <th class="col-1 text-center">
+                    @await Component.InvokeAsync(
+                         "SortableHeaderCell",
+                         Model.CreateHeaderCellViewModel("Wildcard", nameof(CustomRedirect.WildCardSkipAppend))
+                     )
+                </th>
+                <th class="col-1">
+                    @await Component.InvokeAsync(
+                         "SortableHeaderCell",
+                         Model.CreateHeaderCellViewModel("Redirect Type", nameof(CustomRedirect.RedirectType))
+                     )
+                </th>
                 <th class="col-1"></th>
             </tr>
             </thead>

@@ -1,17 +1,18 @@
 using System.Collections.Generic;
 using System.Linq;
+using Geta.NotFoundHandler.Admin.Areas.GetaNotFoundHandlerAdmin.Pages.Base;
+using Geta.NotFoundHandler.Admin.Areas.GetaNotFoundHandlerAdmin.Pages.Models;
 using Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin.Models;
 using Geta.NotFoundHandler.Core.Redirects;
 using Geta.NotFoundHandler.Infrastructure;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using X.PagedList;
 
 namespace Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin;
 
 [Authorize(Constants.PolicyName)]
-public class IndexModel : PageModel
+public class IndexModel : AbstractSortablePageModel
 {
     private readonly IRedirectsService _redirectsService;
 
@@ -35,8 +36,10 @@ public class IndexModel : PageModel
 
     public bool HasQuery => !string.IsNullOrEmpty(Query);
 
-    public void OnGet()
+    public void OnGet(string sortColumn, SortDirection sortDirection)
     {
+        ApplySort(sortColumn, sortDirection);
+
         Load();
     }
 
@@ -71,8 +74,12 @@ public class IndexModel : PageModel
         Items = items;
     }
 
-    private IEnumerable<CustomRedirect> FindRedirects()
+    private List<CustomRedirect> FindRedirects()
     {
-        return HasQuery ? _redirectsService.Search(Query) : _redirectsService.GetSaved();
+        var result = HasQuery ? _redirectsService.Search(Query) : _redirectsService.GetSaved();
+
+        result = Sort(result);
+
+        return result.ToList();
     }
 }

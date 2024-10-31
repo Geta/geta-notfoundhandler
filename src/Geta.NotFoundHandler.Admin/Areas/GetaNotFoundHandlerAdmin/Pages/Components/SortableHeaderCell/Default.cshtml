@@ -1,0 +1,24 @@
+﻿@using Geta.NotFoundHandler.Admin.Areas.GetaNotFoundHandlerAdmin.Pages.Models
+@model Geta.NotFoundHandler.Admin.Areas.GetaNotFoundHandlerAdmin.Pages.Components.SortableHeaderCell.SortableHeaderCellViewModel
+
+<a asp-route-sortColumn="@Model.Key"
+   asp-route-sortDirection="@(Model.SortDirection == SortDirection.Ascending? SortDirection.Descending : SortDirection.Ascending)" 
+   style="white-space: nowrap">
+    @Model.DisplayName
+
+    @if (Model.IsActive)
+    {
+        if (Model.SortDirection == SortDirection.Ascending)
+        {
+            <span data-feather="arrow-down"></span>
+        }
+        else
+        {
+            <span data-feather="arrow-up"></span>
+        }
+    }
+    else
+    {
+        <span data-feather="arrow-down"></span>
+    }
+</a>
