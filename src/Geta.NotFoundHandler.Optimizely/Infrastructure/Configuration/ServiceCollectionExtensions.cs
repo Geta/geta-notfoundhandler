@@ -74,7 +74,7 @@ namespace Geta.NotFoundHandler.Optimizely.Infrastructure.Configuration
             services.AddOptions<OptimizelyNotFoundHandlerOptions>().Configure<IConfiguration>((options, configuration) =>
             {
                 setupAction(options);
-                configuration.GetSection("Geta:NotFoundHandler:Optimizely").Bind(options);
+                configuration.GetSection(OptimizelyNotFoundHandlerOptions.Section).Bind(options);
             });
 
             return services;

@@ -278,6 +278,40 @@ There are two scheduled jobs:
 - *[Geta NotFoundHandler] Index content URLs* - as mentioned before, this job indexes URLs of content. Usually, it is required to run this job only once. All new content is automatically indexed. But if for some reasons content publish events are not firing when creating new content (for example, during the import), then you should set this job to run frequently.
  - *[Geta NotFoundHandler] Register content move redirects* - this job creates redirects based on registered moved content. Normally, this job is not required at all, but there might be situations when content move is registered but redirect creation is not completed. This could happen during deployments. In this case, you can manually run this job or schedule it to run time to time to fix such issues.
 
+# Scheduled jobs
+
+Scheduled jobs powered by Coravel are included in the package, allowing jobs to run at set intervals.
+
+**Important**
+Use this only if the package is not intended for an Optimizely site. Optimizely has built-in scheduled jobs mechanism.
+
+To enable scheduled jobs, you need to configure the following settings:
+```
+services.AddNotFoundHandler(o =>
+{
+    ...
+    o.ScheduledJobs = true;
+});
+```
+
+## Suggestions cleanup job
+Practice shows that the suggestions table grows quickly in production, so a suggestions cleanup job was added to control its growth.
+
+This job is configured by default to run weekly, removing records older than 14 days. 
+You can adjust the retention period as needed.
+
+```
+services.AddNotFoundHandler(o =>
+{
+    o.ScheduledJobs = true;
+    o.SuggestionsCleanupOptions.DaysToKeep = 30;
+});
+```
+**Note**
+For Optimizely was added job that is powered by built-in scheduled jobs mechanism.
+
+[Geta NotFoundHandler] Suggestions cleanup job
+
 # Troubleshooting
 
 The module has extensive logging. Turn on debug logging for the `Geta.NotFoundHandler` namespace in your logging configuration.

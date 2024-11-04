@@ -2,8 +2,11 @@
 // Licensed under Apache-2.0. See the LICENSE file in the project root for more information
 
 using Geta.NotFoundHandler.Core.Redirects;
+using Geta.NotFoundHandler.Core.ScheduledJobs;
+using Geta.NotFoundHandler.Infrastructure.Configuration;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace Geta.NotFoundHandler.Infrastructure.Initialization
 {
@@ -20,6 +23,13 @@ namespace Geta.NotFoundHandler.Infrastructure.Initialization
             initializer.Initialize();
 
             app.UseMiddleware<NotFoundHandlerMiddleware>();
+
+            var options = services.GetRequiredService<IOptions<NotFoundHandlerOptions>>().Value;
+
+            if (options.UseScheduler)
+            {
+                app.UseScheduler();
+            }
 
             return app;
         }
