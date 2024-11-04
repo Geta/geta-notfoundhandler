@@ -1,8 +1,7 @@
 ﻿@using Geta.NotFoundHandler.Admin.Areas.GetaNotFoundHandlerAdmin.Pages.Models
 @model Geta.NotFoundHandler.Admin.Areas.GetaNotFoundHandlerAdmin.Pages.Components.SortableHeaderCell.SortableHeaderCellViewModel
 
-<a asp-route-sortColumn="@Model.GetSortColumn()"
-   asp-route-sortDirection="@Model.GetNextSortDirection()"
+<a href="@Model.GetSortUrl()"
    style="white-space: nowrap">
     @Model.DisplayName
 
