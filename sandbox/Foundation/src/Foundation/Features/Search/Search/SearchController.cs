@@ -1,20 +1,9 @@
-﻿using EPiServer;
-using EPiServer.Core;
-//using EPiServer.Tracking.PageView;
-using EPiServer.Web.Mvc;
-using EPiServer.Web.Mvc.Html;
+﻿//using EPiServer.Tracking.PageView;
 using Foundation.Features.CatalogContent;
 using Foundation.Features.Home;
 using Foundation.Features.Search.Search;
-using Foundation.Features.Settings;
 using Foundation.Infrastructure.Cms.Settings;
 using Foundation.Infrastructure.Personalization;
-using Mediachase.Commerce.Catalog;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Foundation.Features.Search
 {
@@ -114,14 +103,14 @@ namespace Foundation.Features.Search
 
             if (searchSettings?.ShowPdfSearchResults ?? true)
             {
-                //viewModel.PdfSearchResult = _searchService.SearchPdf(new FilterOptionViewModel()
-                //{
-                //    Q = filterOptions.Q,
-                //    PageSize = 5,
-                //    Page = filterOptions.SearchPdf ? filterOptions.Page : 1,
-                //    SectionFilter = filterOptions.SectionFilter
-                //});
-                viewModel.PdfSearchResult = null;
+                viewModel.PdfSearchResult = _searchService.SearchPdf(new FilterOptionViewModel()
+                {
+                    Q = filterOptions.Q,
+                    PageSize = 5,
+                    Page = filterOptions.SearchPdf ? filterOptions.Page : 1,
+                    SectionFilter = filterOptions.SectionFilter
+                });
+                //viewModel.PdfSearchResult = null;
             }
 
             var productCount = viewModel.ProductViewModels?.Count() ?? 0;
@@ -200,15 +189,15 @@ namespace Foundation.Features.Search
 
             if (searchSettings?.ShowPdfSearchResults ?? true)
             {
-                //var pdfResult = _searchService.SearchPdf(new FilterOptionViewModel()
-                //{
-                //    Q = quicksearchterm.search,
-                //    PageSize = 5,
-                //    Page = 1
-                //});
-                model.PdfSearchResult = null;
-                //pdfCount = pdfResult?.Hits.Count() ?? 0;
-                pdfCount = 0;
+                var pdfResult = _searchService.SearchPdf(new FilterOptionViewModel()
+                {
+                    Q = quicksearchterm.search,
+                    PageSize = 5,
+                    Page = 1
+                });
+                model.PdfSearchResult = pdfResult;
+                pdfCount = pdfResult?.Hits.Count() ?? 0;
+                //pdfCount = 0;
             }
 
             if (productCount + contentCount + pdfCount == 1)

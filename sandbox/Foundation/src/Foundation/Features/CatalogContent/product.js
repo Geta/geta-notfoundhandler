@@ -15,26 +15,26 @@
     this.deleteWishlistClick();
   }
 
-  addToCart(data, url, callback, isAddToCart) {
-    $('body > .loading-box').show();
+    addToCart(data, url, callback, isAddToCart) {
+      document.querySelector(".loading-box").style.display = 'block'; // show
     data.requestFrom = "axios";
     axios.post(url, data)
-      .then(function (result) {
-        if (result.data.StatusCode == 0) {
-          notification.warning(result.data.Message);
+        .then(function (result) {
+        if (result.data.statusCode == 0) {
+          notification.warning(result.data.message);
         }
-        if (result.data.StatusCode == 1) {
+        if (result.data.statusCode == 1) {
           let checkoutLink = "";
           let cartLink = "";
-          if ($('#checkoutBtnId')) {
-            checkoutLink = $('#checkoutBtnId').attr('href');
+          if (document.querySelector('#checkoutBtnId')) {
+              checkoutLink = document.querySelector('#checkoutBtnId').getAttribute('href');
           }
 
-          if ($('#cartBtnId')) {
-            cartLink = $('#cartBtnId').attr('href');
+            if (document.querySelector('#cartBtnId')) {
+                cartLink = document.querySelector('#cartBtnId').getAttribute('href');
           }
 
-          let message = result.data.Message;
+          let message = result.data.message;
           if (isAddToCart) {
             let bottomNotification = `\n<div style='display: flex; justify-content: space-between; margin-top: 15px;'>
                             <a href='`+ cartLink + `' class='btn-notification'>View Cart</a>
@@ -45,14 +45,14 @@
 
           notification.success(message, false);
 
-          if (callback) callback(result.data.CountItems);
+          if (callback) callback(result.data.countItems);
         }
       })
       .catch(function (error) {
         notification.error("Can not add the product to the cart.\n" + error.response.statusText);
       })
       .finally(function () {
-        $('body>.loading-box').hide();
+          document.querySelector(".loading-box").style.display = 'none'; // show
       });
 
     return false;
@@ -60,17 +60,17 @@
 
   // use in Wishlist Page
   removeItem(data, url, message, callback) {
-    $('body>.loading-box').show();
+      document.querySelector(".loading-box").style.display = 'block'; // show
     axios.post(url, data)
       .then(function (result) {
         if (result.status == 200) {
           notification.success(message);
-          $('#my-wishlist').html(result.data);
+          document.querySelector('#my-wishlist').innerHTML = result.data;
           feather.replace();
 
           let product = new Product('#my-wishlist');
           product.init();
-          let count = $('#countWishListInPage').val();
+            let count = document.querySelector('#countWishListInPage').value;
           if (callback) callback(count);
         }
         if (result.status == 204) {
@@ -81,7 +81,7 @@
         notification.error(error);
       })
       .finally(function () {
-        $('body>.loading-box').hide();
+          document.querySelector(".loading-box").style.display = 'none'; // hide
       });
   }
 
@@ -92,10 +92,10 @@
   }
 
   addToSharedCartClick() {
-    let inst = this;
-    $(this.divContainerId).find('.addToSharedCart').each(function (i, e) {
-      $(e).click(function () {
-        let code = $(this).attr('data');
+      let inst = this;
+      Array.from(document.querySelectorAll(".addToSharedCart")).forEach(function (el, i) {
+      el.addEventListener("click", function () {
+        let code = el.getAttribute('data');
 
         let callback = (count) => {
           inst.callbackAddToCart('.jsSharedCartBtn', count);
@@ -108,10 +108,9 @@
 
   addToWishlistClick() {
     let inst = this;
-
-    $(this.divContainerId).find('.addToWishlist').each(function (i, e) {
-      $(e).click(function () {
-        let code = $(this).attr('data');
+      Array.from(document.querySelectorAll(".addToWishlist")).forEach(function (el, i) {
+      el.addEventListener("click", function () {
+        let code = el.getAttribute('data');
 
         let callback = (count) => {
           inst.callbackAddToCart('#js-wishlist', count);
@@ -125,27 +124,30 @@
 
   addToCartClick() {
     let inst = this;
-
-    $(this.divContainerId).find('.addToCart').each(function (i, e) {
-      $(e).attr("href", "javascript:void(0);")
-      $(e).click(function () {
-        let code = $(this).attr('data');
+      Array.from(document.querySelectorAll(".addToCart")).forEach(function (el, i) {
+      el.setAttribute("href", "javascript:void(0);")
+          el.addEventListener("click", function () {
+        let code = el.getAttribute('data');
         let data = {
           Code: code
         };
 
-        if ($(this).attr('qty')) data.Quantity = $(this).attr('qty');
-        if ($(this).attr('store')) data.Store = $(this).attr('store');
-        if ($(this).attr('selectedStore')) data.SelectedStore = $(this).attr('selectedStore');
-        //if ($(this).attr('dynamicCodes')) data.DynamicCodes = $(this).attr('dynamicCodes');
-        if ($('.jsDynamicOptions').length > 0 || $('.jsDynamicOptionsInSubgroup').length > 0) {
+          if (el.getAttribute('qty') != null) data.Quantity = el.getAttribute('qty');
+          if (el.getAttribute('store') != null) data.Store = el.getAttribute('store');
+          if (el.getAttribute('selectedStore') != null) data.SelectedStore = el.getAttribute('selectedStore');
+          if (document.querySelector('.jsDynamicOptions') != null || document.querySelector('.jsDynamicOptionsInSubgroup') != null) {
           data.DynamicCodes = [];
-          $('.jsDynamicOptions:checked').each(function (j, dynamicOption) {
-            data.DynamicCodes.push(dynamicOption.value);
-          })
-          $('.jsDynamicOptionsInSubgroup:checked').each(function (j, dynamicOption) {
-            if ($(dynamicOption).closest('.tab-pane').hasClass('active'))
-              data.DynamicCodes.push(dynamicOption.value);
+
+              Array.from(document.querySelectorAll('.jsDynamicOptions')).forEach(function (el, i) {
+                  if (el.checked)
+                      data.DynamicCodes.push(el.value);
+              });
+
+              Array.from(document.querySelectorAll('.jsDynamicOptionsInSubgroup')).forEach(function (el, i) {
+                  if (el.checked) {
+                      if (el.closest('.tab-pane').classList.contains('active'))
+                                  data.DynamicCodes.push(dynamicOption.value);
+                  }
           })    
         }
 
@@ -160,11 +162,10 @@
 
   deleteWishlistClick() {
     let inst = this;
-
-    $(this.divContainerId).find('.deleteLineItemWishlist').each(function (i, e) {
-      $(e).click(function () {
+      Array.from(document.querySelectorAll(".deleteLineItemWishlist")).forEach(function (el, i) {
+      el.addEventListener("click", function () {
         if (confirm("Are you sure?")) {
-          let code = $(e).attr('data');
+          let code = el.getAttribute('data');
           let data = { Code: code, Quantity: 0, RequestFrom: "axios" };
           let callback = (count) => {
             inst.callbackAddToCart("#js-wishlist", count);
@@ -175,21 +176,21 @@
     });
   }
 
-  addAllToCartClick() {
-    $(this.divContainerId).find('.jsAddAllToCart').each(function (i, e) {
-      $(e).click(function () {
-        $('.loading-box').show();
-        let url = $(this).attr('url');
+    addAllToCartClick() {
+        Array.from(document.querySelectorAll(".jsAddAllToCart")).forEach(function (el, i) {
+            el.addEventListener("click", function () {
+        document.querySelector(".loading-box").style.display = 'block'; // show
+        let url = el.getAttribute('url');
         axios.post(url)
           .then(function (result) {
-            notification.success(result.data.Message);
-            cartHelper.setCartReload(result.data.CountItems);
+            notification.success(result.data.message);
+            cartHelper.setCartReload(result.data.countItems);
           })
           .catch(function (error) {
             notification.error(error);
           })
           .finally(function () {
-            $('.loading-box').hide();
+              document.querySelector(".loading-box").style.display = 'none';
           });
 
       });

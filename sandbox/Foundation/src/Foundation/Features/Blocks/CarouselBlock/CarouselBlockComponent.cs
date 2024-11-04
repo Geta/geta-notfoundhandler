@@ -1,10 +1,4 @@
-﻿using EPiServer;
-using EPiServer.Core;
-using EPiServer.Web.Mvc;
-using Foundation.Features.Media;
-using Foundation.Features.Shared;
-using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
+﻿using Foundation.Features.Media;
 
 namespace Foundation.Features.Blocks.CarouselBlock
 {
@@ -42,6 +36,34 @@ namespace Foundation.Features.Blocks.CarouselBlock
                     {
                         model.Items.Add(new CarouselItem() { HeroBlock = new BlockViewModel<HeroBlock.HeroBlock>((HeroBlock.HeroBlock)carouselItem) });
                     }
+                    else if (carouselItem is ContainerBlock.ContainerBlock)
+                    {
+                        model.Items.Add(new CarouselItem() { ContainerBlock = new BlockViewModel<ContainerBlock.ContainerBlock>((ContainerBlock.ContainerBlock)carouselItem) });
+                    }
+                    else if (carouselItem is ImageData)
+                    {
+                        var carouselImage = new CarouselImage()
+                        {
+                            Heading = "",
+                            Description = "",
+                            Image = ((ImageData)carouselItem).ContentLink
+
+                        };
+
+                        model.Items.Add(new CarouselItem() { CarouselImage = carouselImage });
+                    }
+                    //else // for any none-image or hero block
+                    //{
+                    //    var carouselImage = new CarouselImage()
+                    //    {
+                    //        Heading = "Not supported",
+                    //        Description = "Only support images or hero blocks",
+                    //        Image = ((MediaData)carouselItem).ContentLink
+                    //    };
+
+                    //    model.Items.Add(new CarouselItem() { CarouselImage = carouselImage });
+                    //}
+
                 }
             }
 
