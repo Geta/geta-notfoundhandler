@@ -49,23 +49,14 @@
                 </td>
                 <td>
                     <select class="form-select" asp-for="CustomRedirect.RedirectType">
-                        @if (Options.Value.DefaultRedirectType == RedirectType.Temporary)
-                        {
-                            <option selected value="@RedirectType.Temporary">@RedirectType.Temporary</option>
-                        }
-                        else
-                        {
-                            <option value="@RedirectType.Temporary">@RedirectType.Temporary</option>
-                        }
-
-                        @if (Options.Value.DefaultRedirectType == RedirectType.Permanent)
-                        {
-                            <option selected value="@RedirectType.Permanent">@RedirectType.Permanent</option>
-                        }
-                        else
-                        {
-                            <option value="@RedirectType.Permanent">@RedirectType.Permanent</option>
-                        }
+                        <option value="@RedirectType.Temporary"
+                                selected="@(Options.Value.DefaultRedirectType == RedirectType.Temporary)">
+                            @RedirectType.Temporary
+                        </option>
+                        <option value="@RedirectType.Permanent"
+                                selected="@(Options.Value.DefaultRedirectType == RedirectType.Permanent)">
+                            @RedirectType.Permanent
+                        </option>
                     </select>
                 </td>
                 <td>
