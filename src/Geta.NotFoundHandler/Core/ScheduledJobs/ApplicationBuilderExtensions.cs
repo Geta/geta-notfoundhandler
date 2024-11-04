@@ -3,10 +3,7 @@
 
 using Coravel;
 using Geta.NotFoundHandler.Core.ScheduledJobs.Suggestions;
-using Geta.NotFoundHandler.Infrastructure.Configuration;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 
 namespace Geta.NotFoundHandler.Core.ScheduledJobs;
 
@@ -15,7 +12,6 @@ public static class ApplicationBuilderExtensions
     public static IApplicationBuilder UseScheduler(this IApplicationBuilder app)
     {
         var services = app.ApplicationServices;
-        var options = services.GetRequiredService<IOptions<NotFoundHandlerOptions>>();
 
         services.UseScheduler(scheduler =>
         {
