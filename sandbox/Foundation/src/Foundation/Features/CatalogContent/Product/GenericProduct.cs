@@ -1,14 +1,6 @@
-using EPiServer.Commerce.Catalog.ContentTypes;
 using EPiServer.Commerce.Catalog.DataAnnotations;
-using EPiServer.Core;
-using EPiServer.DataAbstraction;
-using EPiServer.DataAnnotations;
-using EPiServer.Shell.ObjectEditing;
 using EPiServer.SpecializedProperties;
-using EPiServer.Web;
-using Foundation.Features.Shared;
 using Foundation.Infrastructure.Commerce.Models.EditorDescriptors;
-using System.ComponentModel.DataAnnotations;
 
 namespace Foundation.Features.CatalogContent.Product
 {
@@ -92,6 +84,7 @@ namespace Foundation.Features.CatalogContent.Product
         [Display(Name = "Content area",
             GroupName = SystemTabNames.Content,
             Order = 65)]
+        [AllowedTypes(new[] { typeof(IContentData) })]
         public virtual ContentArea ContentArea { get; set; }
 
         [CultureSpecific]
@@ -119,7 +112,16 @@ namespace Foundation.Features.CatalogContent.Product
         [Range(1, 5)]
         [Display(Name = "Search Boost (1-5)", GroupName = Infrastructure.TabNames.SearchSettings,
             Description = "Boost product in search results with default sort", Order = 1)]
-        public virtual int Boost { get; set; }
+        public virtual int Boost
+        {
+            get
+            {
+                var boost = this.GetPropertyValue(p => p.Boost);
+
+                return boost == 0 ? 1 : boost;
+            }
+            set => this.SetPropertyValue(p => p.Boost, value);
+        }
 
         [Display(Name = "Bury", GroupName = Infrastructure.TabNames.SearchSettings,
             Description = "This will determine whether or not to hide product in search results.", Order = 2)]

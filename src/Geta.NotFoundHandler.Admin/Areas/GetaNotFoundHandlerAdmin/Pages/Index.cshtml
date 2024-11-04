@@ -1,6 +1,10 @@
 ﻿@page "{handler?}"
 @using Geta.NotFoundHandler.Core.Redirects
+@using Geta.NotFoundHandler.Infrastructure.Configuration
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@using Microsoft.Extensions.Options
 @model Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin.IndexModel
+@inject IOptions<NotFoundHandlerOptions> Options;
 
 @await Component.InvokeAsync("Card", new { message = Model.Message })
 
@@ -45,8 +49,14 @@
                 </td>
                 <td>
                     <select class="form-select" asp-for="CustomRedirect.RedirectType">
-                        <option selected value="@RedirectType.Temporary">@RedirectType.Temporary</option>
-                        <option value="@RedirectType.Permanent">@RedirectType.Permanent</option>
+                        <option value="@RedirectType.Temporary"
+                                selected="@(Options.Value.DefaultRedirectType == RedirectType.Temporary)">
+                            @RedirectType.Temporary
+                        </option>
+                        <option value="@RedirectType.Permanent"
+                                selected="@(Options.Value.DefaultRedirectType == RedirectType.Permanent)">
+                            @RedirectType.Permanent
+                        </option>
                     </select>
                 </td>
                 <td>

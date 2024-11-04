@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using Geta.NotFoundHandler.Core;
 using Geta.NotFoundHandler.Core.Suggestions;
+using Geta.NotFoundHandler.Core.Redirects;
 
 namespace Geta.NotFoundHandler.Infrastructure.Configuration
 {
@@ -35,6 +36,8 @@ namespace Geta.NotFoundHandler.Infrastructure.Configuration
 
         private readonly List<Type> _providers = new();
         public IEnumerable<Type> Providers => _providers;
+
+        public RedirectType DefaultRedirectType { get; set; } = RedirectType.Temporary;
 
         public NotFoundHandlerOptions AddProvider<T>()
             where T : INotFoundHandler

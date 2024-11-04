@@ -1,12 +1,5 @@
-﻿using EPiServer.DataAnnotations;
-using EPiServer.Find;
+﻿using EPiServer.Find;
 using EPiServer.Find.Framework;
-using Foundation.Features.Shared;
-using Foundation.Infrastructure;
-using Microsoft.AspNetCore.Http;
-using System;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
 using System.Web;
 
 namespace Foundation.Features.Locations.Blocks
@@ -14,7 +7,7 @@ namespace Foundation.Features.Locations.Blocks
     [ContentType(DisplayName = "Filter Activities Block",
         GUID = "918c590e-b2cd-4b87-9116-899b1db19117",
         Description = "Activity facets for locations",
-        GroupName = TabNames.Location)]
+        GroupName = GroupNames.LocationBlocks)]
     [ImageUrl("/icons/cms/blocks/map.png")]
     [AvailableContentTypes(Include = new Type[] { typeof(LocationListPage.LocationListPage) })]
     public class FilterActivitiesBlock : FoundationBlockData, IFilterBlock
