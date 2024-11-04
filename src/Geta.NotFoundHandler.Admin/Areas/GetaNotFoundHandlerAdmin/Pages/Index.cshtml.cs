@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Geta.NotFoundHandler.Admin.Areas.GetaNotFoundHandlerAdmin.Pages.Base;
+using Geta.NotFoundHandler.Admin.Areas.GetaNotFoundHandlerAdmin.Pages.Extensions;
 using Geta.NotFoundHandler.Admin.Areas.GetaNotFoundHandlerAdmin.Pages.Models;
 using Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin.Models;
 using Geta.NotFoundHandler.Core.Redirects;
@@ -78,8 +79,7 @@ public class IndexModel : AbstractSortablePageModel
     {
         var result = HasQuery ? _redirectsService.Search(Query) : _redirectsService.GetSaved();
 
-        result = Sort(result);
-
-        return result;
+        return result
+            .Sort(SortColumn, SortDirection);
     }
 }

@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Geta.NotFoundHandler.Admin.Areas.GetaNotFoundHandlerAdmin.Pages.Base;
+using Geta.NotFoundHandler.Admin.Areas.GetaNotFoundHandlerAdmin.Pages.Extensions;
 using Geta.NotFoundHandler.Admin.Areas.GetaNotFoundHandlerAdmin.Pages.Models;
 using Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin.Models;
 using Geta.NotFoundHandler.Core.Redirects;
@@ -67,10 +68,8 @@ public class DeletedModel : AbstractSortablePageModel
     
     private IEnumerable<CustomRedirect> FindRedirects()
     {
-        var result = _redirectsService.GetDeleted();
-
-        result = Sort(result);
-
-        return result;
+        return _redirectsService
+            .GetDeleted()
+            .Sort(SortColumn, SortDirection);
     }
 }

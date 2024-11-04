@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Geta.NotFoundHandler.Admin.Areas.GetaNotFoundHandlerAdmin.Pages.Base;
+using Geta.NotFoundHandler.Admin.Areas.GetaNotFoundHandlerAdmin.Pages.Extensions;
 using Geta.NotFoundHandler.Admin.Areas.GetaNotFoundHandlerAdmin.Pages.Models;
 using Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin.Models;
 using Geta.NotFoundHandler.Core.Providers.RegexRedirects;
@@ -38,7 +39,7 @@ public class RegexModel : AbstractSortablePageModel
     public void OnGet(string sortColumn, SortDirection sortDirection)
     {
         ApplySort(sortColumn, sortDirection);
-        
+
         Load();
     }
 
@@ -110,11 +111,9 @@ public class RegexModel : AbstractSortablePageModel
 
     private IEnumerable<RegexRedirect> FindRedirects()
     {
-        var result = _redirectLoader.GetAll();
-
-        result = Sort(result);
-
-        return result;
+        return _redirectLoader
+            .GetAll()
+            .Sort(SortColumn, SortDirection);
     }
 
     public bool IsEditing(Guid? id)
