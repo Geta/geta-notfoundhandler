@@ -20,4 +20,14 @@ public class SortableHeaderCellViewModel
             _ => throw new ArgumentOutOfRangeException()
         };
     }
+
+    public string GetSortColumn()
+    {
+        if (GetNextSortDirection() == null)
+        {
+            return null;
+        }
+
+        return Key;
+    }
 }
