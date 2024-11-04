@@ -1,30 +1,17 @@
-﻿using EPiServer;
-using EPiServer.Authorization;
-using EPiServer.Core;
-using EPiServer.DataAbstraction;
-using EPiServer.Enterprise;
+﻿using EPiServer.Enterprise;
 using EPiServer.Find.Cms;
 using EPiServer.Logging;
 using EPiServer.Scheduler;
 using EPiServer.Security;
-using EPiServer.ServiceLocation;
 using EPiServer.Shell.Security;
-using EPiServer.Web;
-using Foundation.Infrastructure.Cms.Extensions;
 using Foundation.Infrastructure.Cms.Settings;
 using Mediachase.Commerce.Catalog.ImportExport;
 using Mediachase.Search;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.Extensions.Options;
-using System;
-using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
-using System.Linq;
 using System.Security.Principal;
-using System.Threading.Tasks;
 
 namespace Foundation.Infrastructure
 {
@@ -137,10 +124,13 @@ namespace Foundation.Infrastructure
                 ContentReference.RootPage);
 
             ServiceLocator.Current.GetInstance<ISettingsService>().UpdateSettings();
-
             _principalAccessor.Principal = new GenericPrincipal(new GenericIdentity("Importer"), null);
-            CreateCatalog(new FileStream(Path.Combine(_webHostEnvironment.ContentRootPath, "App_Data", "foundation_fashion.zip"), FileMode.Open),
-                Path.Combine(_webHostEnvironment.ContentRootPath, "App_Data", "foundation_fashion.zip"));
+
+            if (File.Exists(Path.Combine(_webHostEnvironment.ContentRootPath, "App_Data", "foundation_fashion.zip")))
+            {
+                CreateCatalog(new FileStream(Path.Combine(_webHostEnvironment.ContentRootPath, "App_Data", "foundation_fashion.zip"), FileMode.Open),
+                    Path.Combine(_webHostEnvironment.ContentRootPath, "App_Data", "foundation_fashion.zip"));
+            }
 
             var searchManager = new SearchManager(Mediachase.Commerce.Core.AppContext.Current.ApplicationName, _searchOptions, _serviceProvider, _indexBuilder);
             searchManager.BuildIndex(true);

@@ -1,27 +1,27 @@
 ﻿using Advanced.CMS.AdvancedReviews;
+using Advanced.CMS.BulkEdit;
+using Advanced.CMS.GroupingHeader;
 using EPiServer.Authorization;
+using EPiServer.Cms.TinyMce.SpellChecker;
 using EPiServer.ContentApi.Cms;
 using EPiServer.ContentApi.Cms.Internal;
+using EPiServer.ContentApi.Commerce;
 using EPiServer.ContentDefinitionsApi;
 using EPiServer.ContentManagementApi;
 using EPiServer.Data;
-using EPiServer.Framework.Web.Resources;
-using EPiServer.Labs.BlockEnhancements;
 using EPiServer.Labs.ContentManager;
+using EPiServer.Labs.ProjectEnhancements;
+using EPiServer.Marketing.Testing.Web.Initializers;
 using EPiServer.OpenIDConnect;
-using EPiServer.ServiceLocation;
+using EPiServer.ServiceApi;
 using EPiServer.Shell.Modules;
-using EPiServer.Web;
-using EPiServer.Web.Routing;
+using EPiServer.Social.Framework;
 using Foundation.Features.Checkout.Payments;
-using Foundation.Infrastructure;
-using Foundation.Infrastructure.Cms.Extensions;
 using Foundation.Infrastructure.Cms.ModelBinders;
 using Foundation.Infrastructure.Cms.Users;
 using Foundation.Infrastructure.Display;
 using Geta.NotFoundHandler.Infrastructure.Configuration;
 using Geta.NotFoundHandler.Infrastructure.Initialization;
-using Geta.NotFoundHandler.Optimizely.Commerce.Infrastructure.Configuration;
 using Geta.NotFoundHandler.Optimizely.Infrastructure.Configuration;
 using Geta.NotFoundHandler.Optimizely.Infrastructure.Initialization;
 using Geta.Optimizely.Categories.Configuration;
@@ -35,8 +35,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
-using System;
-using System.Linq;
+using Optimizely.Labs.MarketingAutomationIntegration.ODP;
+using System.IO;
+using TinymceDamPicker;
 using UNRVLD.ODP.VisitorGroups.Initilization;
 
 namespace Foundation
@@ -90,12 +91,13 @@ namespace Foundation
             .AddRazorOptions(ro => ro.ViewLocationExpanders.Add(new FeatureViewLocationExpander()));
 
             services.AddCommerce();
-            services.AddFind();
+            //services.AddFind(); // Note: currently added via AddContentSearchApi()
             services.AddSocialFramework();
             services.AddDisplay();
             services.TryAddEnumerable(Microsoft.Extensions.DependencyInjection.ServiceDescriptor.Singleton(typeof(IFirstRequestInitializer), typeof(ContentInstaller)));
             services.AddDetection();
             services.AddTinyMceConfiguration();
+            services.AddTinyMceSpellChecker();
 
             //site specific
             services.AddEmbeddedLocalization<Startup>();
@@ -126,6 +128,15 @@ namespace Foundation
                 o.MaximumSearchResults = 100;
             });
 
+            // Content Delivery Forms API
+            services.AddFormsApi();
+
+            // Content Delivery Commerce API
+            services.AddCommerceApi<SiteUser>(OpenIDConnectOptionsDefaults.AuthenticationScheme, o =>
+            {
+                o.DisableScopeValidation = true;
+            });
+
             // Content Definitions API
             services.AddContentDefinitionsApi(options =>
             {
@@ -140,7 +151,15 @@ namespace Foundation
                 options.DisableScopeValidation = true;
             });
 
-            services.AddOpenIDConnect<SiteUser>(options =>
+            // Service API configuration
+            services.AddServiceApiAuthorization(OpenIDConnectOptionsDefaults.AuthenticationScheme);
+
+            services.AddOpenIDConnect<SiteUser>(
+                useDevelopmentCertificate: true,
+                signingCertificate: null,
+                encryptionCertificate: null,
+                createSchema: true,
+                options =>
             {
                 //options.RequireHttps = !_webHostingEnvironment.IsDevelopment();
                 var application = new OpenIDConnectApplication()
@@ -152,6 +171,8 @@ namespace Foundation
                         ContentDeliveryApiOptionsDefaults.Scope,
                         ContentManagementApiOptionsDefaults.Scope,
                         ContentDefinitionsApiOptionsDefaults.Scope,
+                        CommerceApiOptionsDefaults.Scope,
+                        ServiceApiOptionsDefaults.Scope
                     }
                 };
 
@@ -160,6 +181,16 @@ namespace Foundation
                 application.RedirectUris.Add(new Uri("https://oauth.pstmn.io/v1/callback"));
                 options.Applications.Add(application);
                 options.AllowResourceOwnerPasswordFlow = true;
+
+                options.Applications.Add(new OpenIDConnectApplication()
+                {
+                    ClientId = "anon-client",
+                    Scopes = {
+                        CommerceApiOptionsDefaults.Scope,
+                        "anonymous_id"
+                    }
+                });
+                options.AllowAnonymousFlow = true;
             });
             
             services.AddOpenIDConnectUI();
@@ -167,11 +198,7 @@ namespace Foundation
             services.ConfigureContentDeliveryApiSerializer(settings => settings.NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore);
 
             services.AddNotFoundHandler(o => o.UseSqlServer(_configuration.GetConnectionString("EPiServerDB")), policy => policy.RequireRole(Roles.CmsAdmins));
-            services.AddOptimizelyNotFoundHandler(o =>
-            {
-                o.AutomaticRedirectsEnabled = true;
-                o.AddOptimizelyCommerceProviders();
-            });
+            services.AddOptimizelyNotFoundHandler();
             services.Configure<ProtectedModuleOptions>(x =>
             {
                 if (!x.Items.Any(x => x.Name.Equals("Foundation")))
@@ -183,31 +210,55 @@ namespace Foundation
                 }
             });
             // Don't camelCase Json output -- leave property names unchanged
-            services.AddControllers()
-                .AddJsonOptions(options =>
-                {
-                    options.JsonSerializerOptions.PropertyNamingPolicy = null;
-                });
-
-            // Add ContentManager
-            services.AddContentManager();
-
-            // Add BlockEnhancements
-            services.AddBlockEnhancements();
-            services.Configure<BlockEnhancementsOptions>(options =>
-            {
-                //var blockEnhancements = new BlockEnhancementsOptions
-                options.LocalContentFeatureEnabled = false;
-                options.HideForThisFolder = false;
-                options.AllowQuickEditOnSharedBlocks = true;
-                options.PublishPageWithBlocks = true;
-            });
+            //services.AddControllers()
+            //    .AddJsonOptions(options =>
+            //    {
+            //        options.JsonSerializerOptions.PropertyNamingPolicy = null;
+            //    });
 
             // Add AdvancedReviews
             services.AddAdvancedReviews();
             services.AddGetaCategories();
             services.AddODPVisitorGroups();
-           
+
+            // Add Welcome DAM
+            services.AddDAMUi();
+
+            //Configure GeoLocation for Visitor Groups, etc
+            services.AddMaxMindGeolocationProvider(o =>
+            {
+                o.DatabasePath = Path.Combine(_webHostingEnvironment.ContentRootPath, "App_Data", "GeoLite2-City.mmdb");
+                o.LocationsDatabasePath = Path.Combine(_webHostingEnvironment.ContentRootPath, "App_Data", "GeoLite2-City-Locations-en.csv");
+            });
+
+            // URLs for files in contentassets folder shows friendly URL
+            services.Configure<RoutingOptions>(o =>
+            {
+                o.ContentAssetsBasePath = ContentAssetsBasePath.ContentOwner;
+            });
+
+            // Add ODP MA Connector (note: requires API key in appsettings.json)
+            services.AddMarketingAutomationIntegrationODP(_configuration);
+            services.AddFormRepositoryWorkAround();
+
+            // Add A/B Testing Gadget
+            // https://github.com/episerver/content-ab-testing
+            services.AddABTesting(_configuration.GetConnectionString("EPiServerDB"));
+
+            // Add ContentManager
+            services.AddContentManager();
+
+            // Add GroupingHeader
+            // https://github.com/advanced-cms/grouping-header/
+            services.AddGroupingHeader();
+            // Bulk Edit add-on
+            services.AddBulkEdit();
+
+            // Project Enhancements
+            services.AddProjectEnhancements();
+
+            // Adds the DAM selector button
+            services.AddDamSelectButton();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -215,7 +266,6 @@ namespace Foundation
         {
             app.UseNotFoundHandler();
             app.UseOptimizelyNotFoundHandler();
-            
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -230,6 +280,7 @@ namespace Foundation
             app.UseCors();
             app.UseAuthentication();
             app.UseAuthorization();
+            app.UseAnonymousCartMerging();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(name: "Default", pattern: "{controller}/{action}/{id?}");
