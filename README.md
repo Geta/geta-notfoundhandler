@@ -161,7 +161,7 @@ If you want to specify this yourself, add `IgnoredResourceExtensions` to the con
 
 ## Restricting access to the Admin UI
 
-By default, only users of `Administrators` role can access Admin UI. But you can configure you authorization policy when registrating the NotFound handler.
+By default, only users of `Administrators` role can access Admin UI. But you can configure your authorization policy when registering the NotFound handler.
 
 ```
  services.AddNotFoundHandler(o => { },
@@ -171,7 +171,7 @@ By default, only users of `Administrators` role can access Admin UI. But you can
             });
 ```
 
-You can setup any policy rules you want.
+You can set up any policy rules you want.
 
 ## Import
 
@@ -179,7 +179,7 @@ For details see [Import redirects for 404 handler](https://getadigital.com/blog/
 
 # Custom 404 Page
 
-To setup 404 page, you can use any method ASP.NET Core provides.
+To set up 404 page, you can use any method ASP.NET Core provides.
 
 One of the simplest solutions is adding a controller and a view for it that would display an error page:
 
@@ -275,7 +275,7 @@ It will monitor primary, secondary and SEO URLs:
 Optimizely Content Cloud supports only primary URLs and Optimizely Commerce supports all three types of URLs.
 
 There are two scheduled jobs:
-- *[Geta NotFoundHandler] Index content URLs* - as mentioned before, this job indexes URLs of content. Usually, it is required to run this job only once. All new content is automatically indexed. But if for some reasons content publish events are not firing when creating new content (for example, during the import), then you should set this job to run frequently.
+- *[Geta NotFoundHandler] Index content URLs* - as mentioned before, this job indexes URLs of content. Usually, it is required to run this job only once. All new content is automatically indexed. But if for some reason content publish events are not firing when creating new content (for example, during the import), then you should set this job to run frequently.
  - *[Geta NotFoundHandler] Register content move redirects* - this job creates redirects based on registered moved content. Normally, this job is not required at all, but there might be situations when content move is registered but redirect creation is not completed. This could happen during deployments. In this case, you can manually run this job or schedule it to run time to time to fix such issues.
 
 # Scheduled jobs
@@ -297,13 +297,14 @@ services.AddNotFoundHandler(o =>
 ## Suggestions cleanup job
 Practice shows that the suggestions table grows quickly in production, so a suggestions cleanup job was added to control its growth.
 
-This job is configured by default to run weekly, removing records older than 14 days. 
+This job is configured by default to run daily at midnight, removing records older than 14 days. 
 You can adjust the retention period as needed.
 
 ```
 services.AddNotFoundHandler(o =>
 {
     o.ScheduledJobs = true;
+    o.SuggestionsCleanupOptions.CronInterval = "0 0 * * 0" // weekly on Sunday midnight
     o.SuggestionsCleanupOptions.DaysToKeep = 30;
 });
 ```
@@ -327,7 +328,7 @@ For example, if we have a redirect: `/a` to `/b`, then:
 - without wildcard setting it will redirect `/a/1` to `/b/1`
 
 # Sandbox App
-Sandbox application is testing poligon for pacakge new features and bug fixes.
+Sandbox application is testing polygon for package new features and bug fixes.
 
 CMS username: admin@example.com
 
