@@ -74,12 +74,12 @@ public class IndexModel : AbstractSortablePageModel
         Items = items;
     }
 
-    private List<CustomRedirect> FindRedirects()
+    private IEnumerable<CustomRedirect> FindRedirects()
     {
         var result = HasQuery ? _redirectsService.Search(Query) : _redirectsService.GetSaved();
 
         result = Sort(result);
 
-        return result.ToList();
+        return result;
     }
 }

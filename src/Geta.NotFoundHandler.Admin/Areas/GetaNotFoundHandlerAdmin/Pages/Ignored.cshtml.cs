@@ -49,12 +49,12 @@ public class IgnoredModel : AbstractSortablePageModel
         Items = items;
     }
 
-    private List<CustomRedirect> FindRedirects()
+    private IEnumerable<CustomRedirect> FindRedirects()
     {
         var result = _redirectsService.GetIgnored();
 
         result = Sort(result);
 
-        return result.ToList();
+        return result;
     }
 }

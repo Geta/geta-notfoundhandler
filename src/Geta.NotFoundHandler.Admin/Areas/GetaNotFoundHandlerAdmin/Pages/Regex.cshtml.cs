@@ -108,13 +108,13 @@ public class RegexModel : AbstractSortablePageModel
         RegexRedirect = new RegexRedirectModel { OrderNumber = items.Select(x => x.OrderNumber).DefaultIfEmpty().Max() + 1 };
     }
 
-    private IList<RegexRedirect> FindRedirects()
+    private IEnumerable<RegexRedirect> FindRedirects()
     {
         var result = _redirectLoader.GetAll();
 
         result = Sort(result);
 
-        return result.ToList();
+        return result;
     }
 
     public bool IsEditing(Guid? id)
