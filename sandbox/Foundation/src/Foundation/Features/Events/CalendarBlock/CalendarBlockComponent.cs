@@ -1,9 +1,4 @@
-﻿using EPiServer;
-using EPiServer.Web.Mvc;
-using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
-
-namespace Foundation.Features.Events.CalendarBlock
+﻿namespace Foundation.Features.Events.CalendarBlock
 {
     public class CalendarBlockComponent : AsyncBlockComponent<CalendarBlock>
     {
@@ -18,7 +13,7 @@ namespace Foundation.Features.Events.CalendarBlock
         {
             var model = new CalendarBlockViewModel(currentBlock);
 
-            return await Task.FromResult(View("~/Features/CmsPages/Events/CalendarBlock/Views/index.cshtml", model));
+            return await Task.FromResult(View("~/Features/Events/CalendarBlock/index.cshtml", model));
         }
     }
 }

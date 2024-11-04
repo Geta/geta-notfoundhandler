@@ -1,22 +1,14 @@
-﻿using EPiServer.DataAnnotations;
-using EPiServer.Find;
+﻿using EPiServer.Find;
 using EPiServer.Find.Api.Facets;
 using EPiServer.Find.Framework;
-using Foundation.Features.Shared;
-using Foundation.Infrastructure;
 using Foundation.Infrastructure.Find;
-using Microsoft.AspNetCore.Http;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
 
 namespace Foundation.Features.Locations.Blocks
 {
     [ContentType(DisplayName = "Filter Distances Block",
         GUID = "eab40a8c-9006-4766-a87e-1dec153e735f",
         Description = "Distance facets for locations",
-        GroupName = TabNames.Location)]
+        GroupName = GroupNames.LocationBlocks)]
     [ImageUrl("/icons/cms/blocks/map.png")]
     [AvailableContentTypes(Include = new Type[] { typeof(LocationListPage.LocationListPage) })]
     public class FilterDistancesBlock : FoundationBlockData, IFilterBlock

@@ -1,16 +1,7 @@
-using EPiServer;
 using EPiServer.Cms.Shell.UI.ObjectEditing.EditorDescriptors;
-using EPiServer.Core;
-using EPiServer.DataAbstraction;
-using EPiServer.DataAnnotations;
 using EPiServer.PlugIn;
-using EPiServer.Shell.ObjectEditing;
 using EPiServer.SpecializedProperties;
-using EPiServer.Web;
-using Foundation.Infrastructure;
 using Newtonsoft.Json;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 
 namespace Foundation.Features.Blocks.MenuItemBlock
 {
@@ -44,7 +35,7 @@ namespace Foundation.Features.Blocks.MenuItemBlock
 
         [JsonIgnore]
         [EditorDescriptor(EditorDescriptorType = typeof(CollectionEditorDescriptor<GroupLinkCollection>))]
-        [ClientEditor(ClientEditingClass = "foundation/MenuChildItems")]
+        //[ClientEditor(ClientEditingClass = "foundation/MenuChildItems")]
         [Display(Name = "Child items", GroupName = SystemTabNames.Content, Order = 80)]
         public virtual IList<GroupLinkCollection> ChildItems { get; set; }
     }
