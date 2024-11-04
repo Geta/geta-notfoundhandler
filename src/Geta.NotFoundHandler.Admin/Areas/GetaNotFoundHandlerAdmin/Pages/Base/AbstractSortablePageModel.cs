@@ -11,12 +11,12 @@ namespace Geta.NotFoundHandler.Admin.Areas.GetaNotFoundHandlerAdmin.Pages.Base;
 public abstract class AbstractSortablePageModel : PageModel
 {
     public string SortColumn { get; set; }
-    public SortDirection SortDirectionEnum { get; set; }
+    public SortDirection? SortDirection { get; set; }
 
-    public void ApplySort(string sortColumn, SortDirection sortDirection)
+    public void ApplySort(string sortColumn, SortDirection? sortDirection)
     {
         SortColumn = sortColumn;
-        SortDirectionEnum = sortDirection;
+        SortDirection = sortDirection;
     }
 
     public SortableHeaderCellViewModel CreateHeaderCellViewModel(string displayName, string key)
@@ -36,9 +36,9 @@ public abstract class AbstractSortablePageModel : PageModel
         {
             var prop = typeof(T).GetProperty(SortColumn);
 
-            if (prop != null)
+            if (prop != null && SortDirection != null)
             {
-                if (SortDirectionEnum == SortDirection.Ascending)
+                if (SortDirection == Models.SortDirection.Ascending)
                 {
                     list = list.OrderBy(x => GetValue(prop, x));
                 }
@@ -65,7 +65,15 @@ public abstract class AbstractSortablePageModel : PageModel
         return value;
     }
 
-    private SortDirection GetSortDirection(string key) => IsActiveSortColumn(key) ? SortDirectionEnum : SortDirection.Ascending;
+    private SortDirection? GetSortDirection(string key)
+    {
+        if (IsActiveSortColumn(key))
+        {
+            return SortDirection ?? Models.SortDirection.Ascending;
+        }
+
+        return null;
+    } 
 
     private bool IsActiveSortColumn(string key) => SortColumn == key;
 }

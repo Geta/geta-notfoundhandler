@@ -36,7 +36,7 @@ public class IndexModel : AbstractSortablePageModel
 
     public bool HasQuery => !string.IsNullOrEmpty(Query);
 
-    public void OnGet(string sortColumn, SortDirection sortDirection)
+    public void OnGet(string sortColumn, SortDirection? sortDirection)
     {
         ApplySort(sortColumn, sortDirection);
 
