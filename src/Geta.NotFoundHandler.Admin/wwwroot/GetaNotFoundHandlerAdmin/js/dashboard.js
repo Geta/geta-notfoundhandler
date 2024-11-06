@@ -53,7 +53,7 @@
                 var modalContent = document.querySelector(dialogSelector + " .modal-content");
                 if(!modalContent) { return; }
 
-                modalContent.style = "max-height: 300px"; // we can't use here vh, due to iframe viewport, viewport is not static when scrollable 
+                modalContent.style = "max-height: 300px;"; // we can't use here vh, due to iframe viewport, viewport is not static when scrollable 
             });
         });
     }
