@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Web;
+using Geta.NotFoundHandler.Admin.Areas.GetaNotFoundHandlerAdmin.Pages.Base;
 using Geta.NotFoundHandler.Admin.Areas.GetaNotFoundHandlerAdmin.Pages.Models;
 
 namespace Geta.NotFoundHandler.Admin.Areas.GetaNotFoundHandlerAdmin.Pages.Components.SortableHeaderCell;
@@ -8,17 +9,15 @@ public class SortableHeaderCellViewModel
 {
     public string DisplayName { get; set; }
     public string Key { get; set; }
-    public SortDirection? SortDirection { get; set; }
-    public bool IsActive { get; set; }
     public string QueryString { get; set; }
 
     public SortDirection? GetNextSortDirection()
     {
-        return SortDirection switch
+        return GetSortDirection() switch
         {
-            null => Models.SortDirection.Ascending,
-            Models.SortDirection.Ascending => Models.SortDirection.Descending,
-            Models.SortDirection.Descending => null,
+            null => SortDirection.Ascending,
+            SortDirection.Ascending => SortDirection.Descending,
+            SortDirection.Descending => null,
             _ => throw new ArgumentOutOfRangeException()
         };
     }
@@ -35,11 +34,30 @@ public class SortableHeaderCellViewModel
     
     public string GetSortUrl()
     {
-        var qs = HttpUtility.ParseQueryString(QueryString);
+        var qs = HttpUtility
+            .ParseQueryString(QueryString);
 
-        qs["sortColumn"] = GetSortColumn();
-        qs["sortDirection"] = GetNextSortDirection().ToString();
+        qs[nameof(AbstractSortablePageModel.SortColumn)] = GetSortColumn();
+        qs[nameof(AbstractSortablePageModel.SortDirection)] = GetNextSortDirection().ToString();
 
         return $"?{qs}";
+    }
+
+    public bool IsActive()
+    {
+        var sortColumn = HttpUtility
+            .ParseQueryString(QueryString)
+            .Get(nameof(AbstractSortablePageModel.SortColumn));
+
+        return !string.IsNullOrEmpty(sortColumn) && sortColumn == Key;
+    }
+
+    public SortDirection? GetSortDirection()
+    {
+        var sortDirection = HttpUtility
+            .ParseQueryString(QueryString)
+            .Get(nameof(AbstractSortablePageModel.SortDirection));
+
+        return Enum.TryParse(sortDirection, out SortDirection sort) ? sort : null;
     }
 }

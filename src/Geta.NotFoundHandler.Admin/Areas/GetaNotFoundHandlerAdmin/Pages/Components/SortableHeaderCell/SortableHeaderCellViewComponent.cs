@@ -12,12 +12,15 @@ public class SortableHeaderCellViewComponent : ViewComponent
         _contextAccessor = contextAccessor;
     }
 
-    public IViewComponentResult Invoke(SortableHeaderCellViewModel sortableHeaderCellViewModel)
+    public IViewComponentResult Invoke(string key, string displayName)
     {
         var context = _contextAccessor.HttpContext;
 
-        sortableHeaderCellViewModel.QueryString = context?.Request.QueryString.ToString();
-
-        return View(sortableHeaderCellViewModel);
+        return View(new SortableHeaderCellViewModel
+        {
+            QueryString = context?.Request.QueryString.ToString(),
+            Key = key,
+            DisplayName = displayName
+        });
     }
 }

@@ -11,22 +11,13 @@
             <thead>
             <tr>
                 <th class="col-1">
-                    @await Component.InvokeAsync(
-                         "SortableHeaderCell",
-                         Model.CreateHeaderCellViewModel("Order Number", nameof(RegexRedirect.OrderNumber))
-                     )
+                    <vc:sortable-header-cell key="@nameof(RegexRedirect.OrderNumber)" display-name="OrderNumber"/>
                 </th>
                 <th>
-                    @await Component.InvokeAsync(
-                         "SortableHeaderCell",
-                         Model.CreateHeaderCellViewModel("Old URL Regex", nameof(RegexRedirect.OldUrlRegex))
-                     )
+                    <vc:sortable-header-cell key="@nameof(RegexRedirect.OldUrlRegex)" display-name="Old URL Regex"/>
                 </th>
                 <th>
-                    @await Component.InvokeAsync(
-                         "SortableHeaderCell",
-                         Model.CreateHeaderCellViewModel("New URL Format", nameof(RegexRedirect.NewUrlFormat))
-                     )
+                    <vc:sortable-header-cell key="@nameof(RegexRedirect.NewUrlFormat)" display-name="New URL Format"/>
                 </th>
                 <th class="col-1"></th>
                 <th class="col-1"></th>

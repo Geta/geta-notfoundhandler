@@ -32,7 +32,7 @@ public class DeletedModel : AbstractSortablePageModel
     [BindProperty(SupportsGet = true)]
     public Paging Paging { get; set; }
 
-    public void OnGet(string sortColumn, SortDirection sortDirection)
+    public void OnGet(string sortColumn, SortDirection? sortDirection)
     {
         ApplySort(sortColumn, sortDirection);
 

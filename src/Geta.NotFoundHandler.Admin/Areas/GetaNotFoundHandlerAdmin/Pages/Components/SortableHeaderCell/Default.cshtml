@@ -5,9 +5,9 @@
    style="white-space: nowrap">
     @Model.DisplayName
 
-    @if (Model.IsActive && Model.SortDirection != null)
+    @if (Model.IsActive() && Model.GetSortDirection() != null)
     {
-        <span data-feather="@(Model.SortDirection == SortDirection.Ascending ? "arrow-up" : "arrow-down")">
+        <span data-feather="@(Model.GetSortDirection() == SortDirection.Ascending ? "arrow-up" : "arrow-down")">
         </span>
     }
 </a>

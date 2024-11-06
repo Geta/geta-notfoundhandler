@@ -11,10 +11,7 @@
             <thead>
             <tr>
                 <th>
-                    @await Component.InvokeAsync(
-                         "SortableHeaderCell",
-                         Model.CreateHeaderCellViewModel("URL", nameof(CustomRedirect.OldUrl))
-                     )
+                    <vc:sortable-header-cell key="@nameof(CustomRedirect.OldUrl)" display-name="URL"/>
                 </th>
                 <th class="col-1"></th>
             </tr>

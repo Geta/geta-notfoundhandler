@@ -28,28 +28,16 @@
             <thead>
             <tr>
                 <th>
-                    @await Component.InvokeAsync(
-                         "SortableHeaderCell",
-                         Model.CreateHeaderCellViewModel("New URL", nameof(CustomRedirect.NewUrl))
-                     )
+                    <vc:sortable-header-cell key="@nameof(CustomRedirect.NewUrl)" display-name="New URL"/>
                 </th>
                 <th>
-                    @await Component.InvokeAsync(
-                         "SortableHeaderCell",
-                         Model.CreateHeaderCellViewModel("Old URL", nameof(CustomRedirect.OldUrl))
-                     )
+                    <vc:sortable-header-cell key="@nameof(CustomRedirect.OldUrl)" display-name="Old URL"/>
                 </th>
                 <th class="col-1 text-center">
-                    @await Component.InvokeAsync(
-                         "SortableHeaderCell",
-                         Model.CreateHeaderCellViewModel("Wildcard", nameof(CustomRedirect.WildCardSkipAppend))
-                     )
+                    <vc:sortable-header-cell key="@nameof(CustomRedirect.WildCardSkipAppend)" display-name="Wildcard"/>
                 </th>
                 <th class="col-1">
-                    @await Component.InvokeAsync(
-                         "SortableHeaderCell",
-                         Model.CreateHeaderCellViewModel("Redirect Type", nameof(CustomRedirect.RedirectType))
-                     )
+                    <vc:sortable-header-cell key="@nameof(CustomRedirect.RedirectType)" display-name="Redirect Type"/>
                 </th>
                 <th class="col-1"></th>
             </tr>

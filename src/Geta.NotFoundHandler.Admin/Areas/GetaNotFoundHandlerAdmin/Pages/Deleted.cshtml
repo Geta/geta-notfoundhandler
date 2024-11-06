@@ -1,5 +1,6 @@
 ﻿@page "{handler?}"
-@using Geta.NotFoundHandler.Core.Redirects
+@using Geta.NotFoundHandler.Admin.Areas.GetaNotFoundHandlerAdmin.Pages.Components.SortableHeaderCell
+@using Geta.NotFoundHandler.Core.Providers.RegexRedirects
 @using Microsoft.AspNetCore.Mvc.TagHelpers
 @model Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin.DeletedModel
 
@@ -11,10 +12,7 @@
             <thead>
             <tr>
                 <th>
-                    @await Component.InvokeAsync(
-                         "SortableHeaderCell",
-                         Model.CreateHeaderCellViewModel("URL", nameof(CustomRedirect.OldUrl))
-                     )
+                    <vc:sortable-header-cell key="@nameof(RegexRedirect.OldUrlRegex)" display-name="Old URL Regex"/>
                 </th>
                 <th class="col-1"></th>
             </tr>

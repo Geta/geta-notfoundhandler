@@ -36,7 +36,7 @@ public class RegexModel : AbstractSortablePageModel
     [BindProperty]
     public RegexRedirectModel RegexRedirect { get; set; }
 
-    public void OnGet(string sortColumn, SortDirection sortDirection)
+    public void OnGet(string sortColumn, SortDirection? sortDirection)
     {
         ApplySort(sortColumn, sortDirection);
 
