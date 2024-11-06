@@ -39,7 +39,7 @@
         var modalTriggers = document.querySelectorAll('.modal-trigger[data-bs-target]');
         modalTriggers.forEach(function (modalTrigger) {
             modalTrigger.addEventListener('click', function () {
-                var dialogSelector = modalTrigger.dataset.bsTarget + " .modal-dialog"
+                var dialogSelector = modalTrigger.dataset.bsTarget + " .modal-dialog";
 
                 var modalDialog = document.querySelector(dialogSelector);
                 if (!modalDialog) { return; }
@@ -50,7 +50,7 @@
                     "min-width: 500px;" +
                     "transform: translate(-50%, -50%);";
 
-                var modalContent = document.querySelector(dialogSelector + " .modal-content")
+                var modalContent = document.querySelector(dialogSelector + " .modal-content");
                 if(!modalContent) { return; }
 
                 modalContent.style = "max-height: 300px"; // we can't use here vh, due to iframe viewport, viewport is not static when scrollable 
