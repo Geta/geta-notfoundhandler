@@ -10,7 +10,7 @@ namespace Geta.NotFoundHandler.Optimizely.Infrastructure.Configuration
 {
     public class OptimizelyNotFoundHandlerOptions
     {
-        public const int CurrentDbVersion = 1;
+        public const int CurrentDbVersion = 3;
 
         public bool AutomaticRedirectsEnabled { get; set; }
         public RedirectType AutomaticRedirectType { get; set; } = RedirectType.Temporary;

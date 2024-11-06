@@ -11,6 +11,11 @@ namespace Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin.Infrastruc
             return FileIsOfType(file, new[] { "text/xml", "application/xml" }, new[] { "xml" });
         }
 
+        public static bool IsCsv(this IFormFile file)
+        {
+            return FileIsOfType(file, new[] { "text/csv" }, new[] { "csv" });
+        }
+
         public static bool IsTxt(this IFormFile file)
         {
             return FileIsOfType(file, new[] { "text/plain" }, new[] { "txt" });

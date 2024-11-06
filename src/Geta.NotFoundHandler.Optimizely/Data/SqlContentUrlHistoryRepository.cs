@@ -9,13 +9,15 @@ using Geta.NotFoundHandler.Data;
 using Geta.NotFoundHandler.Optimizely.Core.AutomaticRedirects;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace Geta.NotFoundHandler.Optimizely.Data
 {
     public class SqlContentUrlHistoryRepository : IRepository<ContentUrlHistory>, IContentUrlHistoryLoader
     {
         private const string ContentUrlHistoryTable = "[dbo].[NotFoundHandler.ContentUrlHistory]";
-        private const string AllFields = "Id, ContentKey, Urls, CreatedUtc";
+        private const string AllFields = "Id, ContentKey, Urls, CreatedUtc, md5_ContentKey";
         private readonly IDataExecutor _dataExecutor;
 
         public SqlContentUrlHistoryRepository(IDataExecutor dataExecutor)
@@ -35,33 +37,46 @@ namespace Geta.NotFoundHandler.Optimizely.Data
                 return settings;
             }
         }
+        
+        private static byte[] CalculateMd5Hash(string input)
+        {
+            using var md5 = MD5.Create();
+            var inputBytes = Encoding.Unicode.GetBytes(input);
+            var hashBytes = md5.ComputeHash(inputBytes);
+
+            return hashBytes;
+        }
 
         public bool IsRegistered(ContentUrlHistory entity)
         {
             var sqlCommand = $@"SELECT TOP 1 {AllFields} 
                                 FROM {ContentUrlHistoryTable}
-                                WHERE ContentKey = @contentKey
+                                WHERE ContentKey = @contentKey AND md5_ContentKey = @contentKeyHash
                                 ORDER BY CreatedUtc DESC";
 
             var dataTable = _dataExecutor.ExecuteQuery(
                 sqlCommand,
-                _dataExecutor.CreateStringParameter("contentKey", entity.ContentKey));
+                _dataExecutor.CreateStringParameter("contentKey", entity.ContentKey),
+                _dataExecutor.CreateBinaryParameter("contentKeyHash",  CalculateMd5Hash(entity.ContentKey))
+                );
 
             var last = ToContentUrlHistory(dataTable).FirstOrDefault();
 
-            return last != null && last.Urls.Count == entity.Urls.Count && last.Urls.All(entity.Urls.Contains);
+            var result = last != null && last.Urls.Count == entity.Urls.Count && last.Urls.All(entity.Urls.Contains);
+
+            return result;
         }
 
         public IEnumerable<(string contentKey, IReadOnlyCollection<ContentUrlHistory> histories)> GetAllMoved()
         {
-            var sqlCommand = $@"SELECT h.Id, h.ContentKey, h.Urls, h.CreatedUtc 
+            var sqlCommand = $@"SELECT h.Id, h.ContentKey, h.Urls, h.CreatedUtc, h.md5_ContentKey
                                 FROM {ContentUrlHistoryTable} h
                                 INNER JOIN 
-                                    (SELECT ContentKey
+                                    (SELECT ContentKey, md5_ContentKey
                                     FROM {ContentUrlHistoryTable}
-                                    GROUP BY ContentKey
+                                    GROUP BY ContentKey, md5_ContentKey
                                     HAVING COUNT(*) > 1) k
-                                ON h.ContentKey = k.ContentKey
+                                ON h.ContentKey = k.ContentKey AND h.md5_ContentKey = k.md5_ContentKey
                                 ORDER BY h.ContentKey, h.CreatedUtc DESC";
 
             var dataTable = _dataExecutor.ExecuteQuery(sqlCommand);
@@ -73,18 +88,24 @@ namespace Geta.NotFoundHandler.Optimizely.Data
 
         public IReadOnlyCollection<ContentUrlHistory> GetMoved(string contentKey)
         {
-            var sqlCommand = $@"SELECT h.Id, h.ContentKey, h.Urls, h.CreatedUtc 
+            var contentKeyHash = CalculateMd5Hash(contentKey);
+            
+            var sqlCommand = $@"SELECT h.Id, h.ContentKey, h.Urls, h.CreatedUtc, h.md5_ContentKey
                                 FROM {ContentUrlHistoryTable} h
                                 INNER JOIN 
                                     (SELECT ContentKey
                                     FROM {ContentUrlHistoryTable}
+                                    WHERE md5_ContentKey = @contentKeyHash
                                     GROUP BY ContentKey
                                     HAVING COUNT(*) > 1) k
                                 ON h.ContentKey = k.ContentKey
-                                WHERE h.ContentKey = @contentKey
+                                WHERE h.ContentKey = @contentKey AND h.md5_ContentKey = @contentKeyHash
                                 ORDER BY h.ContentKey, h.CreatedUtc DESC";
 
-            var dataTable = _dataExecutor.ExecuteQuery(sqlCommand, _dataExecutor.CreateStringParameter("contentKey", contentKey));
+            var dataTable = _dataExecutor.ExecuteQuery(sqlCommand, 
+                                                       _dataExecutor.CreateStringParameter("contentKey", contentKey),
+                                                       _dataExecutor.CreateBinaryParameter("contentKeyHash", contentKeyHash)
+                                                       );
 
             var histories = ToContentUrlHistory(dataTable);
 
@@ -124,7 +145,8 @@ namespace Geta.NotFoundHandler.Optimizely.Data
                 _dataExecutor.CreateGuidParameter("id", entity.Id),
                 _dataExecutor.CreateStringParameter("contentKey", entity.ContentKey),
                 _dataExecutor.CreateStringParameter("urls", ToJson(entity.Urls), -1),
-                _dataExecutor.CreateDateTimeParameter("createdUtc", entity.CreatedUtc));
+                _dataExecutor.CreateDateTimeParameter("createdUtc", entity.CreatedUtc)
+                );
         }
 
         private void Update(ContentUrlHistory entity)
@@ -145,7 +167,8 @@ namespace Geta.NotFoundHandler.Optimizely.Data
                 _dataExecutor.CreateGuidParameter("id", entity.Id),
                 _dataExecutor.CreateStringParameter("contentKey", entity.ContentKey),
                 _dataExecutor.CreateStringParameter("urls", ToJson(entity.Urls), -1),
-                _dataExecutor.CreateDateTimeParameter("createdUtc", entity.CreatedUtc));
+                _dataExecutor.CreateDateTimeParameter("createdUtc", entity.CreatedUtc)
+                );
         }
 
         private static string ToJson(ICollection<TypedUrl> urls)

@@ -63,8 +63,8 @@
             <div class="d-flex w-100 justify-content-between">
                 <div class="flex-fill">
                     <div class="d-flex w-100 align-items-center">
-                        Import redirects from an XML-file
-                        <input class="form-control ms-4 input-file" type="file" asp-for="ImportFile" accept=".xml">
+                        Import redirects from a valid XML or CSV
+                        <input class="form-control ms-4 input-file" type="file" asp-for="ImportFile" accept=".xml, .csv">
                     </div>
                 </div>
                 <button type="submit" class="btn btn-primary administer-button"
@@ -99,6 +99,19 @@
                     <span data-feather="download"></span> export
                 </button>
             </div>
+            <input type="hidden" name="TypeId" value="xml">
+        </form>
+    </li>
+    <li class="list-group-item">
+        <form method="post">
+            <div class="d-flex w-100 justify-content-between align-items-center">
+                <div>Export redirects to an CSV-file</div>
+                <button type="submit" class="btn btn-primary administer-button"
+                        asp-page-handler="ExportRedirects">
+                    <span data-feather="download"></span> export
+                </button>
+            </div>
+            <input type="hidden" name="TypeId" value="csv">
         </form>
     </li>
 </ul>

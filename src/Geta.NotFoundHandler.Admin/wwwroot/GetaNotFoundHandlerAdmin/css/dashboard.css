@@ -114,3 +114,11 @@
 .input-file {
     width: 450px;
 }
+
+/*
+ * Table
+ */
+
+td {
+    word-break: break-all;
+}

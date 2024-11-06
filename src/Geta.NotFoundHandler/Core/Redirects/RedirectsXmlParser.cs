@@ -12,7 +12,7 @@ namespace Geta.NotFoundHandler.Core.Redirects
     /// <summary>
     /// Class for reading and writing to the custom redirects file
     /// </summary>
-    public class RedirectsXmlParser
+    public class RedirectsXmlParser : IRedirectsParser
     {
         private readonly ILogger<RedirectsXmlParser> _logger;
         private XmlDocument _customRedirectsXmlFile;

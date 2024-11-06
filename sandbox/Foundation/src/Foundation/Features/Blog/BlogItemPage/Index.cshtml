@@ -56,22 +56,22 @@
             </div>
         </div>
 
+        @* Main Content *@
+        <div class="row">
+            <div class="col-12">
+                <div @Html.EditAttributes(x => x.CurrentContent.MainBody)>
+                    @Html.PropertyFor(m => m.CurrentContent.MainBody)
+                </div>
+            </div>
+        </div>
+        <br />
+
         @* Content Area *@
         <div class="row">
             <div class="col-12">
                 @Html.PropertyFor(x => x.CurrentContent.MainContentArea, new { CssClass = "equal-height" })
             </div>
         </div>
-
-        @* Main Content *@
-        <div class="row">
-            <div class="col-12">
-                <div @Html.EditAttributes(x => x.CurrentContent.MainBody)>
-                    @Html.Raw(@Model.CurrentContent.MainBody)
-                </div>
-            </div>
-        </div>
-        <br />
 
         @* Tags *@
         <div class="row">

@@ -2,7 +2,6 @@
 // Licensed under Apache-2.0. See the LICENSE file in the project root for more information
 
 using Geta.NotFoundHandler.Data;
-using Geta.NotFoundHandler.Infrastructure.Configuration;
 using Geta.NotFoundHandler.Optimizely.Infrastructure.Configuration;
 using Microsoft.Extensions.Logging;
 
@@ -50,9 +49,14 @@ namespace Geta.NotFoundHandler.Optimizely.Infrastructure.Initialization
         /// </summary>
         private void Create()
         {
-            var created = CreateContentUrlHistoryTable();
+            var result = CreateContentUrlHistoryTable();
 
-            if (created)
+            if (result)
+            {
+                result = CreateContentKeyMd5Column();
+            }
+
+            if (result)
             {
                 CreateVersionNumberSp();
             }
@@ -76,14 +80,19 @@ namespace Geta.NotFoundHandler.Optimizely.Infrastructure.Initialization
 
         private void Upgrade()
         {
-            UpdateVersionNumber();
+            var result = CreateContentKeyMd5Column();
+
+            if (result)
+            {
+                UpdateVersionNumber();
+            }
         }
 
         private void CreateVersionNumberSp()
         {
             _logger.LogInformation("Create Optimizely NotFoundHandler version SP START");
             var versionSp =
-                $@"CREATE PROCEDURE {VersionProcedure} AS RETURN {NotFoundHandlerOptions.CurrentDbVersion}";
+                $@"CREATE PROCEDURE {VersionProcedure} AS RETURN {OptimizelyNotFoundHandlerOptions.CurrentDbVersion}";
 
             var created = _dataExecutor.ExecuteNonQuery(versionSp);
 
@@ -105,8 +114,35 @@ namespace Geta.NotFoundHandler.Optimizely.Infrastructure.Initialization
         private void UpdateVersionNumber()
         {
             var versionSp =
-                $@"ALTER PROCEDURE {VersionProcedure} AS RETURN {NotFoundHandlerOptions.CurrentDbVersion}";
+                $@"ALTER PROCEDURE {VersionProcedure} AS RETURN {OptimizelyNotFoundHandlerOptions.CurrentDbVersion}";
             _dataExecutor.ExecuteNonQuery(versionSp);
+        }
+
+        private bool CreateContentKeyMd5Column()
+        {
+            var command = $@"
+            BEGIN TRY
+                BEGIN TRANSACTION;
+                IF NOT EXISTS (
+                    SELECT 1
+                    FROM sys.columns
+                    WHERE object_id = OBJECT_ID('{ContentUrlHistoryTable}')
+                    AND name = 'md5_ContentKey'
+                )
+                BEGIN
+                    ALTER TABLE {ContentUrlHistoryTable} ADD md5_ContentKey AS HASHBYTES('MD5', [ContentKey]);
+                    CREATE INDEX PContentKey_index ON {ContentUrlHistoryTable} (md5_ContentKey);
+                END
+
+                COMMIT TRANSACTION;
+            END TRY
+            BEGIN CATCH
+                ROLLBACK TRANSACTION;
+                THROW;
+            END CATCH;
+            ";
+
+            return _dataExecutor.ExecuteNonQuery(command);
         }
     }
 }

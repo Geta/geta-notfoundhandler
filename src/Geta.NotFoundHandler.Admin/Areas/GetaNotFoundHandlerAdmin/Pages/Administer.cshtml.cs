@@ -1,7 +1,10 @@
+using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml;
+using CsvHelper;
 using Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin.Components.Card;
 using Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin.Infrastructure;
 using Geta.NotFoundHandler.Core.Redirects;
@@ -20,15 +23,21 @@ public class AdministerModel : PageModel
     private readonly IRedirectsService _redirectsService;
     private readonly ISuggestionService _suggestionService;
     private readonly RedirectsXmlParser _redirectsXmlParser;
+    private readonly RedirectsCsvParser _redirectsCsvParser;
+    private readonly RedirectsTxtParser _redirectsTxtParser;
 
     public AdministerModel(
         IRedirectsService redirectsService,
         ISuggestionService suggestionService,
-        RedirectsXmlParser redirectsXmlParser)
+        RedirectsXmlParser redirectsXmlParser,
+        RedirectsCsvParser redirectsCsvParser,
+        RedirectsTxtParser redirectsTxtParser)
     {
         _redirectsService = redirectsService;
         _suggestionService = suggestionService;
         _redirectsXmlParser = redirectsXmlParser;
+        _redirectsCsvParser = redirectsCsvParser;
+        _redirectsTxtParser = redirectsTxtParser;
     }
 
     [BindProperty(SupportsGet = true)]
@@ -46,39 +55,22 @@ public class AdministerModel : PageModel
     public IActionResult OnPostDeleteAllIgnoredSuggestions()
     {
         var count = _redirectsService.DeleteAllIgnored();
-        Message = $"All {count} ignored suggestions permanently removed";
-        CardType = CardType.Success;
 
-        return RedirectToPage(new {
-            Message,
-            CardType
-        });
+        return BuildResponse($"All {count} ignored suggestions permanently removed", CardType.Success);
     }
 
     public IActionResult OnPostDeleteAllSuggestions()
     {
         _suggestionService.DeleteAll();
-        Message = "Suggestions successfully deleted";
-        CardType = CardType.Success;
 
-        return RedirectToPage(new
-        {
-            Message,
-            CardType
-        });
+        return BuildResponse("Suggestions successfully deleted", CardType.Success);
     }
 
     public IActionResult OnPostDeleteAllRedirects()
     {
         _redirectsService.DeleteAll();
-        Message = "Redirects successfully deleted";
-        CardType = CardType.Success;
 
-        return RedirectToPage(new
-        {
-            Message,
-            CardType
-        });
+        return BuildResponse("Redirects successfully deleted", CardType.Success);
     }
 
     public IActionResult OnPostDeleteSuggestions()
@@ -86,122 +78,112 @@ public class AdministerModel : PageModel
         if (!ModelState.IsValid) return Page();
 
         _suggestionService.Delete(DeleteSuggestions.MaxErrors, DeleteSuggestions.MinimumDays);
-        Message = "Suggestions successfully deleted";
-        CardType = CardType.Success;
 
-        return RedirectToPage(new
-        {
-            Message,
-            CardType
-        });
+        return BuildResponse("Suggestions successfully deleted", CardType.Success);
     }
 
     public IActionResult OnPostImportRedirects()
     {
-        if (ImportFile == null || !ImportFile.IsXml())
+        if (ImportFile == null)
         {
-            Message = "The uploaded file is not a valid XML file. Please upload a valid XML file.";
-            CardType = CardType.Warning;
-
-            return RedirectToPage(new
-            {
-                Message,
-                CardType
-            });
+            return BuildResponse("The uploaded file is not a valid XML or CSV file. Please upload a valid XML/CSV file.",
+                                 CardType.Warning);
         }
 
-        var redirects = _redirectsXmlParser.LoadFromStream(ImportFile.OpenReadStream());
-
-        if (redirects.Any())
+        if (ImportFile.IsXml())
         {
-            _redirectsService.AddOrUpdate(redirects);
-            Message = $"{redirects.Count()} urls successfully imported.";
-            CardType = CardType.Success;
-        }
-        else
-        {
-            Message = "No redirects could be imported";
-            CardType = CardType.Warning;
+            return ProcessFile(_redirectsXmlParser);
         }
 
-        return RedirectToPage(new
+        if (ImportFile.IsCsv())
         {
-            Message,
-            CardType
-        });
+            return ProcessFile(_redirectsCsvParser);
+        }
+
+        return BuildResponse("The uploaded file is not a valid. Please upload a file.",
+                             CardType.Warning);
     }
 
     public IActionResult OnPostImportDeletedRedirects()
     {
         if (ImportFile == null || !ImportFile.IsTxt())
         {
-            Message = "The uploaded file is not a valid TXT file. Please upload a valid TXT file.";
-            CardType = CardType.Warning;
-
-            return RedirectToPage(new
-            {
-                Message,
-                CardType
-            });
+            return BuildResponse("The uploaded file is not a valid TXT file. Please upload a valid TXT file.", CardType.Warning);
         }
 
-        var redirects = ReadDeletedRedirectsFromImportFile();
-
-        if (redirects.Any())
-        {
-            _redirectsService.AddOrUpdate(redirects);
-            Message = $"{redirects.Count()} urls successfully imported.";
-            CardType = CardType.Success;
-        }
-        else
-        {
-            Message = "No redirects could be imported";
-            CardType = CardType.Warning;
-        }
-
-        return RedirectToPage(new
-        {
-            Message,
-            CardType
-        });
+        return ProcessFile(_redirectsTxtParser);
     }
 
-    public IActionResult OnPostExportRedirects()
+    public IActionResult OnPostExportRedirects(string typeId)
     {
+        if (string.IsNullOrEmpty(typeId))
+        {
+            return BuildResponse("Failed to Export", CardType.Warning);
+        }
+
         var redirects = _redirectsService.GetSaved().ToList();
+
+        if (!redirects.Any())
+        {
+            return BuildResponse("Nothing to Export", CardType.Warning);
+        }
+
+        return typeId.ToLower() switch
+        {
+            "xml" => ExportAsXml(redirects),
+            "csv" => ExportAsCsv(redirects),
+            _ => BuildResponse("Failed to export. Unsupported export type", CardType.Warning)
+        };
+    }
+
+    private IActionResult ExportAsXml(List<CustomRedirect> redirects)
+    {
         var document = _redirectsXmlParser.Export(redirects);
 
-        var memoryStream = new MemoryStream();
-        var writer = new XmlTextWriter(memoryStream, Encoding.UTF8)
-        {
-            Formatting = Formatting.Indented
-        };
+        using var memoryStream = new MemoryStream();
+        using var writer = new XmlTextWriter(memoryStream, Encoding.UTF8) { Formatting = Formatting.Indented };
         document.WriteTo(writer);
         writer.Flush();
         memoryStream.Seek(0, SeekOrigin.Begin);
 
-        return File(memoryStream, "text/xml", "customRedirects.xml");
+        return File(memoryStream.ToArray(), "text/xml", "customRedirects.xml");
     }
 
-    private CustomRedirectCollection ReadDeletedRedirectsFromImportFile()
+    private IActionResult ExportAsCsv(List<CustomRedirect> redirects)
     {
-        var redirects = new CustomRedirectCollection();
-        using var streamReader = new StreamReader(ImportFile.OpenReadStream());
-        while (streamReader.Peek() >= 0)
+        var documents = _redirectsCsvParser.Export(redirects);
+
+        using var memoryStream = new MemoryStream();
+        using (var tw = new StreamWriter(memoryStream, leaveOpen: true))
+        using (var csv = new CsvWriter(tw, CultureInfo.InvariantCulture))
         {
-            var url = streamReader.ReadLine();
-            if (!string.IsNullOrEmpty(url))
-            {
-                redirects.Add(new CustomRedirect
-                {
-                    OldUrl = url,
-                    NewUrl = string.Empty,
-                    State = (int)RedirectState.Deleted
-                });
-            }
+            csv.WriteRecords(documents);
         }
 
-        return redirects;
+        memoryStream.Seek(0, SeekOrigin.Begin);
+        return File(memoryStream.ToArray(), "text/csv", "customRedirects.csv");
+    }
+
+    private IActionResult BuildResponse(string message, CardType cardType)
+    {
+        Message = message;
+        CardType = cardType;
+
+        return RedirectToPage(new { Message, CardType });
+    }
+
+    private IActionResult ProcessFile(IRedirectsParser parser)
+    {
+        var redirects = parser.LoadFromStream(ImportFile.OpenReadStream());
+
+        if (redirects.Any())
+        {
+            _redirectsService.AddOrUpdate(redirects);
+
+            return BuildResponse($"{redirects.Count()} urls successfully imported.", CardType.Success);
+        }
+
+        return BuildResponse("No redirects could be imported", CardType.Warning);
     }
 }
 
