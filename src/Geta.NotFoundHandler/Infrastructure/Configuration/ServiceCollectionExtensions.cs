@@ -5,6 +5,7 @@ using System;
 using Geta.NotFoundHandler.Core;
 using Geta.NotFoundHandler.Core.Providers.RegexRedirects;
 using Geta.NotFoundHandler.Core.Redirects;
+using Geta.NotFoundHandler.Core.ScheduledJobs;
 using Geta.NotFoundHandler.Core.Suggestions;
 using Geta.NotFoundHandler.Data;
 using Geta.NotFoundHandler.Infrastructure.Initialization;
@@ -89,7 +90,7 @@ namespace Geta.NotFoundHandler.Infrastructure.Configuration
             services.AddOptions<NotFoundHandlerOptions>().Configure<IConfiguration>((options, configuration) =>
             {
                 setupAction(options);
-                configuration.GetSection("Geta:NotFoundHandler").Bind(options);
+                configuration.GetSection(NotFoundHandlerOptions.Section).Bind(options);
             });
 
             services.AddAuthorization(options =>
@@ -97,6 +98,10 @@ namespace Geta.NotFoundHandler.Infrastructure.Configuration
                 options.AddPolicy(Constants.PolicyName, configurePolicy);
             });
 
+            services.AddSingleton<ISuggestionsCleanupService, SuggestionsCleanupService>();
+
+            services.EnableScheduler();
+            
             return services;
         }
     }
