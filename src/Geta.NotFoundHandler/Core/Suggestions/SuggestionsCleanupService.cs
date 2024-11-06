@@ -38,7 +38,7 @@ public class SuggestionsCleanupService : ISuggestionsCleanupService
         ";
 
     
-    public bool Cleanup()
+    public void Cleanup()
     {
         try
         {
@@ -49,14 +49,12 @@ public class SuggestionsCleanupService : ISuggestionsCleanupService
             command.CommandTimeout = _options.Value.SuggestionsCleanupOptions.Timeout;
             command.Connection.Open();
             command.ExecuteNonQuery();
-
-            return true;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "There was a problem while performing cleanup on connection");
 
-            return false;
+            throw;
         }
     }
 }

@@ -23,6 +23,8 @@ public class SuggestionsCleanupJob : ScheduledJobBase
 
     public override string Execute()
     {
-        return _suggestionsCleanupService.Cleanup() ? "": "Unable to cleanup suggestions; please refer to the logs.";
+        _suggestionsCleanupService.Cleanup();
+
+        return string.Empty;
     }
 }

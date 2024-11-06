@@ -5,5 +5,5 @@ namespace Geta.NotFoundHandler.Core.Suggestions;
 
 public interface ISuggestionsCleanupService
 {
-    bool Cleanup();
+    void Cleanup();
 }

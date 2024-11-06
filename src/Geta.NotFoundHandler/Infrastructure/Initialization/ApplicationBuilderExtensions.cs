@@ -26,7 +26,7 @@ namespace Geta.NotFoundHandler.Infrastructure.Initialization
 
             var options = services.GetRequiredService<IOptions<NotFoundHandlerOptions>>().Value;
 
-            if (options.UseScheduler)
+            if (options.UseInternalScheduler)
             {
                 app.UseScheduler();
             }

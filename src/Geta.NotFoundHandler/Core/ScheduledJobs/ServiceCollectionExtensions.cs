@@ -16,7 +16,7 @@ public static class ServiceCollectionExtensions
         using var serviceProvider = services.BuildServiceProvider();
         var options = serviceProvider.GetRequiredService<IOptions<NotFoundHandlerOptions>>().Value;
 
-        if (options.UseScheduler)
+        if (options.UseInternalScheduler)
         {
             services.AddScheduler();
         

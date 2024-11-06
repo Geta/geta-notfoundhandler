@@ -7,5 +7,4 @@ public class SuggestionsCleanupOptions
 {
     public int DaysToKeep { get; set; } = 14;
     public int Timeout { get; set; } = 30 * 60;
-    public string CronInterval { get; set; } = "0 0 * * *";
 }

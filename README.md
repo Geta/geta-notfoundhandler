@@ -280,38 +280,30 @@ There are two scheduled jobs:
 
 # Scheduled jobs
 
-Scheduled jobs powered by Coravel are included in the package, allowing jobs to run at set intervals.
+Scheduled job - process that runs in background
+- Suggestions cleanup job - shipped with the package, contains process that cleans up suggestions table.
+This job is configured by default to remove records older than 14 days. You can adjust the retention period or timeout as needed.
+```
+services.AddNotFoundHandler(o =>
+{
+    o.SuggestionsCleanupOptions.DaysToKeep = 30;
+    o.SuggestionsCleanupOptions.Timeout = 30 * 60;
+});
+```
 
-**Important**
-Use this only if the package is not intended for an Optimizely site. Optimizely has built-in scheduled jobs mechanism.
-
-To enable scheduled jobs, you need to configure the following settings:
+Scheduler - mechanism that triggers scheduled jobs in a recurrent manner
+- InternalScheduler - default scheduler, included in the core package, a scheduler that uses [Coravel](https://docs.coravel.net/).
+  To enable the scheduler, you need to enable UseInternalScheduler flag. Additionally, you can adjust the scheduler run interval:
 ```
 services.AddNotFoundHandler(o =>
 {
     ...
-    o.ScheduledJobs = true;
+    o.UseInternalScheduler = true;
+    o.InternalSchedulerCronInterval = "0 0 * * *" // by default it's configured to run daily at midnight
 });
 ```
-
-## Suggestions cleanup job
-Practice shows that the suggestions table grows quickly in production, so a suggestions cleanup job was added to control its growth.
-
-This job is configured by default to run daily at midnight, removing records older than 14 days. 
-You can adjust the retention period as needed.
-
-```
-services.AddNotFoundHandler(o =>
-{
-    o.ScheduledJobs = true;
-    o.SuggestionsCleanupOptions.CronInterval = "0 0 * * 0" // weekly on Sunday midnight
-    o.SuggestionsCleanupOptions.DaysToKeep = 30;
-});
-```
-**Note**
-For Optimizely was added job that is powered by built-in scheduled jobs mechanism.
-
-[Geta NotFoundHandler] Suggestions cleanup job
+- OptimizelyScheduler - uses Optimizely to schedule job runs.
+An Optimizely scheduled job was added - <code>[Geta NotFoundHandler] Suggestions cleanup job</code>.
 
 # Troubleshooting
 

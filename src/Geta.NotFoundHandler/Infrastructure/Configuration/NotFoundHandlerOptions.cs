@@ -17,7 +17,8 @@ namespace Geta.NotFoundHandler.Infrastructure.Configuration
         public int BufferSize { get; set; } = 30;
         public int ThreshHold { get; set; } = 5;
         public SuggestionsCleanupOptions SuggestionsCleanupOptions { get; set; } = new();
-        public bool UseScheduler { get; set; }
+        public bool UseInternalScheduler { get; set; }
+        public string InternalSchedulerCronInterval { get; set; } = "0 0 * * *";
         public FileNotFoundMode HandlerMode { get; set; } = FileNotFoundMode.On;
         public TimeSpan RegexTimeout { get; set; } = TimeSpan.FromMilliseconds(100);
 
