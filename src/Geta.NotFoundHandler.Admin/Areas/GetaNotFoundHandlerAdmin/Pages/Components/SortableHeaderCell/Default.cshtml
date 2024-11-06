@@ -1,0 +1,13 @@
+﻿@using Geta.NotFoundHandler.Admin.Areas.GetaNotFoundHandlerAdmin.Pages.Models
+@model Geta.NotFoundHandler.Admin.Areas.GetaNotFoundHandlerAdmin.Pages.Components.SortableHeaderCell.SortableHeaderCellViewModel
+
+<a href="@Model.GetSortUrl()"
+   style="white-space: nowrap">
+    @Model.DisplayName
+
+    @if (Model.IsActive() && Model.GetSortDirection() != null)
+    {
+        <span data-feather="@(Model.GetSortDirection() == SortDirection.Ascending ? "arrow-up" : "arrow-down")">
+        </span>
+    }
+</a>

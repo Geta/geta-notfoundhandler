@@ -1,4 +1,7 @@
 ﻿@page "{handler?}"
+@using Geta.NotFoundHandler.Admin.Areas.GetaNotFoundHandlerAdmin.Pages.Components.SortableHeaderCell
+@using Geta.NotFoundHandler.Core.Providers.RegexRedirects
+@using Microsoft.AspNetCore.Mvc.TagHelpers
 @model Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin.DeletedModel
 
 @await Component.InvokeAsync("Card", new { message = Model.Message })
@@ -7,40 +10,42 @@
     <div class="table-responsive mt-3">
         <table class="table table-hover table-sm" aria-label="Deleted redirects">
             <thead>
-                <tr>
-                    <th>URL</th>
-                    <th class="col-1"></th>
-                </tr>
+            <tr>
+                <th>
+                    <vc:sortable-header-cell key="@nameof(RegexRedirect.OldUrlRegex)" display-name="Old URL Regex"/>
+                </th>
+                <th class="col-1"></th>
+            </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td>
-                        <input type="text" class="form-control" asp-for="DeletedRedirect.OldUrl">
-                        <span asp-validation-for="DeletedRedirect.OldUrl" class="text-danger"></span>
-                    </td>
+            <tr>
+                <td>
+                    <input type="text" class="form-control" asp-for="DeletedRedirect.OldUrl">
+                    <span asp-validation-for="DeletedRedirect.OldUrl" class="text-danger"></span>
+                </td>
+                <td>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary"
+                                asp-page-handler="create">
+                            <span data-feather="plus"></span> add
+                        </button>
+                    </div>
+                </td>
+            </tr>
+            @foreach (var item in Model.Items)
+            {
+                <tr class="align-middle">
+                    <td>@item.OldUrl</td>
                     <td>
                         <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-primary"
-                                    asp-page-handler="create">
-                                <span data-feather="plus"></span> add
+                            <button type="submit" class="btn btn-danger"
+                                    asp-page-handler="delete" asp-route-oldurl="@item.OldUrl">
+                                <span data-feather="trash-2"></span> delete
                             </button>
                         </div>
                     </td>
                 </tr>
-                @foreach (var item in Model.Items)
-                {
-                    <tr class="align-middle">
-                        <td>@item.OldUrl</td>
-                        <td>
-                            <div class="d-grid gap-2">
-                                <button type="submit" class="btn btn-danger"
-                                        asp-page-handler="delete" asp-route-oldurl="@item.OldUrl">
-                                    <span data-feather="trash-2"></span> delete
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                }
+            }
             </tbody>
         </table>
         @await Component.InvokeAsync(typeof(Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin.Components.Pager.PagerViewComponent), new { Model.Items })

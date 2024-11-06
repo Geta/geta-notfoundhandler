@@ -1,16 +1,19 @@
+using System.Collections.Generic;
 using System.Linq;
+using Geta.NotFoundHandler.Admin.Areas.GetaNotFoundHandlerAdmin.Pages.Base;
+using Geta.NotFoundHandler.Admin.Areas.GetaNotFoundHandlerAdmin.Pages.Extensions;
+using Geta.NotFoundHandler.Admin.Areas.GetaNotFoundHandlerAdmin.Pages.Models;
 using Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin.Models;
 using Geta.NotFoundHandler.Core.Redirects;
 using Geta.NotFoundHandler.Infrastructure;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using X.PagedList;
 
 namespace Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin;
 
 [Authorize(Constants.PolicyName)]
-public class DeletedModel : PageModel
+public class DeletedModel : AbstractSortablePageModel
 {
     private readonly IRedirectsService _redirectsService;
 
@@ -29,8 +32,10 @@ public class DeletedModel : PageModel
     [BindProperty(SupportsGet = true)]
     public Paging Paging { get; set; }
 
-    public void OnGet()
+    public void OnGet(string sortColumn, SortDirection? sortDirection)
     {
+        ApplySort(sortColumn, sortDirection);
+
         Load();
     }
 
@@ -55,9 +60,16 @@ public class DeletedModel : PageModel
 
     private void Load()
     {
-        var items = _redirectsService.GetDeleted().ToPagedList(Paging.PageNumber, Paging.PageSize);
+        var items = FindRedirects().ToPagedList(Paging.PageNumber, Paging.PageSize);
         Message =
             $"There are currently {items.TotalItemCount} URLs that return a Deleted response. This tells crawlers to remove these URLs from their index.";
         Items = items;
+    }
+    
+    private IEnumerable<CustomRedirect> FindRedirects()
+    {
+        return _redirectsService
+            .GetDeleted()
+            .Sort(SortColumn, SortDirection);
     }
 }
