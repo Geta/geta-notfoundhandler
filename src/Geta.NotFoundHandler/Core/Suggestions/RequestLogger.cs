@@ -17,7 +17,6 @@ namespace Geta.NotFoundHandler.Core.Suggestions
         private readonly ILogger<RequestLogger> _logger;
         private readonly ISuggestionRepository _suggestionRepository;
         private readonly NotFoundHandlerOptions _configuration;
-        private readonly Regex _ignorePatternRegex;
 
         public RequestLogger(
             IOptions<NotFoundHandlerOptions> options,
@@ -27,14 +26,9 @@ namespace Geta.NotFoundHandler.Core.Suggestions
             _logger = logger;
             _suggestionRepository = suggestionRepository;
             _configuration = options.Value;
-
-            if (!string.IsNullOrWhiteSpace(_configuration.IgnoreSuggestionsUrlRegexPattern))
-            {
-                _ignorePatternRegex = new Regex(_configuration.IgnoreSuggestionsUrlRegexPattern, RegexOptions.Compiled);
-            }
         }
 
-        public void LogRequest(string oldUrl, string referer)
+        public virtual void LogRequest(string oldUrl, string referer)
         {
             var bufferSize = _configuration.BufferSize;
             if (!LogQueue.IsEmpty && LogQueue.Count >= bufferSize)
@@ -87,19 +81,20 @@ namespace Geta.NotFoundHandler.Core.Suggestions
             }
         }
 
-        public bool ShouldLogRequest(string url)
+        public virtual bool ShouldLogRequest(string url)
         {
             if (_configuration.Logging == LoggerMode.Off)
             {
                 return false;
             }
 
-            if (_ignorePatternRegex == null)
+            var ignorePattern = _configuration.IgnoreSuggestionsUrlRegexPattern;
+            if (string.IsNullOrWhiteSpace(ignorePattern))
             {
                 return true;
             }
 
-            return !_ignorePatternRegex.IsMatch(url);
+            return !Regex.IsMatch(url, ignorePattern);
         }
 
         private static ConcurrentQueue<LogEvent> LogQueue { get; } = new ConcurrentQueue<LogEvent>();
