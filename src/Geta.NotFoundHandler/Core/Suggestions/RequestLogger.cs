@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Geta.NotFoundHandler.Data;
 using Geta.NotFoundHandler.Infrastructure.Configuration;
 using Microsoft.Extensions.Logging;
@@ -16,6 +17,7 @@ namespace Geta.NotFoundHandler.Core.Suggestions
         private readonly ILogger<RequestLogger> _logger;
         private readonly ISuggestionRepository _suggestionRepository;
         private readonly NotFoundHandlerOptions _configuration;
+        private readonly Regex _ignorePatternRegex;
 
         public RequestLogger(
             IOptions<NotFoundHandlerOptions> options,
@@ -25,6 +27,11 @@ namespace Geta.NotFoundHandler.Core.Suggestions
             _logger = logger;
             _suggestionRepository = suggestionRepository;
             _configuration = options.Value;
+
+            if (!string.IsNullOrWhiteSpace(_configuration.IgnoreSuggestionsUrlRegexPattern))
+            {
+                _ignorePatternRegex = new Regex(_configuration.IgnoreSuggestionsUrlRegexPattern, RegexOptions.Compiled);
+            }
         }
 
         public void LogRequest(string oldUrl, string referer)
@@ -78,6 +85,21 @@ namespace Geta.NotFoundHandler.Core.Suggestions
                 _logger.LogWarning(
                     "404 requests have been made too frequents (exceeded the threshold). Requests not logged to database");
             }
+        }
+
+        public bool ShouldLogRequest(string url)
+        {
+            if (_configuration.Logging == LoggerMode.Off)
+            {
+                return false;
+            }
+
+            if (_ignorePatternRegex == null)
+            {
+                return true;
+            }
+
+            return !_ignorePatternRegex.IsMatch(url);
         }
 
         private static ConcurrentQueue<LogEvent> LogQueue { get; } = new ConcurrentQueue<LogEvent>();

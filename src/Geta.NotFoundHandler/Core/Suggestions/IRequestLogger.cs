@@ -6,5 +6,6 @@ namespace Geta.NotFoundHandler.Core.Suggestions
     public interface IRequestLogger
     {
         void LogRequest(string oldUrl, string referer);
+        bool ShouldLogRequest(string oldUrl);
     }
 }

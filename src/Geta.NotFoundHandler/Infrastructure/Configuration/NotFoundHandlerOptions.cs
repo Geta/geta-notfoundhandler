@@ -20,6 +20,7 @@ namespace Geta.NotFoundHandler.Infrastructure.Configuration
             {"jpg", "gif", "png", "css", "js", "ico", "swf", "woff"};
 
         public LoggerMode Logging { get; set; } = LoggerMode.On;
+        public string IgnoreSuggestionsUrlRegexPattern { get; set; }
         public bool LogWithHostname { get; set; } = false;
         public string ConnectionString { get; private set; }
         public string BootstrapJsUrl { get; set; } = "https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js";

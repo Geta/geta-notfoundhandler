@@ -4,6 +4,7 @@ using FakeItEasy;
 using Geta.NotFoundHandler.Core;
 using Geta.NotFoundHandler.Core.Redirects;
 using Geta.NotFoundHandler.Core.Suggestions;
+using Geta.NotFoundHandler.Data;
 using Geta.NotFoundHandler.Infrastructure.Configuration;
 using Geta.NotFoundHandler.Tests.Base;
 using Microsoft.AspNetCore.Http;
@@ -23,16 +24,23 @@ namespace Geta.NotFoundHandler.Tests
         private static readonly Uri DefaultOldUri = new Uri("http://example.com/old");
         private readonly NotFoundHandlerOptions _configuration;
 
+        private const string IgnoreSuggestionsUrlRegexPattern = "^(https?:\\/\\/[^\\/]+)?\\/(api|nilleapi|episerverapi|globalassets|siteassets)(?!\\/private)(\\/.*)?$";
+
         public RequestHandlerTests()
         {
             _redirectHandler = A.Fake<IRedirectHandler>();
-            _requestLogger = A.Fake<IRequestLogger>();
             var options = A.Fake<IOptions<NotFoundHandlerOptions>>();
             _configuration = new NotFoundHandlerOptions();
             A.CallTo(() => options.Value).Returns(_configuration);
-            var logger = A.Fake<ILogger<RequestHandler>>();
+            var suggestionsRepository = A.Fake<ISuggestionRepository>();
+            var requestLoggerLogger = A.Fake<ILogger<RequestLogger>>();
+
+            _requestLogger = A.Fake<RequestLogger>(o => o.WithArgumentsForConstructor(new object[] {options, requestLoggerLogger, suggestionsRepository })
+                                                       .CallsBaseMethods());
+
+            var requestHandlerLogger = A.Fake<ILogger<RequestHandler>>();
             _sut = A.Fake<RequestHandler>(
-                o => o.WithArgumentsForConstructor(new object[] { _redirectHandler, _requestLogger, options, logger })
+                o => o.WithArgumentsForConstructor(new object[] { _redirectHandler, _requestLogger, options, requestHandlerLogger })
                     .CallsBaseMethods());
 
             _httpContext = new DefaultHttpContext();
@@ -253,6 +261,51 @@ namespace Geta.NotFoundHandler.Tests
         {
             A.CallTo(() => _requestLogger.LogRequest(urlNotFound.PathAndQuery, referrer.ToString()))
                 .MustHaveHappened();
+        }
+
+        [Theory]
+        [InlineData("https://example.com/api/something.json")]
+        [InlineData("/episerverapi/content")]
+        [InlineData("/globalassets/image.jpg")]
+        [InlineData("/siteassets/style.css")]
+        [InlineData("/api/resource")]
+        public void HandleRequest_ignore_suggestions_when_regex_matches(string url)
+        {
+            WhenLoggingIsOn();
+
+            _configuration.IgnoreSuggestionsUrlRegexPattern = IgnoreSuggestionsUrlRegexPattern;
+
+            var result = _requestLogger.ShouldLogRequest(url);
+
+            Assert.False(result);
+        }
+
+        [Theory]
+        [InlineData("https://example.com/home")]
+        [InlineData("/")]
+        [InlineData("/login")]
+        public void HandleRequest_do_not_ignore_suggestions_when_regex_do_not_matches(string url)
+        {
+            WhenLoggingIsOn();
+
+            _configuration.IgnoreSuggestionsUrlRegexPattern = IgnoreSuggestionsUrlRegexPattern;
+
+            var result = _requestLogger.ShouldLogRequest(url);
+
+            Assert.True(result);
+        }
+
+        [Theory]
+        [InlineData("/siteassets/private/file.json")]
+        public void HandleRequest_do_not_ignore_suggestions_when_regex_matches_using_lookahead(string url)
+        {
+            WhenLoggingIsOn();
+
+            _configuration.IgnoreSuggestionsUrlRegexPattern = IgnoreSuggestionsUrlRegexPattern;
+
+            var result = _requestLogger.ShouldLogRequest(url);
+
+            Assert.True(result);
         }
 
         private void WhenLoggingIsOn()

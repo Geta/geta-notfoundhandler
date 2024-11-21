@@ -154,11 +154,12 @@ namespace Geta.NotFoundHandler.Core
             }
             else
             {
+                // Safe logging
+                var logUrl = _configuration.LogWithHostname ? urlNotFound.ToString() : urlNotFound.PathAndQuery;
+
                 // log request to database - if logging is turned on.
-                if (_configuration.Logging == LoggerMode.On)
+                if (_requestLogger.ShouldLogRequest(logUrl))
                 {
-                    // Safe logging
-                    var logUrl = _configuration.LogWithHostname ? urlNotFound.ToString() : urlNotFound.PathAndQuery;
                     _requestLogger.LogRequest(logUrl, referer?.ToString());
                 }
             }
