@@ -1,7 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
     <AddRazorSupportForMvc>true</AddRazorSupportForMvc>
     <PackageId>Geta.NotFoundHandler.Optimizely</PackageId>
     <Title>NotFound handler Admin UI integration Optimizely</Title>
@@ -16,6 +15,7 @@
     <PackageReleaseNotes>https://github.com/Geta/geta-notfoundhandler/blob/master/CHANGELOG.md</PackageReleaseNotes>
     <PackageTags>404 NotFound 404Error Handler Geta Redirect</PackageTags>
     <RepositoryUrl>https://github.com/Geta/geta-notfoundhandler.git</RepositoryUrl>
+    <TargetFramework>net8.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
@@ -23,7 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="EPiServer.CMS.UI.Core" Version="12.7.0" />
+    <PackageReference Include="EPiServer.CMS.UI.Core" Version="12.31.2" />
   </ItemGroup>
 
   <ItemGroup>

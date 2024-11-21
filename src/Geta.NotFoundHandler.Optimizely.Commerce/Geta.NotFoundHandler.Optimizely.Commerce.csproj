@@ -1,7 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
     <PackageId>Geta.NotFoundHandler.Optimizely.Commerce</PackageId>
     <Title>NotFound handler Admin UI integration Optimizely Commerce</Title>
     <Authors>Geta Digital</Authors>
@@ -15,6 +14,7 @@
     <PackageReleaseNotes>https://github.com/Geta/geta-notfoundhandler/blob/master/CHANGELOG.md</PackageReleaseNotes>
     <PackageTags>404 NotFound 404Error Handler Geta Redirect</PackageTags>
     <RepositoryUrl>https://github.com/Geta/geta-notfoundhandler.git</RepositoryUrl>
+    <TargetFramework>net8.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
@@ -30,7 +30,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="EPiServer.Commerce.Core" Version="14.3.1" />
+    <PackageReference Include="EPiServer.Commerce.Core" Version="14.30.0" />
   </ItemGroup>
 
 </Project>

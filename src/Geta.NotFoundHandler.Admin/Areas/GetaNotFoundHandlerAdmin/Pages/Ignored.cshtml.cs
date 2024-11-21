@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using X.PagedList;
+using X.PagedList.Extensions;
 
 namespace Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin;
 

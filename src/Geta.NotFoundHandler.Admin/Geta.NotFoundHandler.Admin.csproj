@@ -1,7 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
     <AddRazorSupportForMvc>true</AddRazorSupportForMvc>
     <PackageId>Geta.NotFoundHandler.Admin</PackageId>
     <Title>Admin UI for NotFound Handler for ASP.NET Core and EPiServer</Title>
@@ -17,6 +16,7 @@
     <PackageTags>404 NotFound 404Error Handler Geta Redirect</PackageTags>
     <RepositoryUrl>https://github.com/Geta/geta-notfoundhandler.git</RepositoryUrl>
     <StaticWebAssetBasePath>/_content/</StaticWebAssetBasePath>
+    <TargetFramework>net8.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
@@ -24,7 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="X.PagedList" Version="8.4.3" />
+    <PackageReference Include="X.PagedList" Version="10.5.7" />
   </ItemGroup>
 
   <ItemGroup>
