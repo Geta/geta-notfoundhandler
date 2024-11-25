@@ -7,6 +7,7 @@ using Geta.NotFoundHandler.Data;
 using Geta.NotFoundHandler.Infrastructure;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace Geta.NotFoundHandler.Admin.Areas.Geta.NotFoundHandler.Admin;
@@ -29,10 +30,11 @@ public class RegexModel : PageModel
 
     public IEnumerable<RegexRedirect> Items { get; set; } = Enumerable.Empty<RegexRedirect>();
 
-    private string EditItemId { get; set; }
-
     [BindProperty]
     public RegexRedirectModel RegexRedirect { get; set; }
+
+    [BindProperty]
+    public RegexRedirectModel EditRedirect { get; set; }
 
     public void OnGet()
     {
@@ -41,15 +43,19 @@ public class RegexModel : PageModel
 
     public IActionResult OnPostCreate()
     {
-        if (!ModelState.IsValid)
+        if (ModelState.GetValidationState($"{nameof(RegexRedirect)}.{nameof(RegexRedirect.OldUrlRegex)}") ==
+            ModelValidationState.Valid &&
+            ModelState.GetValidationState($"{nameof(RegexRedirect)}.{nameof(RegexRedirect.NewUrlFormat)}") ==
+            ModelValidationState.Valid)
         {
-            Load();
-            return Page();
+            _regexRedirectsService.Create(RegexRedirect.OldUrlRegex, RegexRedirect.NewUrlFormat, RegexRedirect.OrderNumber);
+
+            return RedirectToPage();
+
         }
 
-        _regexRedirectsService.Create(RegexRedirect.OldUrlRegex, RegexRedirect.NewUrlFormat, RegexRedirect.OrderNumber);
-
-        return RedirectToPage();
+        Load();
+        return Page();
     }
 
     public IActionResult OnPostDelete(Guid id)
@@ -59,42 +65,24 @@ public class RegexModel : PageModel
         return RedirectToPage();
     }
 
-    public IActionResult OnPostEdit(Guid id)
+    public IActionResult OnPostUpdate()
     {
-        ModelState.Clear();
+        if (ModelState.GetValidationState($"{nameof(EditRedirect)}.{nameof(EditRedirect.OldUrlRegex)}") ==
+            ModelValidationState.Valid &&
+            ModelState.GetValidationState($"{nameof(EditRedirect)}.{nameof(EditRedirect.NewUrlFormat)}") ==
+            ModelValidationState.Valid &&
+            EditRedirect.Id != null)
+        {
+            _regexRedirectsService.Update(EditRedirect.Id.Value,
+                                          EditRedirect.OldUrlRegex,
+                                          EditRedirect.NewUrlFormat,
+                                          EditRedirect.OrderNumber);
+            return RedirectToPage();
+        }
 
         Load();
 
-        EditItemId = id.ToString();
-
-        var redirect = _redirectLoader.Get(id);
-
-        RegexRedirect = new RegexRedirectModel
-        {
-            Id = redirect.Id,
-            OldUrlRegex = redirect.OldUrlRegex.ToString(),
-            NewUrlFormat = redirect.NewUrlFormat,
-            OrderNumber = redirect.OrderNumber
-        };
-
         return Page();
-    }
-
-    public IActionResult OnPostUpdate(Guid id)
-    {
-        if (!ModelState.IsValid)
-        {
-            Load();
-            EditItemId = id.ToString();
-
-            return Page();
-        }
-
-        _regexRedirectsService.Update(id,
-                                      RegexRedirect.OldUrlRegex,
-                                      RegexRedirect.NewUrlFormat,
-                                      RegexRedirect.OrderNumber);
-        return RedirectToPage();
     }
     
     public IActionResult OnPostCancel(Guid id)
@@ -113,15 +101,5 @@ public class RegexModel : PageModel
     private IList<RegexRedirect> FindRedirects()
     {
         return _redirectLoader.GetAll().ToList();
-    }
-
-    public bool IsEditing(Guid? id)
-    {
-        return id.ToString() == EditItemId;
-    }
-
-    public bool IsEditing()
-    {
-        return !string.IsNullOrEmpty(EditItemId);
     }
 }
