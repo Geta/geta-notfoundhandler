@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Geta.NotFoundHandler.Admin.Areas.GetaNotFoundHandlerAdmin.Pages;
@@ -7,6 +6,7 @@ using Geta.NotFoundHandler.Core.Redirects;
 using Geta.NotFoundHandler.Infrastructure;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using X.PagedList;
 
@@ -37,8 +37,9 @@ public class IndexModel : PageModel
 
     public bool HasQuery => !string.IsNullOrEmpty(Query);
 
-    private Guid? EditItemId { get; set; }
-    
+    [BindProperty]
+    public RedirectModel EditRedirect { get; set; }
+
     public void OnGet(RedirectsRequest request)
     {
         ApplyRequest(request);
@@ -48,20 +49,23 @@ public class IndexModel : PageModel
 
     public IActionResult OnPostCreate()
     {
-        if (!ModelState.IsValid)
+        if (ModelState.GetValidationState($"{nameof(CustomRedirect)}.{nameof(CustomRedirect.OldUrl)}") ==
+            ModelValidationState.Valid &&
+            ModelState.GetValidationState($"{nameof(CustomRedirect)}.{nameof(CustomRedirect.NewUrl)}") ==
+            ModelValidationState.Valid)
         {
-            Load();
-            return Page();
+            var customRedirect = new CustomRedirect(CustomRedirect.OldUrl,
+                                                    CustomRedirect.NewUrl,
+                                                    CustomRedirect.WildCardSkipAppend,
+                                                    CustomRedirect.RedirectType);
+
+            _redirectsService.AddOrUpdate(customRedirect);
+
+            return RedirectToPage();
         }
 
-        var customRedirect = new CustomRedirect(CustomRedirect.OldUrl,
-                                                CustomRedirect.NewUrl,
-                                                CustomRedirect.WildCardSkipAppend,
-                                                CustomRedirect.RedirectType);
-
-        _redirectsService.AddOrUpdate(customRedirect);
-
-        return RedirectToPage();
+        Load();
+        return Page();
     }
 
     public IActionResult OnPostDelete(RedirectsRequest request)
@@ -69,83 +73,36 @@ public class IndexModel : PageModel
         ModelState.Clear();
 
         _redirectsService.DeleteById(request.Id);
-        
+
         ApplyRequest(request);
 
         Load();
-        
+
         return RedirectToPage(request);
     }
 
-    public IActionResult OnPostEdit(RedirectsRequest request)
-    {
-        ModelState.Clear();
-
-        ApplyRequest(request);
-
-        Load();
-
-        var redirect = _redirectsService.Get(request.Id);
-
-        if (redirect != null)
-        {
-            ActivateEditMode(request.Id);
-
-            CustomRedirect = new RedirectModel
-            {
-                OldUrl = redirect.OldUrl,
-                RedirectType = redirect.RedirectType,
-                NewUrl = redirect.NewUrl,
-                WildCardSkipAppend = redirect.WildCardSkipAppend
-            };
-        }
-
-        return Page();
-    }
-    
     public IActionResult OnPostUpdate(RedirectsRequest request)
     {
-        if (!ModelState.IsValid)
+        if (ModelState.GetValidationState($"{nameof(EditRedirect)}.{nameof(EditRedirect.OldUrl)}") ==
+            ModelValidationState.Valid &&
+            ModelState.GetValidationState($"{nameof(EditRedirect)}.{nameof(EditRedirect.NewUrl)}") ==
+            ModelValidationState.Valid &&
+            EditRedirect.Id != null)
         {
-            ApplyRequest(request);
+            _redirectsService.AddOrUpdate(new CustomRedirect
+            {
+                Id = EditRedirect.Id,
+                OldUrl = EditRedirect.OldUrl,
+                RedirectType = EditRedirect.RedirectType,
+                NewUrl = EditRedirect.NewUrl,
+                WildCardSkipAppend = EditRedirect.WildCardSkipAppend
+            });
 
-            Load();
-
-            ActivateEditMode(request.Id);
-
-            return Page();
+            return RedirectToPage(request);
         }
 
-        _redirectsService.AddOrUpdate(new CustomRedirect
-        {
-            Id = request.Id,
-            OldUrl = CustomRedirect.OldUrl,
-            RedirectType = CustomRedirect.RedirectType,
-            NewUrl = CustomRedirect.NewUrl,
-            WildCardSkipAppend = CustomRedirect.WildCardSkipAppend
-        });
-
-        return RedirectToPage(request);
-    }
-    
-    public IActionResult OnPostCancelEdit(RedirectsRequest request)
-    {
-        return RedirectToPage(request);
-    }
-    
-    public bool IsEditing(Guid? id)
-    {
-        return id.HasValue && id == EditItemId;
-    }
-    
-    public bool IsEditing()
-    {
-        return EditItemId != null;
-    }
-
-    private void ActivateEditMode(Guid id)
-    {
-        EditItemId = id;
+        Load();
+        return Page();
     }
 
     private void Load()
@@ -166,6 +123,7 @@ public class IndexModel : PageModel
         {
             Paging.PageNumber = request.PageNumber.Value;
         }
+
         Query = request.Query ?? Query;
     }
 }
