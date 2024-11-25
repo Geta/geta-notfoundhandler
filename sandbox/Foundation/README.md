@@ -13,7 +13,7 @@ Foundation offers a starting point that is intuitive, well-structured and modula
 
 You will need these to run locally on your machine.
 
-[Net 5](https://dotnet.microsoft.com/download/dotnet/5.0) sdk is required to use with visual studio.  Runtime maybe sufficent to just run the application.
+[Net 6](https://dotnet.microsoft.com/en-us/download/dotnet/6.0) sdk is required to use with visual studio.  Runtime maybe sufficent to just run the application.
 
 [Node JS](https://nodejs.org/en/download/)
 
@@ -41,7 +41,6 @@ Windows
 open command prompt as administrator
 git clone https://github.com/episerver/Foundation.git
 cd foundation
-git checkout main
 setup.cmd 
 dotnet run --project .\src\Foundation\Foundation.csproj
 ```
@@ -52,7 +51,6 @@ dotnet run --project .\src\Foundation\Foundation.csproj
 Open a Terminal window
 git clone https://github.com/episerver/Foundation.git
 cd Foundation
-git checkout main
 chmod u+x setup.sh
 ./setup.sh
 dotnet run --project ./src/Foundation/Foundation.csproj
@@ -64,7 +62,6 @@ dotnet run --project ./src/Foundation/Foundation.csproj
 Open a bash terminal window
 git clone https://github.com/episerver/Foundation.git
 cd Foundation
-git checkout main
 chmod u+x setup.sh
 ./setup.sh
 dotnet run --project ./src/Foundation/Foundation.csproj

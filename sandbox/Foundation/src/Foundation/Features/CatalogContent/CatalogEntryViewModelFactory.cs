@@ -1,12 +1,7 @@
-using EPiServer;
-using EPiServer.Commerce.Catalog.ContentTypes;
 using EPiServer.Commerce.Catalog.Linking;
-using EPiServer.Commerce.SpecializedProperties;
-using EPiServer.Core;
 using EPiServer.Data;
 using EPiServer.Filters;
 using EPiServer.Security;
-using EPiServer.Web.Routing;
 using Foundation.Features.CatalogContent.Bundle;
 using Foundation.Features.CatalogContent.Package;
 using Foundation.Features.CatalogContent.Product;
@@ -14,18 +9,10 @@ using Foundation.Features.CatalogContent.Services;
 using Foundation.Features.CatalogContent.Variation;
 using Foundation.Features.Media;
 using Foundation.Features.Stores;
-using Foundation.Infrastructure.Commerce.Extensions;
-using Foundation.Infrastructure.Commerce.Markets;
-using Mediachase.Commerce;
-using Mediachase.Commerce.Catalog;
 using Mediachase.Commerce.Inventory;
 using Mediachase.Commerce.InventoryService;
-using Mediachase.Commerce.Pricing;
 using Mediachase.Commerce.Security;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Foundation.Features.CatalogContent
 {
@@ -176,7 +163,7 @@ namespace Foundation.Features.CatalogContent
                     Sku = x.Code,
                     Name = x.Name,
                     Size = x is GenericVariant ? $"{(x as GenericVariant).Color} {(x as GenericVariant).Size}" : "",
-                    ImageUrl = string.IsNullOrEmpty(variantImage) ? "http://placehold.it/54x54/" : variantImage,
+                    ImageUrl = string.IsNullOrEmpty(variantImage) ? "https://placehold.jp/54x54.png" : variantImage,
                     DiscountedPrice = GetDiscountPrice(variantDefaultPrice, market, currency),
                     ListingPrice = variantDefaultPrice?.UnitPrice ?? new Money(0, currency),
                     StockQuantity = _quickOrderService.GetTotalInventoryByEntry(x.Code)

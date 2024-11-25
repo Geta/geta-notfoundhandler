@@ -1,13 +1,5 @@
-using EPiServer;
-using EPiServer.Core;
-using EPiServer.DataAbstraction;
-using EPiServer.DataAnnotations;
 using EPiServer.Framework.Blobs;
 using EPiServer.Framework.DataAnnotations;
-using EPiServer.Shell.ObjectEditing;
-using Foundation.Infrastructure;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 
 namespace Foundation.Features.Media
 {
@@ -21,9 +13,6 @@ namespace Foundation.Features.Media
         [ImageDescriptor(Width = 256, Height = 256)]
         [Display(Name = "Large thumbnail", GroupName = SystemTabNames.Content, Order = 10)]
         public virtual Blob LargeThumbnail { get; set; }
-
-        [Editable(false)]
-        public override Blob Thumbnail { get => BinaryData; }
 
         [Editable(false)]
         [Display(Name = "File size", GroupName = SystemTabNames.Content, Order = 20)]
