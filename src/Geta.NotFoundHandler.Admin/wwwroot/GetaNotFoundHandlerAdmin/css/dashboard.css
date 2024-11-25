@@ -122,3 +122,15 @@
 td {
     word-break: break-all;
 }
+
+.edit-modal {
+    max-height: 600px !important;
+}
+
+.referrers-modal {
+    max-height: 350px !important;
+}
+
+.pagination-spacing {
+    margin-top: 5rem !important;
+}
