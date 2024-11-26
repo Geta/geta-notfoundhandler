@@ -10,6 +10,7 @@ namespace Geta.NotFoundHandler.Optimizely.Infrastructure.Configuration
 {
     public class OptimizelyNotFoundHandlerOptions
     {
+        public const string Section = "Geta:NotFoundHandler:Optimizely";
         public const int CurrentDbVersion = 3;
 
         public bool AutomaticRedirectsEnabled { get; set; }

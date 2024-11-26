@@ -9,6 +9,7 @@ using EPiServer.ContentApi.Commerce;
 using EPiServer.ContentDefinitionsApi;
 using EPiServer.ContentManagementApi;
 using EPiServer.Data;
+using EPiServer.Framework.Hosting;
 using EPiServer.Labs.ContentManager;
 using EPiServer.Labs.ProjectEnhancements;
 using EPiServer.Marketing.Testing.Web.Initializers;
@@ -16,12 +17,14 @@ using EPiServer.OpenIDConnect;
 using EPiServer.ServiceApi;
 using EPiServer.Shell.Modules;
 using EPiServer.Social.Framework;
+using EPiServer.Web.Hosting;
 using Foundation.Features.Checkout.Payments;
 using Foundation.Infrastructure.Cms.ModelBinders;
 using Foundation.Infrastructure.Cms.Users;
 using Foundation.Infrastructure.Display;
 using Geta.NotFoundHandler.Infrastructure.Configuration;
 using Geta.NotFoundHandler.Infrastructure.Initialization;
+using Geta.NotFoundHandler.Optimizely;
 using Geta.NotFoundHandler.Optimizely.Infrastructure.Configuration;
 using Geta.NotFoundHandler.Optimizely.Infrastructure.Initialization;
 using Geta.Optimizely.Categories.Configuration;
@@ -209,6 +212,18 @@ namespace Foundation
                     });
                 }
             });
+            
+            // Add not found handler optimizely module
+            var moduleName = typeof(ContainerController).Assembly.GetName().Name;
+
+            services.Configure<CompositeFileProviderOptions>(options =>
+            {
+                options.BasePathFileProviders.Add(new MappingPhysicalFileProvider(
+                    $"/EPiServer/{moduleName}",
+                    string.Empty,
+                    Path.GetFullPath($"..\\..\\..\\..\\src\\{moduleName}")));
+            });
+
             // Don't camelCase Json output -- leave property names unchanged
             //services.AddControllers()
             //    .AddJsonOptions(options =>

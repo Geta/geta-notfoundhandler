@@ -28,10 +28,18 @@
     <table class="table table-hover table-sm" aria-label="Redirects">
         <thead>
         <tr>
-            <th>Old URL</th>
-            <th>New URL</th>
-            <th class="col-1 text-center">Wildcard</th>
-            <th class="col-1">Redirect Type</th>
+            <th>
+                    <vc:sortable-header-cell key="@nameof(CustomRedirect.NewUrl)" display-name="New URL"/>
+                </th>
+            <th>
+                    <vc:sortable-header-cell key="@nameof(CustomRedirect.OldUrl)" display-name="Old URL"/>
+                </th>
+            <th class="col-1 text-center">
+                    <vc:sortable-header-cell key="@nameof(CustomRedirect.WildCardSkipAppend)" display-name="Wildcard"/>
+                </th>
+            <th class="col-1">
+                    <vc:sortable-header-cell key="@nameof(CustomRedirect.RedirectType)" display-name="Redirect Type"/>
+                </th>
             <th class="col-1"></th>
         </tr>
         </thead>

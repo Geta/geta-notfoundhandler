@@ -1,16 +1,19 @@
+using System.Collections.Generic;
 using System.Linq;
+using Geta.NotFoundHandler.Admin.Areas.GetaNotFoundHandlerAdmin.Pages.Base;
+using Geta.NotFoundHandler.Admin.Areas.GetaNotFoundHandlerAdmin.Pages.Extensions;
+using Geta.NotFoundHandler.Admin.Areas.GetaNotFoundHandlerAdmin.Pages.Models;
 using Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin.Models;
 using Geta.NotFoundHandler.Core.Redirects;
 using Geta.NotFoundHandler.Infrastructure;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using X.PagedList;
 
 namespace Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin;
 
 [Authorize(Constants.PolicyName)]
-public class IgnoredModel : PageModel
+public class IgnoredModel : AbstractSortablePageModel
 {
     private readonly IRedirectsService _redirectsService;
 
@@ -26,8 +29,10 @@ public class IgnoredModel : PageModel
     [BindProperty(SupportsGet = true)]
     public Paging Paging { get; set; }
 
-    public void OnGet()
+    public void OnGet(string sortColumn, SortDirection? sortDirection)
     {
+        ApplySort(sortColumn, sortDirection);
+
         Load();
     }
 
@@ -40,8 +45,15 @@ public class IgnoredModel : PageModel
 
     private void Load()
     {
-        var items = _redirectsService.GetIgnored().ToPagedList(Paging.PageNumber, Paging.PageSize);
+        var items = FindRedirects().ToPagedList(Paging.PageNumber, Paging.PageSize);
         Message = $"There are currently {items.TotalItemCount} ignored suggestions stored.";
         Items = items;
+    }
+
+    private IEnumerable<CustomRedirect> FindRedirects()
+    {
+        return _redirectsService
+            .GetIgnored()
+            .Sort(SortColumn, SortDirection);
     }
 }

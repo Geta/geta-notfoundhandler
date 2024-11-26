@@ -1,5 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
+using Geta.NotFoundHandler.Admin.Areas.GetaNotFoundHandlerAdmin.Pages.Base;
+using Geta.NotFoundHandler.Admin.Areas.GetaNotFoundHandlerAdmin.Pages.Extensions;
+using Geta.NotFoundHandler.Admin.Areas.GetaNotFoundHandlerAdmin.Pages.Models;
 using Geta.NotFoundHandler.Admin.Areas.GetaNotFoundHandlerAdmin.Pages;
 using Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin.Models;
 using Geta.NotFoundHandler.Core.Redirects;
@@ -13,7 +16,7 @@ using X.PagedList;
 namespace Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin;
 
 [Authorize(Constants.PolicyName)]
-public class IndexModel : PageModel
+public class IndexModel : AbstractSortablePageModel
 {
     private readonly IRedirectsService _redirectsService;
 
@@ -37,22 +40,17 @@ public class IndexModel : PageModel
 
     public bool HasQuery => !string.IsNullOrEmpty(Query);
 
-    [BindProperty]
-    public RedirectModel EditRedirect { get; set; }
-
-    public void OnGet(RedirectsRequest request)
+    public void OnGet(RedirectsRequest request, string sortColumn, SortDirection? sortDirection)
     {
         ApplyRequest(request);
+        ApplySort(sortColumn, sortDirection);
 
         Load();
     }
 
     public IActionResult OnPostCreate()
     {
-        if (ModelState.GetValidationState($"{nameof(CustomRedirect)}.{nameof(CustomRedirect.OldUrl)}") ==
-            ModelValidationState.Valid &&
-            ModelState.GetValidationState($"{nameof(CustomRedirect)}.{nameof(CustomRedirect.NewUrl)}") ==
-            ModelValidationState.Valid)
+        if (ModelState.IsValid)
         {
             var customRedirect = new CustomRedirect(CustomRedirect.OldUrl,
                                                     CustomRedirect.NewUrl,
@@ -72,7 +70,10 @@ public class IndexModel : PageModel
     {
         ModelState.Clear();
 
-        _redirectsService.DeleteById(request.Id);
+        if (request.Id != null)
+        {
+            _redirectsService.DeleteById(request.Id.Value);
+        }
 
         ApplyRequest(request);
 
@@ -83,19 +84,16 @@ public class IndexModel : PageModel
 
     public IActionResult OnPostUpdate(RedirectsRequest request)
     {
-        if (ModelState.GetValidationState($"{nameof(EditRedirect)}.{nameof(EditRedirect.OldUrl)}") ==
-            ModelValidationState.Valid &&
-            ModelState.GetValidationState($"{nameof(EditRedirect)}.{nameof(EditRedirect.NewUrl)}") ==
-            ModelValidationState.Valid &&
-            EditRedirect.Id != null)
+        if (ModelState.IsValid &&
+            CustomRedirect.Id != null)
         {
             _redirectsService.AddOrUpdate(new CustomRedirect
             {
-                Id = EditRedirect.Id,
-                OldUrl = EditRedirect.OldUrl,
-                RedirectType = EditRedirect.RedirectType,
-                NewUrl = EditRedirect.NewUrl,
-                WildCardSkipAppend = EditRedirect.WildCardSkipAppend
+                Id = CustomRedirect.Id,
+                OldUrl = CustomRedirect.OldUrl,
+                RedirectType = CustomRedirect.RedirectType,
+                NewUrl = CustomRedirect.NewUrl,
+                WildCardSkipAppend = CustomRedirect.WildCardSkipAppend
             });
 
             return RedirectToPage(request);
@@ -114,7 +112,10 @@ public class IndexModel : PageModel
 
     private IEnumerable<CustomRedirect> FindRedirects()
     {
-        return HasQuery ? _redirectsService.Search(Query) : _redirectsService.GetSaved();
+        var result = HasQuery ? _redirectsService.Search(Query) : _redirectsService.GetSaved();
+
+        return result
+            .Sort(SortColumn, SortDirection);
     }
 
     private void ApplyRequest(RedirectsRequest request)
