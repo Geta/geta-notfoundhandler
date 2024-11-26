@@ -11,7 +11,7 @@
 <!-- Search form -->
 <form method="get">
     <div class="search-container input-group flex-nowrap">
-        <input class="form-control w-100 border-end-0" type="text" placeholder="Search" aria-label="Search" id="search" name="q" value="@Model.Query">
+        <input class="form-control w-100 border-end-0" type="text" placeholder="Search" aria-label="Search" id="search"name="q" value="@Model.Query">
         <span class="input-group-append">
             <button class="btn btn-outline-secondary border-start-0 border" type="button" data-clear="#search">
                 <span data-feather="x"></span>
@@ -29,17 +29,17 @@
         <thead>
         <tr>
             <th>
-                    <vc:sortable-header-cell key="@nameof(CustomRedirect.NewUrl)" display-name="New URL"/>
-                </th>
+                <vc:sortable-header-cell key="@nameof(CustomRedirect.OldUrl)" display-name="Old URL"/>
+            </th>
             <th>
-                    <vc:sortable-header-cell key="@nameof(CustomRedirect.OldUrl)" display-name="Old URL"/>
-                </th>
+                <vc:sortable-header-cell key="@nameof(CustomRedirect.NewUrl)" display-name="New URL"/>
+            </th>
             <th class="col-1 text-center">
-                    <vc:sortable-header-cell key="@nameof(CustomRedirect.WildCardSkipAppend)" display-name="Wildcard"/>
-                </th>
+                <vc:sortable-header-cell key="@nameof(CustomRedirect.WildCardSkipAppend)" display-name="Wildcard"/>
+            </th>
             <th class="col-1">
-                    <vc:sortable-header-cell key="@nameof(CustomRedirect.RedirectType)" display-name="Redirect Type"/>
-                </th>
+                <vc:sortable-header-cell key="@nameof(CustomRedirect.RedirectType)" display-name="Redirect Type"/>
+            </th>
             <th class="col-1"></th>
         </tr>
         </thead>
@@ -47,11 +47,11 @@
         <tr>
             <form method="post">
                 <td>
-                    <input type="text" class="form-control" asp-for="CustomRedirect.OldUrl">
+                    <input required type="text" class="form-control" asp-for="CustomRedirect.OldUrl">
                     <span asp-validation-for="CustomRedirect.OldUrl" class="text-danger"></span>
                 </td>
                 <td>
-                    <input type="text" class="form-control" asp-for="CustomRedirect.NewUrl">
+                    <input required type="text" class="form-control" asp-for="CustomRedirect.NewUrl">
                     <span asp-validation-for="CustomRedirect.NewUrl" class="text-danger"></span>
                 </td>
                 <td class="text-center align-middle">
@@ -104,29 +104,24 @@
                                 </div>
                                 <div class="modal-body">
                                     <form method="post" id="form-@editModalId">
-
-                                        <div class="input-group mb-3">
+                                        <div class="input-group mb-2">
                                             <div class="input-group-prepend">
-                                                <span class="input-group-text" id="basic-addon1">OldUrl</span>
+                                                <span class="input-group-text">Old Url</span>
                                             </div>
-                                            <textarea class="form-control" id="EditRedirect.OldUrl"
-                                                      name="EditRedirect.OldUrl" rows="1">@item.OldUrl</textarea>
-                                            <span asp-validation-for="EditRedirect.OldUrl" class="text-danger"></span>
+                                            <textarea required="required" class="form-control" name="@Html.NameFor(m => m.EditRedirect.OldUrl)" rows="1">@item.OldUrl</textarea>
                                         </div>
 
-                                        <div class="input-group mb-3">
+                                        <div class="input-group mb-2">
                                             <div class="input-group-prepend">
-                                                <span class="input-group-text" id="basic-addon1">NewUrl</span>
+                                                <span class="input-group-text">New Url</span>
                                             </div>
-                                            <textarea class="form-control" id="EditRedirect.NewUrl"
-                                                      name="EditRedirect.NewUrl" rows="1">@item.NewUrl</textarea>
-                                            <span asp-validation-for="EditRedirect.NewUrl" class="text-danger"></span>
+                                            <textarea required="required" class="form-control" name="@Html.NameFor(m => m.EditRedirect.NewUrl)" rows="1">@item.NewUrl</textarea>
                                         </div>
 
                                         <div class="d-flex flex-row">
                                             <div class="flex-fill">
                                                 <label>Wildcard</label>
-                                                <div class="input-group mb-3 text-center align-middle">
+                                                <div class="input-group mb-2 text-center align-middle">
                                                     @if (item.WildCardSkipAppend)
                                                     {
                                                         <input type="checkbox" class="form-check-input"
@@ -136,14 +131,15 @@
                                                     else
                                                     {
                                                         <input type="checkbox" class="form-check-input"
-                                                               asp-for="EditRedirect.WildCardSkipAppend" value="true"/>
+                                                               asp-for="EditRedirect.WildCardSkipAppend"
+                                                               value="true"/>
                                                     }
                                                 </div>
                                             </div>
 
                                             <div class="flex-fill">
                                                 <label>RedirectType</label>
-                                                <div class="input-group mb-3">
+                                                <div class="input-group mb-2">
                                                     <select class="form-select" asp-for="EditRedirect.RedirectType">
                                                         @if (item.RedirectType == RedirectType.Temporary)
                                                         {
@@ -173,11 +169,11 @@
 
 
                                         <input type="hidden" asp-for="EditRedirect.Id" value="@item.Id"/>
-                                        <input type="hidden" id="PageNumber" name="PageNumber" value="@Model.Paging.PageNumber"/>
-                                        <input type="hidden" id="Query" name="Query" value="@Model.Query"/>
 
                                         <button type="submit"
-                                                class="btn btn-primary"
+                                                class="mt-3 btn btn-primary"
+                                                asp-route-pagenumber="@Model.Items.PageNumber"
+                                                asp-route-query="@Model.Query"
                                                 asp-page-handler="update">Update
                                         </button>
                                     </form>

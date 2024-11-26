@@ -10,8 +10,6 @@ using Geta.NotFoundHandler.Data;
 using Geta.NotFoundHandler.Infrastructure;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace Geta.NotFoundHandler.Admin.Areas.Geta.NotFoundHandler.Admin;
 
@@ -33,8 +31,11 @@ public class RegexModel : AbstractSortablePageModel
 
     public IEnumerable<RegexRedirect> Items { get; set; } = Enumerable.Empty<RegexRedirect>();
 
-    [BindProperty]
+    [BindProperty(Name = nameof(RegexRedirect))]
     public RegexRedirectModel RegexRedirect { get; set; }
+
+    [BindProperty(Name = nameof(EditRedirect))]
+    public RegexRedirectModel EditRedirect { get; set; }
 
     public void OnGet(string sortColumn, SortDirection? sortDirection)
     {
@@ -45,12 +46,13 @@ public class RegexModel : AbstractSortablePageModel
 
     public IActionResult OnPostCreate()
     {
+        ModelState.RemoveNestedKeys(nameof(EditRedirect));
+
         if (ModelState.IsValid)
         {
             _regexRedirectsService.Create(RegexRedirect.OldUrlRegex, RegexRedirect.NewUrlFormat, RegexRedirect.OrderNumber);
 
             return RedirectToPage();
-
         }
 
         Load();
@@ -66,24 +68,21 @@ public class RegexModel : AbstractSortablePageModel
 
     public IActionResult OnPostUpdate()
     {
+        ModelState.RemoveNestedKeys(nameof(RegexRedirect));
+
         if (ModelState.IsValid &&
-            RegexRedirect.Id != null)
+            EditRedirect.Id != null)
         {
-            _regexRedirectsService.Update(RegexRedirect.Id.Value,
-                                          RegexRedirect.OldUrlRegex,
-                                          RegexRedirect.NewUrlFormat,
-                                          RegexRedirect.OrderNumber);
+            _regexRedirectsService.Update(EditRedirect.Id.Value,
+                                          EditRedirect.OldUrlRegex,
+                                          EditRedirect.NewUrlFormat,
+                                          EditRedirect.OrderNumber);
             return RedirectToPage();
         }
 
         Load();
 
         return Page();
-    }
-    
-    public IActionResult OnPostCancel(Guid id)
-    {
-        return RedirectToPage();
     }
 
     private void Load()

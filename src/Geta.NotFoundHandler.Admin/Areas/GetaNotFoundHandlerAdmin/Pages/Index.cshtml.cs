@@ -9,8 +9,6 @@ using Geta.NotFoundHandler.Core.Redirects;
 using Geta.NotFoundHandler.Infrastructure;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using X.PagedList;
 
 namespace Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin;
@@ -29,8 +27,11 @@ public class IndexModel : AbstractSortablePageModel
 
     public IPagedList<CustomRedirect> Items { get; set; } = Enumerable.Empty<CustomRedirect>().ToPagedList();
 
-    [BindProperty]
+    [BindProperty(Name = nameof(CustomRedirect))]
     public RedirectModel CustomRedirect { get; set; }
+
+    [BindProperty(Name = nameof(EditRedirect))]
+    public RedirectModel EditRedirect { get; set; }
 
     [BindProperty(SupportsGet = true)]
     public Paging Paging { get; set; }
@@ -50,6 +51,8 @@ public class IndexModel : AbstractSortablePageModel
 
     public IActionResult OnPostCreate()
     {
+        ModelState.RemoveNestedKeys(nameof(EditRedirect));
+
         if (ModelState.IsValid)
         {
             var customRedirect = new CustomRedirect(CustomRedirect.OldUrl,
@@ -84,16 +87,17 @@ public class IndexModel : AbstractSortablePageModel
 
     public IActionResult OnPostUpdate(RedirectsRequest request)
     {
-        if (ModelState.IsValid &&
-            CustomRedirect.Id != null)
+        ModelState.RemoveNestedKeys(nameof(CustomRedirect));
+        
+        if (ModelState.IsValid && EditRedirect.Id != null)
         {
             _redirectsService.AddOrUpdate(new CustomRedirect
             {
-                Id = CustomRedirect.Id,
-                OldUrl = CustomRedirect.OldUrl,
-                RedirectType = CustomRedirect.RedirectType,
-                NewUrl = CustomRedirect.NewUrl,
-                WildCardSkipAppend = CustomRedirect.WildCardSkipAppend
+                Id = EditRedirect.Id,
+                OldUrl = EditRedirect.OldUrl,
+                RedirectType = EditRedirect.RedirectType,
+                NewUrl = EditRedirect.NewUrl,
+                WildCardSkipAppend = EditRedirect.WildCardSkipAppend
             });
 
             return RedirectToPage(request);

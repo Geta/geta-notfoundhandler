@@ -10,14 +10,14 @@
         <thead>
         <tr>
             <th class="col-1">
-                    <vc:sortable-header-cell key="@nameof(RegexRedirect.OrderNumber)" display-name="Order Number"/>
-                </th>
+                <vc:sortable-header-cell key="@nameof(RegexRedirect.OrderNumber)" display-name="Order Number"/>
+            </th>
             <th>
-                    <vc:sortable-header-cell key="@nameof(RegexRedirect.OldUrlRegex)" display-name="Old URL Regex"/>
-                </th>
+                <vc:sortable-header-cell key="@nameof(RegexRedirect.OldUrlRegex)" display-name="Old URL Regex"/>
+            </th>
             <th>
-                    <vc:sortable-header-cell key="@nameof(RegexRedirect.NewUrlFormat)" display-name="New URL Format"/>
-                </th>
+                <vc:sortable-header-cell key="@nameof(RegexRedirect.NewUrlFormat)" display-name="New URL Format"/>
+            </th>
             <th class="col-1"></th>
             <th class="col-1"></th>
         </tr>
@@ -30,11 +30,11 @@
                     <span asp-validation-for="RegexRedirect.OrderNumber" class="text-danger"></span>
                 </td>
                 <td>
-                    <input type="text" class="form-control" asp-for="RegexRedirect.OldUrlRegex">
+                    <input required type="text" class="form-control" asp-for="RegexRedirect.OldUrlRegex">
                     <span asp-validation-for="RegexRedirect.OldUrlRegex" class="text-danger"></span>
                 </td>
                 <td>
-                    <input type="text" class="form-control" asp-for="RegexRedirect.NewUrlFormat">
+                    <input required type="text" class="form-control" asp-for="RegexRedirect.NewUrlFormat">
                     <span asp-validation-for="RegexRedirect.NewUrlFormat" class="text-danger"></span>
                 </td>
                 <td>
@@ -71,32 +71,36 @@
                                 </div>
                                 <div class="modal-body">
                                     <form method="post" id="form-@editModalId">
-                                        <div class="input-group mb-3">
+                                        <div class="input-group mb-2">
                                             <div class="input-group-prepend">
                                                 <span class="input-group-text">Old URL Regex</span>
                                             </div>
-                                            <textarea class="form-control" id="EditRedirect.OldUrlRegex"
-                                                      name="EditRedirect.OldUrlRegex" rows="1">@item.OldUrlRegex</textarea>
-                                            <span asp-validation-for="EditRedirect.OldUrlRegex"
-                                                  class="text-danger"></span>
+                                            <textarea required class="form-control"
+                                                      name="@Html.NameFor(m => m.EditRedirect.OldUrlRegex)" rows="1">@item.OldUrlRegex</textarea>
                                         </div>
 
-                                        <div class="input-group mb-3">
+                                        <span asp-validation-for="EditRedirect.OldUrlRegex"
+                                              class="text-danger"></span>
+
+                                        <div class="input-group mb-2">
                                             <div class="input-group-prepend">
                                                 <span class="input-group-text">New URL Format</span>
                                             </div>
-                                            <textarea class="form-control" id="EditRedirect.NewUrlFormat"
-                                                      name="EditRedirect.NewUrlFormat" rows="1">@item.NewUrlFormat</textarea>
-                                            <span asp-validation-for="EditRedirect.NewUrlFormat"
-                                                  class="text-danger"></span>
+                                            <textarea required class="form-control"
+                                                      name="@Html.NameFor(m => m.EditRedirect.NewUrlFormat)" rows="1">@item.NewUrlFormat</textarea>
                                         </div>
+
+                                        <span asp-validation-for="EditRedirect.NewUrlFormat"
+                                              class="text-danger"></span>
 
                                         <input type="hidden" asp-for="EditRedirect.Id" value="@item.Id"/>
 
-                                        <button type="submit"
-                                                class="btn btn-primary"
-                                                asp-page-handler="update">Update
-                                        </button>
+                                        <div class="d-block mt-3">
+                                            <button type="submit"
+                                                    class="btn btn-primary"
+                                                    asp-page-handler="update">Update
+                                            </button>
+                                        </div>
                                     </form>
                                 </div>
                             </div>

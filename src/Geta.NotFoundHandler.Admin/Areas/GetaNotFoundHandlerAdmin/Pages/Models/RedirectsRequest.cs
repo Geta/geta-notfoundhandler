@@ -6,5 +6,5 @@ public class RedirectsRequest
 {
     public string Query { get; set; }
     public int? PageNumber { get; set; }
-    public Guid Id { get; set; }
+    public Guid? Id { get; set; }
 }
