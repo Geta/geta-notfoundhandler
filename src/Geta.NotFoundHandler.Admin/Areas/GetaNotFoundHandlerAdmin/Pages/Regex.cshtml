@@ -1,4 +1,5 @@
 ﻿@page "{handler?}"
+@using Geta.NotFoundHandler.Core.Providers.RegexRedirects
 @using Microsoft.AspNetCore.Mvc.TagHelpers
 @model Geta.NotFoundHandler.Admin.Areas.Geta.NotFoundHandler.Admin.RegexModel
 
@@ -9,9 +10,15 @@
         <table class="table table-hover table-sm" aria-label="Redirects">
             <thead>
             <tr>
-                <th class="col-1">Order Number</th>
-                <th>Old URL Regex</th>
-                <th>New URL Format</th>
+                <th class="col-1">
+                    <vc:sortable-header-cell key="@nameof(RegexRedirect.OrderNumber)" display-name="Order Number"/>
+                </th>
+                <th>
+                    <vc:sortable-header-cell key="@nameof(RegexRedirect.OldUrlRegex)" display-name="Old URL Regex"/>
+                </th>
+                <th>
+                    <vc:sortable-header-cell key="@nameof(RegexRedirect.NewUrlFormat)" display-name="New URL Format"/>
+                </th>
                 <th class="col-1"></th>
                 <th class="col-1"></th>
             </tr>
