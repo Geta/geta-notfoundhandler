@@ -95,7 +95,20 @@ namespace Geta.NotFoundHandler.Core.Suggestions
                 return true;
             }
 
-            return !Regex.IsMatch(url, ignorePattern);
+            try
+            {
+                return !Regex.IsMatch(url, ignorePattern, RegexOptions.None, TimeSpan.FromMilliseconds(50));
+            }
+            catch (RegexMatchTimeoutException ex)
+            {
+                _logger.LogWarning(ex, "Regex matching timed out for pattern: {Pattern} and URL: {Url}", ignorePattern, url);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Unexpected error while matching regex for URL: {Url} and pattern: {Pattern}", url, ignorePattern);
+                return true;
+            }
         }
 
         private static ConcurrentQueue<LogEvent> LogQueue { get; } = new ConcurrentQueue<LogEvent>();
