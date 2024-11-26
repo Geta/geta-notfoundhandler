@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Geta.NotFoundHandler.Data;
 using Geta.NotFoundHandler.Infrastructure.Configuration;
 using Microsoft.Extensions.Logging;
@@ -27,7 +28,7 @@ namespace Geta.NotFoundHandler.Core.Suggestions
             _configuration = options.Value;
         }
 
-        public void LogRequest(string oldUrl, string referer)
+        public virtual void LogRequest(string oldUrl, string referer)
         {
             var bufferSize = _configuration.BufferSize;
             if (!LogQueue.IsEmpty && LogQueue.Count >= bufferSize)
@@ -77,6 +78,36 @@ namespace Geta.NotFoundHandler.Core.Suggestions
             {
                 _logger.LogWarning(
                     "404 requests have been made too frequents (exceeded the threshold). Requests not logged to database");
+            }
+        }
+
+        public virtual bool ShouldLogRequest(string url)
+        {
+            // log request to database - if logging is turned on.
+            if (_configuration.Logging == LoggerMode.Off)
+            {
+                return false;
+            }
+
+            var ignorePattern = _configuration.IgnoreSuggestionsUrlRegexPattern;
+            if (string.IsNullOrWhiteSpace(ignorePattern))
+            {
+                return true;
+            }
+
+            try
+            {
+                return !Regex.IsMatch(url, ignorePattern, RegexOptions.None, TimeSpan.FromMilliseconds(50));
+            }
+            catch (RegexMatchTimeoutException ex)
+            {
+                _logger.LogWarning(ex, "Regex matching timed out for pattern: {Pattern} and URL: {Url}", ignorePattern, url);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Unexpected error while matching regex for URL: {Url} and pattern: {Pattern}", url, ignorePattern);
+                return true;
             }
         }
 
