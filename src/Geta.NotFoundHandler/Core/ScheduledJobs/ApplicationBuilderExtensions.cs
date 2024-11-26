@@ -13,7 +13,7 @@ namespace Geta.NotFoundHandler.Core.ScheduledJobs;
 
 public static class ApplicationBuilderExtensions
 {
-    public static IApplicationBuilder UseScheduler(this IApplicationBuilder app)
+    public static IApplicationBuilder UseInternalScheduler(this IApplicationBuilder app)
     {
         var services = app.ApplicationServices;
 
@@ -29,7 +29,7 @@ public static class ApplicationBuilderExtensions
             })
             .OnError(x =>
             {
-                logger.LogError(x, "Something went wrong, scheduled job fails with exception");
+                logger.LogError(x, "Something went wrong, scheduled job failed with exception");
             });
 
         return app;

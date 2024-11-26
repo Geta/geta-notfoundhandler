@@ -274,10 +274,6 @@ It will monitor primary, secondary and SEO URLs:
 
 Optimizely Content Cloud supports only primary URLs and Optimizely Commerce supports all three types of URLs.
 
-There are two scheduled jobs:
-- *[Geta NotFoundHandler] Index content URLs* - as mentioned before, this job indexes URLs of content. Usually, it is required to run this job only once. All new content is automatically indexed. But if for some reason content publish events are not firing when creating new content (for example, during the import), then you should set this job to run frequently.
- - *[Geta NotFoundHandler] Register content move redirects* - this job creates redirects based on registered moved content. Normally, this job is not required at all, but there might be situations when content move is registered but redirect creation is not completed. This could happen during deployments. In this case, you can manually run this job or schedule it to run time to time to fix such issues.
-
 # Scheduled jobs
 
 Scheduled job - process that runs in background
@@ -304,6 +300,11 @@ services.AddNotFoundHandler(o =>
 ```
 - OptimizelyScheduler - uses Optimizely to schedule job runs.
 An Optimizely scheduled job was added - <code>[Geta NotFoundHandler] Suggestions cleanup job</code>.
+
+Additionally, there are two optimizely scheduled jobs responsible for:
+- *[Geta NotFoundHandler] Index content URLs* - as mentioned before, this job indexes URLs of content. Usually, it is required to run this job only once. All new content is automatically indexed. But if for some reason content publish events are not firing when creating new content (for example, during the import), then you should set this job to run frequently.
+- *[Geta NotFoundHandler] Register content move redirects* - this job creates redirects based on registered moved content. Normally, this job is not required at all, but there might be situations when content move is registered but redirect creation is not completed. This could happen during deployments. In this case, you can manually run this job or schedule it to run time to time to fix such issues.
+
 
 # Troubleshooting
 

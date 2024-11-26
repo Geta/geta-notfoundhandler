@@ -28,7 +28,7 @@ namespace Geta.NotFoundHandler.Infrastructure.Initialization
 
             if (options.UseInternalScheduler)
             {
-                app.UseScheduler();
+                app.UseInternalScheduler();
             }
 
             return app;
