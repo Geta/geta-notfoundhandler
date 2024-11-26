@@ -167,7 +167,6 @@ If certain URLs should be ignored, you can use the `IgnoreSuggestionsUrlRegexPat
 services.AddNotFoundHandler(o =>
 {
     o.IgnoreSuggestionsUrlRegexPattern = @"^(https?:\/\/[^\/]+)?\/(api|episerverapi|globalassets|siteassets)";
-    // The first group in this pattern is common if LogWithHostname is set to true
 });
 ```
 
