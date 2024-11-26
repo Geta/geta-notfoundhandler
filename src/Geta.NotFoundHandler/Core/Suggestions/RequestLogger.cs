@@ -83,6 +83,7 @@ namespace Geta.NotFoundHandler.Core.Suggestions
 
         public virtual bool ShouldLogRequest(string url)
         {
+            // log request to database - if logging is turned on.
             if (_configuration.Logging == LoggerMode.Off)
             {
                 return false;

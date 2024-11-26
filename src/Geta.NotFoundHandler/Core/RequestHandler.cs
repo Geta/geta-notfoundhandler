@@ -157,7 +157,6 @@ namespace Geta.NotFoundHandler.Core
                 // Safe logging
                 var logUrl = _configuration.LogWithHostname ? urlNotFound.ToString() : urlNotFound.PathAndQuery;
 
-                // log request to database - if logging is turned on.
                 if (_requestLogger.ShouldLogRequest(logUrl))
                 {
                     _requestLogger.LogRequest(logUrl, referer?.ToString());
