@@ -3,6 +3,7 @@ using System.Linq;
 using Geta.NotFoundHandler.Admin.Areas.GetaNotFoundHandlerAdmin.Pages.Base;
 using Geta.NotFoundHandler.Admin.Areas.GetaNotFoundHandlerAdmin.Pages.Extensions;
 using Geta.NotFoundHandler.Admin.Areas.GetaNotFoundHandlerAdmin.Pages.Models;
+using Geta.NotFoundHandler.Admin.Areas.GetaNotFoundHandlerAdmin.Pages;
 using Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin.Models;
 using Geta.NotFoundHandler.Core.Redirects;
 using Geta.NotFoundHandler.Infrastructure;
@@ -26,8 +27,11 @@ public class IndexModel : AbstractSortablePageModel
 
     public IPagedList<CustomRedirect> Items { get; set; } = Enumerable.Empty<CustomRedirect>().ToPagedList();
 
-    [BindProperty]
+    [BindProperty(Name = nameof(CustomRedirect))]
     public RedirectModel CustomRedirect { get; set; }
+
+    [BindProperty(Name = nameof(EditRedirect))]
+    public RedirectModel EditRedirect { get; set; }
 
     [BindProperty(SupportsGet = true)]
     public Paging Paging { get; set; }
@@ -37,8 +41,9 @@ public class IndexModel : AbstractSortablePageModel
 
     public bool HasQuery => !string.IsNullOrEmpty(Query);
 
-    public void OnGet(string sortColumn, SortDirection? sortDirection)
+    public void OnGet(RedirectsRequest request, string sortColumn, SortDirection? sortDirection)
     {
+        ApplyRequest(request);
         ApplySort(sortColumn, sortDirection);
 
         Load();
@@ -46,26 +51,60 @@ public class IndexModel : AbstractSortablePageModel
 
     public IActionResult OnPostCreate()
     {
-        if (!ModelState.IsValid)
+        ModelState.RemoveNestedKeys(nameof(EditRedirect));
+
+        if (ModelState.IsValid)
         {
-            Load();
-            return Page();
+            var customRedirect = new CustomRedirect(CustomRedirect.OldUrl,
+                                                    CustomRedirect.NewUrl,
+                                                    CustomRedirect.WildCardSkipAppend,
+                                                    CustomRedirect.RedirectType);
+
+            _redirectsService.AddOrUpdate(customRedirect);
+
+            return RedirectToPage();
         }
 
-        var customRedirect = new CustomRedirect(CustomRedirect.OldUrl,
-                                                CustomRedirect.NewUrl,
-                                                CustomRedirect.WildCardSkipAppend,
-                                                CustomRedirect.RedirectType);
-
-        _redirectsService.AddOrUpdate(customRedirect);
-
-        return RedirectToPage();
+        Load();
+        return Page();
     }
 
-    public IActionResult OnPostDelete(string oldUrl)
+    public IActionResult OnPostDelete(RedirectsRequest request)
     {
-        _redirectsService.DeleteByOldUrl(oldUrl);
-        return RedirectToPage();
+        ModelState.Clear();
+
+        if (request.Id != null)
+        {
+            _redirectsService.DeleteById(request.Id.Value);
+        }
+
+        ApplyRequest(request);
+
+        Load();
+
+        return RedirectToPage(request);
+    }
+
+    public IActionResult OnPostUpdate(RedirectsRequest request)
+    {
+        ModelState.RemoveNestedKeys(nameof(CustomRedirect));
+        
+        if (ModelState.IsValid && EditRedirect.Id != null)
+        {
+            _redirectsService.AddOrUpdate(new CustomRedirect
+            {
+                Id = EditRedirect.Id,
+                OldUrl = EditRedirect.OldUrl,
+                RedirectType = EditRedirect.RedirectType,
+                NewUrl = EditRedirect.NewUrl,
+                WildCardSkipAppend = EditRedirect.WildCardSkipAppend
+            });
+
+            return RedirectToPage(request);
+        }
+
+        Load();
+        return Page();
     }
 
     private void Load()
@@ -81,5 +120,15 @@ public class IndexModel : AbstractSortablePageModel
 
         return result
             .Sort(SortColumn, SortDirection);
+    }
+
+    private void ApplyRequest(RedirectsRequest request)
+    {
+        if (request.PageNumber.HasValue)
+        {
+            Paging.PageNumber = request.PageNumber.Value;
+        }
+
+        Query = request.Query ?? Query;
     }
 }

@@ -1,7 +1,7 @@
 ﻿@model Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin.Components.Pager.PagerViewModel
 
 <nav aria-label="Table pagination">
-    <ul class="pagination">
+    <ul class="pagination pagination-spacing">
         <li class="page-item @(Model.HasPreviousPage ? string.Empty : "disabled")">
             <a class="page-link" href="@Model.PageUrl(Model.PageNumber-1)" aria-label="Previous">
                 <span aria-hidden="true">&laquo;</span>

@@ -8,9 +8,10 @@
 
 @await Component.InvokeAsync("Card", new { message = Model.Message })
 
+<!-- Search form -->
 <form method="get">
     <div class="search-container input-group flex-nowrap">
-        <input class="form-control w-100 border-end-0" type="text" placeholder="Search" aria-label="Search" id="search" name="q" value="@Model.Query">
+        <input class="form-control w-100 border-end-0" type="text" placeholder="Search" aria-label="Search" id="search"name="q" value="@Model.Query">
         <span class="input-group-append">
             <button class="btn btn-outline-secondary border-start-0 border" type="button" data-clear="#search">
                 <span data-feather="x"></span>
@@ -22,34 +23,35 @@
     </div>
 </form>
 
-<form method="post">
-    <div class="table-responsive mt-3">
-        <table class="table table-hover table-sm" aria-label="Redirects">
-            <thead>
-            <tr>
-                <th>
-                    <vc:sortable-header-cell key="@nameof(CustomRedirect.NewUrl)" display-name="New URL"/>
-                </th>
-                <th>
-                    <vc:sortable-header-cell key="@nameof(CustomRedirect.OldUrl)" display-name="Old URL"/>
-                </th>
-                <th class="col-1 text-center">
-                    <vc:sortable-header-cell key="@nameof(CustomRedirect.WildCardSkipAppend)" display-name="Wildcard"/>
-                </th>
-                <th class="col-1">
-                    <vc:sortable-header-cell key="@nameof(CustomRedirect.RedirectType)" display-name="Redirect Type"/>
-                </th>
-                <th class="col-1"></th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr>
+<!-- Redirect table -->
+<div class="table-responsive mt-3">
+    <table class="table table-hover table-sm" aria-label="Redirects">
+        <thead>
+        <tr>
+            <th>
+                <vc:sortable-header-cell key="@nameof(CustomRedirect.OldUrl)" display-name="Old URL"/>
+            </th>
+            <th>
+                <vc:sortable-header-cell key="@nameof(CustomRedirect.NewUrl)" display-name="New URL"/>
+            </th>
+            <th class="col-1 text-center">
+                <vc:sortable-header-cell key="@nameof(CustomRedirect.WildCardSkipAppend)" display-name="Wildcard"/>
+            </th>
+            <th class="col-1">
+                <vc:sortable-header-cell key="@nameof(CustomRedirect.RedirectType)" display-name="Redirect Type"/>
+            </th>
+            <th class="col-1"></th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <form method="post">
                 <td>
-                    <input type="text" class="form-control" asp-for="CustomRedirect.OldUrl">
+                    <input required type="text" class="form-control" asp-for="CustomRedirect.OldUrl">
                     <span asp-validation-for="CustomRedirect.OldUrl" class="text-danger"></span>
                 </td>
                 <td>
-                    <input type="text" class="form-control" asp-for="CustomRedirect.NewUrl">
+                    <input required type="text" class="form-control" asp-for="CustomRedirect.NewUrl">
                     <span asp-validation-for="CustomRedirect.NewUrl" class="text-danger"></span>
                 </td>
                 <td class="text-center align-middle">
@@ -58,45 +60,157 @@
                 <td>
                     <select class="form-select" asp-for="CustomRedirect.RedirectType">
                         <option value="@RedirectType.Temporary"
-                                selected="@(Options.Value.DefaultRedirectType == RedirectType.Temporary)">
-                            @RedirectType.Temporary
-                        </option>
+                                selected="@(Options.Value.DefaultRedirectType == RedirectType.Temporary)">@RedirectType.Temporary</option>
                         <option value="@RedirectType.Permanent"
                                 selected="@(Options.Value.DefaultRedirectType == RedirectType.Permanent)">
-                            @RedirectType.Permanent
-                        </option>
+                            @RedirectType.Permanent</option>
                     </select>
                 </td>
                 <td>
                     <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-primary"
-                                asp-page-handler="create">
+                        <button type="submit" class="btn btn-primary" asp-page-handler="create">
                             <span data-feather="plus"></span> add
                         </button>
                     </div>
                 </td>
-            </tr>
-            @foreach (var item in Model.Items)
-            {
-                <tr class="align-middle">
-                    <td>@item.OldUrl</td>
-                    <td>@item.NewUrl</td>
-                    <td class="text-center align-middle">
-                        @await Component.InvokeAsync("CheckboxReadonly", new { isChecked = item.WildCardSkipAppend })
-                    </td>
-                    <td>@item.RedirectType</td>
-                    <td>
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-danger"
-                                    asp-page-handler="delete" asp-route-oldurl="@item.OldUrl">
+            </form>
+        </tr>
+
+        @for (int i = 0; i < Model.Items.Count; i++)
+        {
+            var item = Model.Items[i];
+            <tr class="align-middle">
+
+                <!-- Display Mode -->
+                <td>@item.OldUrl</td>
+                <td>@item.NewUrl</td>
+                <td class="text-center align-middle">
+                    @await Component.InvokeAsync("CheckboxReadonly", new { isChecked = item.WildCardSkipAppend })
+                </td>
+                <td>@item.RedirectType</td>
+                <td>
+                    @{
+                        var editModalId = $"editModal{i}";
+                        var modalTitleId = $"modalTitle{i}";
+                    }
+
+                    <div class="modal fade" id="@editModalId" tabindex="-1" aria-labelledby="@modalTitleId">
+                        <div class="modal-dialog">
+                            <div class="modal-content edit-modal">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="@modalTitleId">Edit</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                            aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <form method="post" id="form-@editModalId">
+                                        <div class="input-group mb-2">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text">Old Url</span>
+                                            </div>
+                                            <textarea required="required" class="form-control" name="@Html.NameFor(m => m.EditRedirect.OldUrl)" rows="1">@item.OldUrl</textarea>
+                                        </div>
+
+                                        <div class="input-group mb-2">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text">New Url</span>
+                                            </div>
+                                            <textarea required="required" class="form-control" name="@Html.NameFor(m => m.EditRedirect.NewUrl)" rows="1">@item.NewUrl</textarea>
+                                        </div>
+
+                                        <div class="d-flex flex-row">
+                                            <div class="flex-fill">
+                                                <label>Wildcard</label>
+                                                <div class="input-group mb-2 text-center align-middle">
+                                                    @if (item.WildCardSkipAppend)
+                                                    {
+                                                        <input type="checkbox" class="form-check-input"
+                                                               asp-for="EditRedirect.WildCardSkipAppend" value="true"
+                                                               checked="checked"/>
+                                                    }
+                                                    else
+                                                    {
+                                                        <input type="checkbox" class="form-check-input"
+                                                               asp-for="EditRedirect.WildCardSkipAppend"
+                                                               value="true"/>
+                                                    }
+                                                </div>
+                                            </div>
+
+                                            <div class="flex-fill">
+                                                <label>RedirectType</label>
+                                                <div class="input-group mb-2">
+                                                    <select class="form-select" asp-for="EditRedirect.RedirectType">
+                                                        @if (item.RedirectType == RedirectType.Temporary)
+                                                        {
+                                                            <option value="@RedirectType.Temporary"
+                                                                    selected>@RedirectType.Temporary</option>
+                                                        }
+                                                        else
+                                                        {
+                                                            <option
+                                                                value="@RedirectType.Temporary">@RedirectType.Temporary</option>
+                                                        }
+
+                                                        @if (item.RedirectType == RedirectType.Permanent)
+                                                        {
+                                                            <option value="@RedirectType.Permanent"
+                                                                    selected>@RedirectType.Permanent</option>
+                                                        }
+                                                        else
+                                                        {
+                                                            <option
+                                                                value="@RedirectType.Permanent">@RedirectType.Permanent</option>
+                                                        }
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+
+
+                                        <input type="hidden" asp-for="EditRedirect.Id" value="@item.Id"/>
+
+                                        <button type="submit"
+                                                class="mt-3 btn btn-primary"
+                                                asp-route-pagenumber="@Model.Items.PageNumber"
+                                                asp-route-query="@Model.Query"
+                                                asp-page-handler="update">Update
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button
+                            type="submit"
+                            class="btn btn-primary modal-trigger"
+                            data-bs-toggle="modal"
+                            data-bs-target="#@editModalId">
+                            <span data-feather="edit"></span> edit
+                        </button>
+                    </div>
+                </td>
+                <td>
+                    <div class="d-grid gap-2">
+                        <form method="post">
+                            <button
+                                type="submit"
+                                class="btn btn-danger"
+                                asp-page-handler="delete"
+                                asp-route-id="@item.Id"
+                                asp-route-pagenumber="@Model.Items.PageNumber"
+                                asp-route-query="@Model.Query">
                                 <span data-feather="trash-2"></span> delete
                             </button>
-                        </div>
-                    </td>
-                </tr>
-            }
-            </tbody>
-        </table>
-        @await Component.InvokeAsync(typeof(Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin.Components.Pager.PagerViewComponent), new { Model.Items })
-    </div>
-</form>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+
+    @await Component.InvokeAsync(typeof(Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin.Components.Pager.PagerViewComponent), new { Model.Items })
+</div>

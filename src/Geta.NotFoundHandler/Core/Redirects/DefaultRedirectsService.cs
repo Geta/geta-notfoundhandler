@@ -151,6 +151,21 @@ namespace Geta.NotFoundHandler.Core.Redirects
             return ignoredRedirects.Count;
         }
 
+        public void DeleteById(Guid id)
+        {
+            var match = _redirectLoader.Get(id);
+
+            if (match != null)
+            {
+                _repository.Delete(match);
+            }
+        }
+
+        public CustomRedirect Get(Guid id)
+        {
+            return _redirectLoader.Get(id);
+        }
+
         private static bool HasChanged(CustomRedirect oldRedirect, CustomRedirect newRedirect)
         {
             if (oldRedirect == null) return true;

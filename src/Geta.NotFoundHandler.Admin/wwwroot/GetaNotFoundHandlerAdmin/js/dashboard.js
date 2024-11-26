@@ -42,6 +42,7 @@
                 var dialogSelector = modalTrigger.dataset.bsTarget + " .modal-dialog";
 
                 var modalDialog = document.querySelector(dialogSelector);
+                
                 if (!modalDialog) { return; }
 
                 modalDialog.style = "position: fixed;" +
@@ -49,11 +50,6 @@
                     "left: 50%;" +
                     "min-width: 500px;" +
                     "transform: translate(-50%, -50%);";
-
-                var modalContent = document.querySelector(dialogSelector + " .modal-content");
-                if(!modalContent) { return; }
-
-                modalContent.style = "max-height: 300px;"; // we can't use here vh, due to iframe viewport, viewport is not static when scrollable 
             });
         });
     }

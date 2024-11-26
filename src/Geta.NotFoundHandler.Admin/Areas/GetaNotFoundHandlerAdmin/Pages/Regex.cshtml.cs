@@ -31,10 +31,11 @@ public class RegexModel : AbstractSortablePageModel
 
     public IEnumerable<RegexRedirect> Items { get; set; } = Enumerable.Empty<RegexRedirect>();
 
-    private string EditItemId { get; set; }
-
-    [BindProperty]
+    [BindProperty(Name = nameof(RegexRedirect))]
     public RegexRedirectModel RegexRedirect { get; set; }
+
+    [BindProperty(Name = nameof(EditRedirect))]
+    public RegexRedirectModel EditRedirect { get; set; }
 
     public void OnGet(string sortColumn, SortDirection? sortDirection)
     {
@@ -45,15 +46,17 @@ public class RegexModel : AbstractSortablePageModel
 
     public IActionResult OnPostCreate()
     {
-        if (!ModelState.IsValid)
+        ModelState.RemoveNestedKeys(nameof(EditRedirect));
+
+        if (ModelState.IsValid)
         {
-            Load();
-            return Page();
+            _regexRedirectsService.Create(RegexRedirect.OldUrlRegex, RegexRedirect.NewUrlFormat, RegexRedirect.OrderNumber);
+
+            return RedirectToPage();
         }
 
-        _regexRedirectsService.Create(RegexRedirect.OldUrlRegex, RegexRedirect.NewUrlFormat, RegexRedirect.OrderNumber);
-
-        return RedirectToPage();
+        Load();
+        return Page();
     }
 
     public IActionResult OnPostDelete(Guid id)
@@ -63,42 +66,23 @@ public class RegexModel : AbstractSortablePageModel
         return RedirectToPage();
     }
 
-    public IActionResult OnPostEdit(Guid id)
+    public IActionResult OnPostUpdate()
     {
-        ModelState.Clear();
+        ModelState.RemoveNestedKeys(nameof(RegexRedirect));
+
+        if (ModelState.IsValid &&
+            EditRedirect.Id != null)
+        {
+            _regexRedirectsService.Update(EditRedirect.Id.Value,
+                                          EditRedirect.OldUrlRegex,
+                                          EditRedirect.NewUrlFormat,
+                                          EditRedirect.OrderNumber);
+            return RedirectToPage();
+        }
 
         Load();
 
-        EditItemId = id.ToString();
-
-        var redirect = _redirectLoader.Get(id);
-
-        RegexRedirect = new RegexRedirectModel
-        {
-            Id = redirect.Id,
-            OldUrlRegex = redirect.OldUrlRegex.ToString(),
-            NewUrlFormat = redirect.NewUrlFormat,
-            OrderNumber = redirect.OrderNumber
-        };
-
         return Page();
-    }
-
-    public IActionResult OnPostUpdate(Guid id)
-    {
-        if (!ModelState.IsValid)
-        {
-            Load();
-            EditItemId = id.ToString();
-
-            return Page();
-        }
-
-        _regexRedirectsService.Update(id,
-                                      RegexRedirect.OldUrlRegex,
-                                      RegexRedirect.NewUrlFormat,
-                                      RegexRedirect.OrderNumber);
-        return RedirectToPage();
     }
 
     private void Load()
@@ -114,15 +98,5 @@ public class RegexModel : AbstractSortablePageModel
         return _redirectLoader
             .GetAll()
             .Sort(SortColumn, SortDirection);
-    }
-
-    public bool IsEditing(Guid? id)
-    {
-        return id.ToString() == EditItemId;
-    }
-
-    public bool IsEditing()
-    {
-        return !string.IsNullOrEmpty(EditItemId);
     }
 }
