@@ -24,7 +24,7 @@ namespace Geta.NotFoundHandler.Tests
         private static readonly Uri DefaultOldUri = new Uri("http://example.com/old");
         private readonly NotFoundHandlerOptions _configuration;
 
-        private const string IgnoreSuggestionsUrlRegexPattern = "^(https?:\\/\\/[^\\/]+)?\\/(api|nilleapi|episerverapi|globalassets|siteassets)(?!\\/private)(\\/.*)?$";
+        private const string IgnoreSuggestionsUrlRegexPattern = @"^(https?:\/\/[^\/]+)?\/(api|nilleapi|episerverapi|globalassets|siteassets)(?!\/private)(\/.*)?$";
 
         public RequestHandlerTests()
         {

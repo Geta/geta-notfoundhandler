@@ -159,6 +159,21 @@ By default, requests to files with the following extensions will be ignored by t
 
 If you want to specify this yourself, add `IgnoredResourceExtensions` to the configuration.
 
+### Specifying ignored URLs
+
+If certain URLs should be ignored, you can use the `IgnoreSuggestionsUrlRegexPattern` option:
+
+```
+services.AddNotFoundHandler(o =>
+{
+    o.IgnoreSuggestionsUrlRegexPattern = @"^(https?:\/\/[^\/]+)?\/(api|episerverapi|globalassets|siteassets)";
+    // The first group in this pattern is common if LogWithHostname is set to true
+});
+```
+
+When a URL matches the specified regex pattern, suggestions will be skipped.
+
+
 ## Restricting access to the Admin UI
 
 By default, only users of `Administrators` role can access Admin UI. But you can configure you authorization policy when registrating the NotFound handler.
