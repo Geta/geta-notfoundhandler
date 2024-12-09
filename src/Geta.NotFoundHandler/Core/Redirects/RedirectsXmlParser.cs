@@ -33,9 +33,17 @@ namespace Geta.NotFoundHandler.Core.Redirects
         public CustomRedirectCollection LoadFromStream(Stream xmlContent)
         {
             _customRedirectsXmlFile = new XmlDocument();
+
             if (xmlContent != null)
             {
-                _customRedirectsXmlFile.Load(xmlContent);
+                var settings = new XmlReaderSettings
+                {
+                    DtdProcessing = DtdProcessing.Prohibit,
+                    XmlResolver = null
+                };
+
+                using var reader = XmlReader.Create(xmlContent, settings);
+                _customRedirectsXmlFile.Load(reader);
             }
             else
             {
