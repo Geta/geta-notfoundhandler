@@ -20,6 +20,7 @@ namespace Geta.NotFoundHandler.Infrastructure.Configuration
         public bool UseInternalScheduler { get; set; }
         public string InternalSchedulerCronInterval { get; set; } = "0 0 * * *";
         public FileNotFoundMode HandlerMode { get; set; } = FileNotFoundMode.On;
+        public bool Handle410 { get; set; } = false;
         public TimeSpan RegexTimeout { get; set; } = TimeSpan.FromMilliseconds(100);
 
         public string[] IgnoredResourceExtensions { get; set; } =
