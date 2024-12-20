@@ -3,6 +3,8 @@
 
 using Geta.NotFoundHandler.Core.Redirects;
 using Geta.NotFoundHandler.Data;
+using Geta.NotFoundHandler.Infrastructure.Configuration;
+using Microsoft.Extensions.Options;
 using X.PagedList;
 
 namespace Geta.NotFoundHandler.Core.Suggestions
@@ -12,15 +14,18 @@ namespace Geta.NotFoundHandler.Core.Suggestions
         private readonly ISuggestionLoader _suggestionLoader;
         private readonly IRedirectsService _redirectsService;
         private readonly ISuggestionRepository _suggestionRepository;
+        private readonly NotFoundHandlerOptions _options;
 
         public DefaultSuggestionService(
             ISuggestionLoader suggestionLoader,
             IRedirectsService redirectsService,
-            ISuggestionRepository suggestionRepository)
+            ISuggestionRepository suggestionRepository,
+            IOptions<NotFoundHandlerOptions> options)
         {
             _suggestionLoader = suggestionLoader;
             _redirectsService = redirectsService;
             _suggestionRepository = suggestionRepository;
+            _options = options.Value;
         }
 
         public IPagedList<SuggestionSummary> GetSummaries(int page, int pageSize)
@@ -58,7 +63,7 @@ namespace Geta.NotFoundHandler.Core.Suggestions
 
         private void SaveRedirect(SuggestionRedirect suggestionRedirect)
         {
-            var customRedirect = new CustomRedirect(suggestionRedirect.OldUrl, suggestionRedirect.NewUrl);
+            var customRedirect = new CustomRedirect(suggestionRedirect.OldUrl, suggestionRedirect.NewUrl, false, _options.DefaultRedirectType);
             _redirectsService.AddOrUpdate(customRedirect);
         }
 
