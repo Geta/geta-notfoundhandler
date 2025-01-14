@@ -143,8 +143,8 @@ public class CustomRedirectCollection : IEnumerable<CustomRedirect>
 
                 if (cr.WildCardSkipAppend)
                 {
-                    // We'll redirect without appending the 404 url
-                    return cr;
+                    // Remove path from original url but keep query string.
+                    return CreateSubSegmentRedirect(path, query, cr, oldPath, true);
                 }
 
                 if (UrlIsOldUrlsSubSegment(path, oldUrl))
@@ -196,6 +196,40 @@ public class CustomRedirectCollection : IEnumerable<CustomRedirect>
         var hasEmptyPath = builder.Length == 0;
 
         if (hasEmptyPath && hasQuery)
+        {
+            builder.Append('/');
+        }
+
+        BuildQuery(query, newQuery, builder);
+
+        redirCopy.NewUrl = builder.ToString();
+
+        return redirCopy;
+    }
+
+    // Remove path from original url but keep query string.
+    private static CustomRedirect CreateSubSegmentRedirect(
+        ReadOnlySpan<char> path,
+        ReadOnlySpan<char> query,
+        CustomRedirect cr,
+        ReadOnlySpan<char> oldPath,
+        bool isWildcard)
+    {
+        var redirCopy = new CustomRedirect(cr);
+
+        var newUrl = redirCopy.NewUrl;
+        var newPath = newUrl.AsPathSpan();
+        var newQuery = newUrl.AsQuerySpan();
+
+        var size = query.Length + newQuery.Length + 1;
+        var builder = new StringBuilder(size);
+
+        builder.Append(newPath);
+
+        var hasQuery = query.Length > 0 || newQuery.Length > 0;
+        var pathHasTrailingSlash = newPath.EndsWith("/");
+
+        if (hasQuery && !pathHasTrailingSlash)
         {
             builder.Append('/');
         }
