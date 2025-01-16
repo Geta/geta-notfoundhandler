@@ -1,10 +1,12 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using FakeItEasy;
 using Geta.NotFoundHandler.Core.Providers.RegexRedirects;
 using Geta.NotFoundHandler.Data;
+using Geta.NotFoundHandler.Infrastructure.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Xunit;
 
 namespace Geta.NotFoundHandler.Tests.Providers;
@@ -18,7 +20,8 @@ public class RegexNotFoundHandlerTests
     {
         _fakeRegexRedirectLoader = A.Fake<IRegexRedirectLoader>();
         var fakeLogger = A.Fake<ILogger<RegexRedirectNotFoundHandler>>();
-        _sut = new RegexRedirectNotFoundHandler(_fakeRegexRedirectLoader, fakeLogger);
+        var fakeOptions = A.Fake<IOptions<NotFoundHandlerOptions>>();
+        _sut = new RegexRedirectNotFoundHandler(_fakeRegexRedirectLoader, fakeLogger, fakeOptions);
     }
 
     [Fact]

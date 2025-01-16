@@ -2,7 +2,6 @@
 // Licensed under Apache-2.0. See the LICENSE file in the project root for more information
 
 using System.Text.RegularExpressions;
-using Geta.NotFoundHandler.Core.Redirects;
 using Geta.NotFoundHandler.Data;
 using Geta.NotFoundHandler.Infrastructure.Configuration;
 using Microsoft.Extensions.Logging;
