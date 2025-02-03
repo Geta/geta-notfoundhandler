@@ -244,7 +244,7 @@ Here is an example using Optimizely Find to look up a product by code:
 ```csharp
 public class CustomProductRedirectHandler : INotFoundHandler
 {
-    public string RewriteUrl(string url)
+    public RewriteResult RewriteUrl(string url)
     {
         if(url.Contains("productid"))
         {
@@ -264,7 +264,7 @@ public class CustomProductRedirectHandler : INotFoundHandler
                 }
             }
         }
-        return null;
+        return RewriteResult.Empty;
     }
 }
 ```
