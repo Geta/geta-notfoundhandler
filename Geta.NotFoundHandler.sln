@@ -32,6 +32,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Foundation", "sandbox\geta-
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Foundation.AppHost", "sandbox\geta-packages-foundation-sandbox\src\Foundation.AppHost\Foundation.AppHost.csproj", "{6B8210B1-743F-4B24-BA25-D4CC414C54EF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Geta.NotFoundHandler.Web", "src\Geta.NotFoundHandler.Web\Geta.NotFoundHandler.Web.csproj", "{3BEE6726-C16D-4A49-94E5-99E1AD77F131}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -70,6 +72,10 @@ Global
 		{6B8210B1-743F-4B24-BA25-D4CC414C54EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6B8210B1-743F-4B24-BA25-D4CC414C54EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6B8210B1-743F-4B24-BA25-D4CC414C54EF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3BEE6726-C16D-4A49-94E5-99E1AD77F131}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3BEE6726-C16D-4A49-94E5-99E1AD77F131}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3BEE6726-C16D-4A49-94E5-99E1AD77F131}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3BEE6726-C16D-4A49-94E5-99E1AD77F131}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
