@@ -335,9 +335,33 @@ For example, if we have a redirect: `/a` to `/b`, then:
 - without wildcard setting it will redirect `/a/1` to `/b/1`
 
 ## How to run locally
-[Follow the instructions](https://github.com/Geta/geta-packages-foundation-sandbox#how-to-run-locally)
 
-**_NOTE:_** If used regular installation, please run Geta.NotFoundHandler.Web instead of Foundation as it contains specific configurations/setup for package.
+Install required dependencies [click](https://github.com/Geta/geta-packages-foundation-sandbox#prerequisites)
+
+### Option 1: Aspire Project (Recommended)
+1. **Run application**
+   ```bash
+   cd sandbox/geta-packages-foundation-sandbox/src/Foundation.AppHost
+   dotnet run --project Foundation.AppHost
+2. **Access Dashboard**
+   ```
+   Open the Aspire dashboard and navigate from the dashboard to https://localhost:5001/
+
+### Option 2: Regular project
+1. **Setup Environment**
+   ```bash
+    cd sandbox/geta-packages-foundation-sandbox
+    # Windows
+    setup.cmd
+    
+    # macOS/Linux
+    chmod +x setup.sh
+    ./setup.sh
+2. **Run application**
+   ```bash
+   dotnet run --project ./src/Geta.NotFoundHandler.Web/Geta.NotFoundHandler.Web.csproj
+---
+
 
 CMS username: admin@example.com
 
