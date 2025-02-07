@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\sandbox\geta-packages-foundation-sandbox\src\Foundation.Web\Foundation.Web.csproj" />
+    <ProjectReference Include="..\..\sandbox\geta-packages-foundation-sandbox\src\Foundation\Foundation.csproj" />
     <ProjectReference Include="..\Geta.NotFoundHandler.Admin\Geta.NotFoundHandler.Admin.csproj"/>
     <ProjectReference Include="..\Geta.NotFoundHandler.Optimizely.Commerce\Geta.NotFoundHandler.Optimizely.Commerce.csproj"/>
     <ProjectReference Include="..\Geta.NotFoundHandler.Optimizely\Geta.NotFoundHandler.Optimizely.csproj"/>
