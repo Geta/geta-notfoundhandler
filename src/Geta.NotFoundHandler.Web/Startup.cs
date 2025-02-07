@@ -1,10 +1,6 @@
 using EPiServer.Authorization;
 using EPiServer.Framework.Hosting;
 using EPiServer.Web.Hosting;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using Geta.NotFoundHandler.Infrastructure.Configuration;
 using Geta.NotFoundHandler.Infrastructure.Initialization;
 using Geta.NotFoundHandler.Optimizely;
@@ -27,18 +23,19 @@ public class Startup
     public void ConfigureServices(IServiceCollection services)
     {
         services.AddNotFoundHandler(o => o.UseSqlServer(_configuration.GetConnectionString("EPiServerDB")),
-                                    policy => policy.RequireRole(Roles.CmsAdmins));
+                            policy => policy.RequireRole(Roles.CmsAdmins));
         services.AddOptimizelyNotFoundHandler();
         _foundationStartup.ConfigureServices(services);
 
         var moduleName = typeof(ContainerController).Assembly.GetName().Name;
+        var fullPath = Path.GetFullPath($"..\\{moduleName}");
 
         services.Configure<CompositeFileProviderOptions>(options =>
         {
             options.BasePathFileProviders.Add(new MappingPhysicalFileProvider(
                                                   $"/EPiServer/{moduleName}",
                                                   string.Empty,
-                                                  Path.GetFullPath($"..\\..\\..\\..\\src\\{moduleName}")));
+                                                  fullPath));
         });
     }
 

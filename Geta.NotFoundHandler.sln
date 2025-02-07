@@ -28,11 +28,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Geta.NotFoundHandler.Optimi
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Geta.NotFoundHandler.Optimizely.Commerce", "src\Geta.NotFoundHandler.Optimizely.Commerce\Geta.NotFoundHandler.Optimizely.Commerce.csproj", "{9A4FFC8B-74B3-4300-BFB8-24F7B0AB0DDD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Foundation", "sandbox\geta-packages-foundation-sandbox\src\Foundation\Foundation.csproj", "{757E780C-7CC2-4F25-A679-CE7BBE7BCFBA}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Foundation.AppHost", "sandbox\geta-packages-foundation-sandbox\src\Foundation.AppHost\Foundation.AppHost.csproj", "{6B8210B1-743F-4B24-BA25-D4CC414C54EF}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Geta.NotFoundHandler.Web", "src\Geta.NotFoundHandler.Web\Geta.NotFoundHandler.Web.csproj", "{3BEE6726-C16D-4A49-94E5-99E1AD77F131}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Foundation.Web", "sandbox\geta-packages-foundation-sandbox\src\Foundation.Web\Foundation.Web.csproj", "{D3ADE0CE-4BE7-4581-9502-79EFB4C77314}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -64,10 +64,6 @@ Global
 		{9A4FFC8B-74B3-4300-BFB8-24F7B0AB0DDD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9A4FFC8B-74B3-4300-BFB8-24F7B0AB0DDD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9A4FFC8B-74B3-4300-BFB8-24F7B0AB0DDD}.Release|Any CPU.Build.0 = Release|Any CPU
-		{757E780C-7CC2-4F25-A679-CE7BBE7BCFBA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{757E780C-7CC2-4F25-A679-CE7BBE7BCFBA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{757E780C-7CC2-4F25-A679-CE7BBE7BCFBA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{757E780C-7CC2-4F25-A679-CE7BBE7BCFBA}.Release|Any CPU.Build.0 = Release|Any CPU
 		{6B8210B1-743F-4B24-BA25-D4CC414C54EF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{6B8210B1-743F-4B24-BA25-D4CC414C54EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6B8210B1-743F-4B24-BA25-D4CC414C54EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -76,6 +72,10 @@ Global
 		{3BEE6726-C16D-4A49-94E5-99E1AD77F131}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3BEE6726-C16D-4A49-94E5-99E1AD77F131}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3BEE6726-C16D-4A49-94E5-99E1AD77F131}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D3ADE0CE-4BE7-4581-9502-79EFB4C77314}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D3ADE0CE-4BE7-4581-9502-79EFB4C77314}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D3ADE0CE-4BE7-4581-9502-79EFB4C77314}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D3ADE0CE-4BE7-4581-9502-79EFB4C77314}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -83,8 +83,8 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{80F6A409-357F-4EF2-BAAF-9603180BF1E1} = {751ABE30-032D-40A9-B36C-5549905113BD}
 		{8DD01C7F-3D7A-49B5-A255-AC69F4EA0162} = {751ABE30-032D-40A9-B36C-5549905113BD}
-		{757E780C-7CC2-4F25-A679-CE7BBE7BCFBA} = {320DF82B-2EF9-4AFA-9A77-FCE2B94F7038}
 		{6B8210B1-743F-4B24-BA25-D4CC414C54EF} = {320DF82B-2EF9-4AFA-9A77-FCE2B94F7038}
+		{D3ADE0CE-4BE7-4581-9502-79EFB4C77314} = {320DF82B-2EF9-4AFA-9A77-FCE2B94F7038}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {76CC4F02-91DF-4BB8-A977-065BC8CB65C5}

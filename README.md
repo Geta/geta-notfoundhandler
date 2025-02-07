@@ -334,8 +334,10 @@ For example, if we have a redirect: `/a` to `/b`, then:
 - with wildcard setting it will redirect `/a/1` to `/b`
 - without wildcard setting it will redirect `/a/1` to `/b/1`
 
-# Sandbox App
-Sandbox application is testing polygon for package new features and bug fixes.
+## How to run locally
+[Follow the instructions](https://github.com/Geta/geta-packages-foundation-sandbox#how-to-run-locally)
+
+**_NOTE:_** If used regular installation, please run Geta.NotFoundHandler.Web instead of Foundation as it contains specific configurations/setup for package.
 
 CMS username: admin@example.com
 

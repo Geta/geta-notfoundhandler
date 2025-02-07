@@ -1,1 +1,3 @@
-﻿Foundation.Program.Main(args);
+﻿using Geta.NotFoundHandler.Web;
+
+Foundation.Program.Main<Startup>(args);
