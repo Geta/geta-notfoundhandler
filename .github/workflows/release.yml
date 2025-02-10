@@ -34,3 +34,17 @@ jobs:
           dotnet nuget push Geta.NotFoundHandler.Optimizely.Commerce.${{env.VERSION}}.nupkg --source https://nuget.pkg.github.com/Geta/index.json --api-key ${{env.GITHUB_TOKEN}}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create GitHub Release with Auto-Generated Notes
+        run: |
+          gh release create ${{ github.ref_name }} --generate-notes     
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Loop through all .nupkg files in the current directory and upload them to the release
+        run: |
+           Get-ChildItem -Filter *.nupkg -Recurse | ForEach-Object {
+             Write-Host "Uploading file: $($_.Name)"
+             gh release upload ${{ github.ref_name }} $_.FullName --clobber
+          }
+        env:
+           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
