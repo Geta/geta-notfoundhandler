@@ -14,15 +14,23 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 1.11
-      - uses: actions/checkout@v2
+
+      - name: Checkout repository with submodules
+        uses: actions/checkout@v2
         with:
           fetch-depth: 0
+          submodules: recursive
+
+      - name: Checkout submodules (if needed)
+        run: git submodule update --init --recursive
+
       - name: Cache SonarCloud packages
         uses: actions/cache@v1
         with:
           path: ~\sonar\cache
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
+
       - name: Cache SonarCloud scanner
         id: cache-sonar-scanner
         uses: actions/cache@v1
@@ -30,12 +38,17 @@ jobs:
           path: .\.sonar\scanner
           key: ${{ runner.os }}-sonar-scanner
           restore-keys: ${{ runner.os }}-sonar-scanner
+
       - name: Install SonarCloud scanner
         if: steps.cache-sonar-scanner.outputs.cache-hit != 'true'
         shell: powershell
         run: |
           New-Item -Path .\.sonar\scanner -ItemType Directory
           dotnet tool update dotnet-sonarscanner --tool-path .\.sonar\scanner
+
+      - name: Restore dependencies
+        run: dotnet restore
+
       - name: Build and analyze
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
