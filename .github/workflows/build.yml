@@ -21,9 +21,6 @@ jobs:
           fetch-depth: 0
           submodules: recursive
 
-      - name: Checkout submodules (if needed)
-        run: git submodule update --init --recursive
-
       - name: Cache SonarCloud packages
         uses: actions/cache@v1
         with:
