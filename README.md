@@ -334,8 +334,47 @@ For example, if we have a redirect: `/a` to `/b`, then:
 - with wildcard setting it will redirect `/a/1` to `/b`
 - without wildcard setting it will redirect `/a/1` to `/b/1`
 
-# Sandbox App
-Sandbox application is testing polygon for package new features and bug fixes.
+## How to run locally
+
+Install required dependencies [click](https://github.com/Geta/geta-packages-foundation-sandbox#prerequisites)
+
+### Option 1: Aspire Project (Recommended)
+1. **Checkout repository with submodule**
+   ```bash
+   git clone https://github.com/Geta/geta-notfoundhandler
+   cd geta-notfoundhandler
+   git submodule update --init
+
+2. **Run application**
+   ```bash
+   Turn on docker
+   cd sandbox/geta-packages-foundation-sandbox/src/Foundation.AppHost
+   dotnet run --project Foundation.AppHost
+
+3. **Access Dashboard**
+   ```
+   Open the Aspire dashboard and navigate from the dashboard to https://localhost:5001/
+
+### Option 2: Regular project
+1. **Checkout repository**
+   ```bash
+   git clone https://github.com/Geta/geta-notfoundhandler
+   cd geta-notfoundhandler
+   git submodule update --init
+2. **Setup Environment**
+   ```bash
+    cd sandbox/geta-packages-foundation-sandbox
+    # Windows
+    setup.cmd
+    
+    # macOS/Linux
+    chmod +x setup.sh
+    ./setup.sh
+3. **Run application**
+   ```bash
+   dotnet run --project ./src/Geta.NotFoundHandler.Web/Geta.NotFoundHandler.Web.csproj
+---
+
 
 CMS username: admin@example.com
 

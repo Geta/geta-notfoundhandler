@@ -1,0 +1,3 @@
+[submodule "sandbox/geta-packages-foundation-sandbox"]
+	path = sandbox/geta-packages-foundation-sandbox
+	url = https://github.com/Geta/geta-packages-foundation-sandbox
