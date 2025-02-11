@@ -360,6 +360,7 @@ Install required dependencies [click](https://github.com/Geta/geta-packages-foun
    ```bash
    git clone https://github.com/Geta/geta-notfoundhandler
    cd geta-notfoundhandler
+   git submodule update --init
 2. **Setup Environment**
    ```bash
     cd sandbox/geta-packages-foundation-sandbox
