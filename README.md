@@ -349,11 +349,11 @@ Install required dependencies [click](https://github.com/Geta/geta-packages-foun
    ```bash
    Turn on docker
    cd sandbox/geta-packages-foundation-sandbox/src/Foundation.AppHost
-   dotnet run --project Foundation.AppHost
+   dotnet run --project Foundation.AppHost.csproj
 
 3. **Access Dashboard**
    ```
-   Open the Aspire dashboard and navigate from the dashboard to https://localhost:5001/
+   Open the Aspire dashboard and navigate from the dashboard
 
 ### Option 2: Regular project
 1. **Checkout repository**
