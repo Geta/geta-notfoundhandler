@@ -28,7 +28,7 @@ public class Startup
         _foundationStartup.ConfigureServices(services);
 
         var moduleName = typeof(ContainerController).Assembly.GetName().Name;
-        var fullPath = Path.GetFullPath($"..\\{moduleName}");
+        var fullPath = Path.GetFullPath($"../{moduleName}");
 
         services.Configure<CompositeFileProviderOptions>(options =>
         {
