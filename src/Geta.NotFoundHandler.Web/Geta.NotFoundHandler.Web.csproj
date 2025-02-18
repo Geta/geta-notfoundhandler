@@ -8,12 +8,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\sandbox\geta-packages-foundation-sandbox\src\Foundation\Foundation.csproj" />
+    <ProjectReference Include="..\..\sub\geta-foundation-core\src\Foundation\Foundation.csproj" />
     <ProjectReference Include="..\Geta.NotFoundHandler.Admin\Geta.NotFoundHandler.Admin.csproj"/>
     <ProjectReference Include="..\Geta.NotFoundHandler.Optimizely.Commerce\Geta.NotFoundHandler.Optimizely.Commerce.csproj"/>
     <ProjectReference Include="..\Geta.NotFoundHandler.Optimizely\Geta.NotFoundHandler.Optimizely.csproj"/>
     <ProjectReference Include="..\Geta.NotFoundHandler\Geta.NotFoundHandler.csproj"/>
   </ItemGroup>
 
-  <Import Project="..\..\sandbox\geta-packages-foundation-sandbox\src\Foundation\modules\ModulesInclude.proj"/>
+  <Import Project="..\..\sub\geta-foundation-core\src\Foundation\modules\ModulesInclude.proj"/>
 </Project>

@@ -5,8 +5,6 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Geta.NotFoundHandler", "src\Geta.NotFoundHandler\Geta.NotFoundHandler.csproj", "{00BEC106-B3EE-421B-8ED5-B51EA016FD3D}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Sandbox", "Sandbox", "{320DF82B-2EF9-4AFA-9A77-FCE2B94F7038}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{751ABE30-032D-40A9-B36C-5549905113BD}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{653AFFE2-7C31-4C4E-9D68-6B1DAD1FEFAD}"
@@ -28,13 +26,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Geta.NotFoundHandler.Optimi
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Geta.NotFoundHandler.Optimizely.Commerce", "src\Geta.NotFoundHandler.Optimizely.Commerce\Geta.NotFoundHandler.Optimizely.Commerce.csproj", "{9A4FFC8B-74B3-4300-BFB8-24F7B0AB0DDD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Foundation.AppHost", "sandbox\geta-packages-foundation-sandbox\src\Foundation.AppHost\Foundation.AppHost.csproj", "{6B8210B1-743F-4B24-BA25-D4CC414C54EF}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Geta.NotFoundHandler.Web", "src\Geta.NotFoundHandler.Web\Geta.NotFoundHandler.Web.csproj", "{3BEE6726-C16D-4A49-94E5-99E1AD77F131}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Foundation", "sandbox\geta-packages-foundation-sandbox\src\Foundation\Foundation.csproj", "{8C1C5713-4B34-41AE-A48F-4DEDA771F752}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "geta-foundation-core", "geta-foundation-core", "{637F7C28-82DB-4DFA-ADB4-B6061538FC11}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Foundation.AppHost.ServiceDefaults", "sandbox\geta-packages-foundation-sandbox\src\Foundation.AppHost.ServiceDefaults\Foundation.AppHost.ServiceDefaults.csproj", "{8717BC74-02FB-427E-B01D-4CBA13185122}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Foundation", "sub\geta-foundation-core\src\Foundation\Foundation.csproj", "{482B37E4-8CBF-426A-865C-8AB7E4E145DA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Foundation.AppHost", "sub\geta-foundation-core\src\Foundation.AppHost\Foundation.AppHost.csproj", "{21873564-1FF0-41B3-B9EE-3D1EAF274763}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Foundation.AppHost.ServiceDefaults", "sub\geta-foundation-core\src\Foundation.AppHost.ServiceDefaults\Foundation.AppHost.ServiceDefaults.csproj", "{FF8CF906-96C1-4205-8E53-CFE933F054A2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -66,22 +66,22 @@ Global
 		{9A4FFC8B-74B3-4300-BFB8-24F7B0AB0DDD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9A4FFC8B-74B3-4300-BFB8-24F7B0AB0DDD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9A4FFC8B-74B3-4300-BFB8-24F7B0AB0DDD}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6B8210B1-743F-4B24-BA25-D4CC414C54EF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6B8210B1-743F-4B24-BA25-D4CC414C54EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6B8210B1-743F-4B24-BA25-D4CC414C54EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6B8210B1-743F-4B24-BA25-D4CC414C54EF}.Release|Any CPU.Build.0 = Release|Any CPU
 		{3BEE6726-C16D-4A49-94E5-99E1AD77F131}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{3BEE6726-C16D-4A49-94E5-99E1AD77F131}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3BEE6726-C16D-4A49-94E5-99E1AD77F131}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3BEE6726-C16D-4A49-94E5-99E1AD77F131}.Release|Any CPU.Build.0 = Release|Any CPU
-		{8C1C5713-4B34-41AE-A48F-4DEDA771F752}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8C1C5713-4B34-41AE-A48F-4DEDA771F752}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8C1C5713-4B34-41AE-A48F-4DEDA771F752}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8C1C5713-4B34-41AE-A48F-4DEDA771F752}.Release|Any CPU.Build.0 = Release|Any CPU
-		{8717BC74-02FB-427E-B01D-4CBA13185122}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8717BC74-02FB-427E-B01D-4CBA13185122}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8717BC74-02FB-427E-B01D-4CBA13185122}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8717BC74-02FB-427E-B01D-4CBA13185122}.Release|Any CPU.Build.0 = Release|Any CPU
+		{482B37E4-8CBF-426A-865C-8AB7E4E145DA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{482B37E4-8CBF-426A-865C-8AB7E4E145DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{482B37E4-8CBF-426A-865C-8AB7E4E145DA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{482B37E4-8CBF-426A-865C-8AB7E4E145DA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{21873564-1FF0-41B3-B9EE-3D1EAF274763}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{21873564-1FF0-41B3-B9EE-3D1EAF274763}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{21873564-1FF0-41B3-B9EE-3D1EAF274763}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{21873564-1FF0-41B3-B9EE-3D1EAF274763}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FF8CF906-96C1-4205-8E53-CFE933F054A2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FF8CF906-96C1-4205-8E53-CFE933F054A2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FF8CF906-96C1-4205-8E53-CFE933F054A2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FF8CF906-96C1-4205-8E53-CFE933F054A2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -89,9 +89,9 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{80F6A409-357F-4EF2-BAAF-9603180BF1E1} = {751ABE30-032D-40A9-B36C-5549905113BD}
 		{8DD01C7F-3D7A-49B5-A255-AC69F4EA0162} = {751ABE30-032D-40A9-B36C-5549905113BD}
-		{6B8210B1-743F-4B24-BA25-D4CC414C54EF} = {320DF82B-2EF9-4AFA-9A77-FCE2B94F7038}
-		{8C1C5713-4B34-41AE-A48F-4DEDA771F752} = {320DF82B-2EF9-4AFA-9A77-FCE2B94F7038}
-		{8717BC74-02FB-427E-B01D-4CBA13185122} = {320DF82B-2EF9-4AFA-9A77-FCE2B94F7038}
+		{482B37E4-8CBF-426A-865C-8AB7E4E145DA} = {637F7C28-82DB-4DFA-ADB4-B6061538FC11}
+		{21873564-1FF0-41B3-B9EE-3D1EAF274763} = {637F7C28-82DB-4DFA-ADB4-B6061538FC11}
+		{FF8CF906-96C1-4205-8E53-CFE933F054A2} = {637F7C28-82DB-4DFA-ADB4-B6061538FC11}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {76CC4F02-91DF-4BB8-A977-065BC8CB65C5}
