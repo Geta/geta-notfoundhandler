@@ -336,10 +336,10 @@ For example, if we have a redirect: `/a` to `/b`, then:
 
 ## How to run locally
 
-Install required dependencies [click](https://github.com/Geta/geta-packages-foundation-sandbox#prerequisites)
+Install required dependencies [click](https://github.com/Geta/geta-packages-foundation-sandbox#%EF%B8%8F-prerequisites)
 
 ### Option 1: Aspire Project (Recommended)
-1. **Checkout repository with submodule**
+1. **Clone repository**
    ```bash
    git clone https://github.com/Geta/geta-notfoundhandler
    cd geta-notfoundhandler
@@ -373,6 +373,9 @@ Install required dependencies [click](https://github.com/Geta/geta-packages-foun
 3. **Run application**
    ```bash
    dotnet run --project ./src/Geta.NotFoundHandler.Web/Geta.NotFoundHandler.Web.csproj
+
+here are the list with known problems [sample project](https://github.com/Geta/geta-packages-foundation-sample?tab=readme-ov-file#faq) 
+
 ---
 
 
