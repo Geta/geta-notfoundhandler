@@ -333,51 +333,53 @@ If you want to redirect many addresses below a specific one to one new URL, set 
 For example, if we have a redirect: `/a` to `/b`, then:
 - with wildcard setting it will redirect `/a/1` to `/b`
 - without wildcard setting it will redirect `/a/1` to `/b/1`
+## 🏁 Getting Started
 
-## How to run locally
+### 📦 Prerequisites
 
-Install required dependencies [click](https://github.com/Geta/geta-foundation-core#%EF%B8%8F-prerequisites)
+Ensure your system is properly configured to meet all prerequisites for Geta Foundation Core listed [here](https://github.com/Geta/geta-foundation-core#%EF%B8%8F-prerequisites)
 
-### Option 1: Aspire Project (Recommended)
-1. **Clone repository**
-   ```bash
-   git clone https://github.com/Geta/geta-notfoundhandler
-   cd geta-notfoundhandler
-   git submodule update --init
+### 🐑 Cloning the repository
 
-2. **Run application**
-   ```bash
-   Turn on docker
-   cd sub/geta-foundation-core/src/Foundation.AppHost
-   dotnet run --project Foundation.AppHost.csproj
+```bash
+    git clone https://github.com/Geta/geta-notfoundhandler.git
+    cd geta-notfoundhandler
+    git submodule update --init
+```
 
-3. **Access Dashboard**
-   ```
-   Open the Aspire dashboard and navigate from the dashboard
-
-### Option 2: Regular project
-1. **Checkout repository**
-   ```bash
-   git clone https://github.com/Geta/geta-notfoundhandler
-   cd geta-notfoundhandler
-   git submodule update --init
-2. **Setup Environment**
-   ```bash
-    cd sub/geta-foundation-core
+### 🚀 Running with Aspire (Recommended)
+```bash
     # Windows
-    setup.cmd
-    
-    # macOS/Linux
-    chmod +x setup.sh
-    ./setup.sh
-3. **Run application**
-   ```bash
-   dotnet run --project ./src/Geta.NotFoundHandler.Web/Geta.NotFoundHandler.Web.csproj
+    cd sub/geta-foundation-core/src/Foundation.AppHost
+    dotnet run
 
-here are the list with known problems [sample project](https://github.com/Geta/geta-packages-foundation-sample?tab=readme-ov-file#faq) 
+    # Linux / MacOS
+    sudo env "PATH=$PATH" bash
+    chmod +x sub/geta-foundation-core/src/Foundation/docker/build-script/*.sh
+    cd sub/geta-foundation-core/src/Foundation.AppHost
+    dotnet run
+```
+
+### 🖥️ Running as Standalone
+```bash
+   # Windows
+   cd sub/geta-foundation-core
+   ./setup.cmd
+   cd ../../src/Geta.NotFoundHandler.Web
+   dotnet run
+
+   # Linux / MacOS
+   sudo env "PATH=$PATH" bash
+   cd sub/geta-foundation-core
+   chmod +x *.sh
+   ./setup.sh
+   cd ../../src/Foundation.Web
+   dotnet run
+```
+
+If you run into any issues, check the FAQ section [here](https://github.com/Geta/geta-foundation-web?tab=readme-ov-file#faq) 
 
 ---
-
 
 CMS username: admin@example.com
 
