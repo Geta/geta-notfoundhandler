@@ -333,6 +333,7 @@ If you want to redirect many addresses below a specific one to one new URL, set 
 For example, if we have a redirect: `/a` to `/b`, then:
 - with wildcard setting it will redirect `/a/1` to `/b`
 - without wildcard setting it will redirect `/a/1` to `/b/1`
+
 ## 🏁 Getting Started
 
 ### 📦 Prerequisites
