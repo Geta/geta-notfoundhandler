@@ -373,7 +373,7 @@ Ensure your system is properly configured to meet all prerequisites for Geta Fou
    cd sub/geta-foundation-core
    chmod +x *.sh
    ./setup.sh
-   cd ../../src/Foundation.Web
+   cd ../../src/Geta.NotFoundHandler.Web
    dotnet run
 ```
 
