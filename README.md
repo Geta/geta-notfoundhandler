@@ -334,8 +334,53 @@ For example, if we have a redirect: `/a` to `/b`, then:
 - with wildcard setting it will redirect `/a/1` to `/b`
 - without wildcard setting it will redirect `/a/1` to `/b/1`
 
-# Sandbox App
-Sandbox application is testing polygon for package new features and bug fixes.
+## 🏁 Getting Started
+
+### 📦 Prerequisites
+
+Ensure your system is properly configured to meet all prerequisites for Geta Foundation Core listed [here](https://github.com/Geta/geta-foundation-core#%EF%B8%8F-prerequisites)
+
+### 🐑 Cloning the repository
+
+```bash
+    git clone https://github.com/Geta/geta-notfoundhandler.git
+    cd geta-notfoundhandler
+    git submodule update --init
+```
+
+### 🚀 Running with Aspire (Recommended)
+```bash
+    # Windows
+    cd sub/geta-foundation-core/src/Foundation.AppHost
+    dotnet run
+
+    # Linux / MacOS
+    sudo env "PATH=$PATH" bash
+    chmod +x sub/geta-foundation-core/src/Foundation/docker/build-script/*.sh
+    cd sub/geta-foundation-core/src/Foundation.AppHost
+    dotnet run
+```
+
+### 🖥️ Running as Standalone
+```bash
+   # Windows
+   cd sub/geta-foundation-core
+   ./setup.cmd
+   cd ../../src/Geta.NotFoundHandler.Web
+   dotnet run
+
+   # Linux / MacOS
+   sudo env "PATH=$PATH" bash
+   cd sub/geta-foundation-core
+   chmod +x *.sh
+   ./setup.sh
+   cd ../../src/Geta.NotFoundHandler.Web
+   dotnet run
+```
+
+If you run into any issues, check the FAQ section [here](https://github.com/Geta/geta-foundation-web?tab=readme-ov-file#faq) 
+
+---
 
 CMS username: admin@example.com
 
