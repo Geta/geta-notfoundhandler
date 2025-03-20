@@ -19,7 +19,7 @@ public class CustomRedirectCollection : IEnumerable<CustomRedirect>
     private readonly IEnumerable<INotFoundHandler> _providers = new List<INotFoundHandler>();
 
     /// <summary>
-    /// Cache of URLs sorted ZA for look up of partially matched URLs
+    /// URLs sorted Z-A.
     /// </summary>
     private readonly SortedDictionary<string, CustomRedirect> _redirectsZA = new(new ReverseStringComparer());
 
