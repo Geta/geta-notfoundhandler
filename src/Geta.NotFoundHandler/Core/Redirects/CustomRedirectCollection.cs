@@ -19,14 +19,9 @@ public class CustomRedirectCollection : IEnumerable<CustomRedirect>
     private readonly IEnumerable<INotFoundHandler> _providers = new List<INotFoundHandler>();
 
     /// <summary>
-    /// Hashtable for quick lookup of old urls
-    /// </summary>
-    private readonly Dictionary<string, CustomRedirect> _quickLookupTable = new(StringComparer.OrdinalIgnoreCase);
-
-    /// <summary>
     /// Cache of URLs sorted ZA for look up of partially matched URLs
     /// </summary>
-    private KeyValuePair<string, CustomRedirect>[] _redirectsZACache;
+    private readonly SortedDictionary<string, CustomRedirect> _redirectsZA = new(new ReverseStringComparer());
 
     public CustomRedirectCollection()
     {
@@ -39,7 +34,7 @@ public class CustomRedirectCollection : IEnumerable<CustomRedirect>
 
     public IEnumerator<CustomRedirect> GetEnumerator()
     {
-        return _quickLookupTable.Values.GetEnumerator();
+        return _redirectsZA.Values.GetEnumerator();
     }
 
     IEnumerator IEnumerable.GetEnumerator()
@@ -79,34 +74,19 @@ public class CustomRedirectCollection : IEnumerable<CustomRedirect>
     public void Add(CustomRedirect customRedirect)
     {
         var oldUrl = HttpUtility.UrlDecode(customRedirect.OldUrl);
-        if (_quickLookupTable.ContainsKey(oldUrl))
-        {
-            _quickLookupTable[oldUrl] = customRedirect;
-            return;
-        }
-
-        // Add to quick look up table too
-        _quickLookupTable.Add(oldUrl, customRedirect);
-
-        // clean cache
-        _redirectsZACache = null;
+        _redirectsZA[oldUrl] = customRedirect;
     }
 
     private CustomRedirect FindInternal(string url)
     {
         url = HttpUtility.UrlDecode(url) ?? string.Empty;
-        if (_quickLookupTable.TryGetValue(url, out var redirect))
+        if (_redirectsZA.TryGetValue(url, out var redirect))
         {
             return redirect;
         }
 
         // working with local copy to avoid multi-threading issues
-        var redirectsZA = _redirectsZACache;
-        if (redirectsZA == null)
-        {
-            redirectsZA = _quickLookupTable.OrderByDescending(x => x.Key, StringComparer.OrdinalIgnoreCase).ToArray();
-            _redirectsZACache = redirectsZA;
-        }
+        var redirectsZA = _redirectsZA.ToArray();
 
         var path = url.AsPathSpan();
         var query = url.AsQuerySpan();
