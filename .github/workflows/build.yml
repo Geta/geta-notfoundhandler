@@ -5,22 +5,32 @@ on:
       - master
   pull_request:
     types: [opened, synchronize, reopened]
+concurrency:
+  group: "build-${{ github.ref_name }}"
+  cancel-in-progress: false
+
 jobs:
   build:
     name: Build
     runs-on: windows-latest
     steps:
       - name: Set up JDK 11
-        uses: actions/setup-java@v1
+        uses: actions/setup-java@v4
         with:
           java-version: 1.11
 
       - name: Checkout repository with submodules
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           submodules: recursive
-
+      - name: Cache NuGet packages
+        uses: actions/cache@v3
+        with:
+            path: ~/.nuget/packages
+            key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+            restore-keys: |
+                ${{ runner.os }}-nuget-
       - name: Cache SonarCloud packages
         uses: actions/cache@v4
         with:
