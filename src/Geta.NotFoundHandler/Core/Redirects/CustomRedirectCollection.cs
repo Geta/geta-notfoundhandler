@@ -124,7 +124,7 @@ public class CustomRedirectCollection : IEnumerable<CustomRedirect>
         foreach (var redirectPair in redirectsZA)
         {
             var oldUrl = redirectPair.Key;
-            if (oldUrl is null)
+            if (string.IsNullOrEmpty(oldUrl))
             {
                 continue;
             }
