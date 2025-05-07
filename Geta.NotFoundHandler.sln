@@ -10,10 +10,12 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{653AFFE2-7C31-4C4E-9D68-6B1DAD1FEFAD}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
+		.github\workflows\build.yml = .github\workflows\build.yml
 		CHANGELOG.md = CHANGELOG.md
 		LICENSE = LICENSE
 		pack.ps1 = pack.ps1
 		README.md = README.md
+		.github\workflows\release.yml = .github\workflows\release.yml
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Geta.NotFoundHandler.Tests", "tests\Geta.NotFoundHandler.Tests\Geta.NotFoundHandler.Tests.csproj", "{80F6A409-357F-4EF2-BAAF-9603180BF1E1}"
