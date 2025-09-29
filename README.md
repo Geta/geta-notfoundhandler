@@ -69,7 +69,7 @@ public void ConfigureServices(IServiceCollection services)
         o.IgnoredResourceExtensions = new[] { "jpg", "gif", "png", "css", "js", "ico", "swf", "woff" };
         o.Logging = LoggerMode.On;
         o.LogWithHostname = false;
-        o.Handle410 = false;
+        o.ActiveStatusCodes = new int[] { StatusCodes.Status404NotFound };
         o.AddProvider<NullNotFoundHandlerProvider>();
     });
 
