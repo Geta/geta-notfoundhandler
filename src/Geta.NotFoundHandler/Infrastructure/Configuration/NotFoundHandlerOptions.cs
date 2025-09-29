@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using Geta.NotFoundHandler.Core;
 using Geta.NotFoundHandler.Core.Suggestions;
 using Geta.NotFoundHandler.Core.Redirects;
+using Microsoft.AspNetCore.Http;
 
 namespace Geta.NotFoundHandler.Infrastructure.Configuration
 {
@@ -20,7 +21,7 @@ namespace Geta.NotFoundHandler.Infrastructure.Configuration
         public bool UseInternalScheduler { get; set; }
         public string InternalSchedulerCronInterval { get; set; } = "0 0 * * *";
         public FileNotFoundMode HandlerMode { get; set; } = FileNotFoundMode.On;
-        public bool Handle410 { get; set; } = false;
+        public int[] ActiveStatusCodes { get; set; } = new int[] { StatusCodes.Status404NotFound };
         public TimeSpan RegexTimeout { get; set; } = TimeSpan.FromMilliseconds(100);
 
         public string[] IgnoredResourceExtensions { get; set; } =

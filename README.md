@@ -152,7 +152,7 @@ If the `bufferSize` is set to `0`, the `threshold` value will be ignored, and ev
 
 **LogWithHostname**: Set to `true` to include hostname in the log. Useful in a multisite environment with several hostnames/domains. Default is `false`
 
-**Handle410**: Set to `true` to handle redirect for expired pages in Optimizely.
+**ActiveStatusCodes**: A integerlist with the status codes that NotFoundHandler will be active on. (Ex. ```options.ActiveStatusCodes = new int[] { StatusCodes.Status404NotFound, StatusCodes.Status410Gone };```)
 
 ### Specifying ignored resources
 
