@@ -69,6 +69,7 @@ public void ConfigureServices(IServiceCollection services)
         o.IgnoredResourceExtensions = new[] { "jpg", "gif", "png", "css", "js", "ico", "swf", "woff" };
         o.Logging = LoggerMode.On;
         o.LogWithHostname = false;
+        o.ActiveStatusCodes = new int[] { StatusCodes.Status404NotFound };
         o.AddProvider<NullNotFoundHandlerProvider>();
     });
 
@@ -150,6 +151,8 @@ Logging of 404 requests is buffered to shield your application from Denial of Se
 If the `bufferSize` is set to `0`, the `threshold` value will be ignored, and every request will be logged immediately.
 
 **LogWithHostname**: Set to `true` to include hostname in the log. Useful in a multisite environment with several hostnames/domains. Default is `false`
+
+**ActiveStatusCodes**: A integerlist with the status codes that NotFoundHandler will be active on. (Ex. ```options.ActiveStatusCodes = new int[] { StatusCodes.Status404NotFound, StatusCodes.Status410Gone };```)
 
 ### Specifying ignored resources
 

@@ -44,9 +44,9 @@ namespace Geta.NotFoundHandler.Core
                 return;
             }
 
-            if (context.Response.StatusCode != 404)
+            if (_configuration.ActiveStatusCodes.Any() && !_configuration.ActiveStatusCodes.Contains(context.Response.StatusCode))
             {
-                LogDebug("Not a 404 response.", context);
+                LogDebug("Not a accepted statuscode.", context);
                 return;
             }
 
