@@ -1,27 +1,37 @@
 ﻿// Copyright (c) Geta Digital. All rights reserved.
 // Licensed under Apache-2.0. See the LICENSE file in the project root for more information
 
+using System;
 using Coravel;
 using Geta.NotFoundHandler.Core.ScheduledJobs.Suggestions;
 using Geta.NotFoundHandler.Infrastructure.Configuration;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 
 namespace Geta.NotFoundHandler.Core.ScheduledJobs;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection EnableScheduler(this IServiceCollection services)
+    [Obsolete("Use EnableScheduler with IConfigurationSection parameter instead.")]
+    public static IServiceCollection EnableScheduler(
+        this IServiceCollection services)
     {
-        using var serviceProvider = services.BuildServiceProvider();
-        var options = serviceProvider.GetRequiredService<IOptions<NotFoundHandlerOptions>>().Value;
+        return services.EnableScheduler(null);
+    }
 
-        if (options.UseInternalScheduler)
+    public static IServiceCollection EnableScheduler(
+        this IServiceCollection services,
+        IConfigurationSection notFoundHandlerConfiguration)
+    {
+        var options = notFoundHandlerConfiguration?.Get<NotFoundHandlerOptions>();
+
+        if (!(options?.UseInternalScheduler ?? false))
         {
-            services.AddScheduler();
-        
-            services.AddTransient<SuggestionsCleanupJob>();
+            return services;
         }
+
+        services.AddScheduler();
+        services.AddTransient<SuggestionsCleanupJob>();
 
         return services;
     }
