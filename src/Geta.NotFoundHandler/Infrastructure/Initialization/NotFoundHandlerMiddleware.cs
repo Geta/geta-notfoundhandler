@@ -19,8 +19,12 @@ namespace Geta.NotFoundHandler.Infrastructure.Initialization
         public async Task InvokeAsync(HttpContext context, RequestHandler requestHandler)
         {
             await _next(context);
-
-            requestHandler.Handle(context);
+            
+            context.Response.OnStarting(() =>
+            {
+                requestHandler.Handle(context);
+                return Task.CompletedTask;
+            });
         }
     }
 }
