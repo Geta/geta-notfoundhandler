@@ -7,6 +7,7 @@ using Geta.NotFoundHandler.Core.Redirects;
 using Geta.NotFoundHandler.Core.Suggestions;
 using Geta.NotFoundHandler.Infrastructure.Configuration;
 using Geta.NotFoundHandler.Infrastructure.Web;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.Extensions.Logging;
@@ -69,7 +70,24 @@ namespace Geta.NotFoundHandler.Core
 
             LogDebug("Handling 404 request.", context);
 
-            var notFoundUri = new Uri(context.Request.GetDisplayUrl());
+            Uri notFoundUri;
+
+            if (context.Features.Get<IStatusCodeReExecuteFeature>() is StatusCodeReExecuteFeature statusCodeReExecuteFeature)
+            {
+                var request = context.Request;
+                var absoluteUrl = $"{request.Scheme}://{request.Host}{statusCodeReExecuteFeature.OriginalPathBase}{statusCodeReExecuteFeature.OriginalPath}{statusCodeReExecuteFeature.OriginalQueryString}";
+    
+                if (!Uri.TryCreate(absoluteUrl, UriKind.Absolute, out notFoundUri))
+                {
+                    // Fallback to current request URL if construction fails
+                    notFoundUri = new Uri(context.Request.GetDisplayUrl());
+                }
+            }
+            else
+            {
+                notFoundUri = new Uri(context.Request.GetDisplayUrl());
+            }
+
 
             if (IsResourceFile(notFoundUri))
             {
