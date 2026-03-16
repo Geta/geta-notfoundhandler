@@ -95,18 +95,6 @@ namespace Geta.NotFoundHandler.Core
                 context
                     .Redirect(newUrl.NewUrl, newUrl.RedirectType);
             }
-            else if (canHandleRedirect && newUrl.State == (int)RedirectState.Deleted)
-            {
-                LogDebug("Handled deleted URL", context);
-
-                SetStatusCodeAndShow404(context, 410);
-            }
-            else
-            {
-                LogDebug("Not handled. Current URL is ignored or no redirect found.", context);
-
-                SetStatusCodeAndShow404(context);
-            }
 
             MarkHandled(context);
         }

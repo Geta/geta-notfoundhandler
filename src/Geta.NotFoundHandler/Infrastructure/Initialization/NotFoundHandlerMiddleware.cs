@@ -7,24 +7,24 @@ using Microsoft.AspNetCore.Http;
 
 namespace Geta.NotFoundHandler.Infrastructure.Initialization
 {
-    public class NotFoundHandlerMiddleware
+    public class NotFoundHandlerMiddleware : IMiddleware
     {
-        private readonly RequestDelegate _next;
+        private readonly RequestHandler _requestHandler;
 
-        public NotFoundHandlerMiddleware(RequestDelegate next)
+        public NotFoundHandlerMiddleware(RequestHandler requestHandler)
         {
-            _next = next;
+            _requestHandler = requestHandler;
         }
 
-        public async Task InvokeAsync(HttpContext context, RequestHandler requestHandler)
+        public async Task InvokeAsync(HttpContext context, RequestDelegate next)
         {
-            await _next(context);
-            
-            context.Response.OnStarting(() =>
+            context.Response.OnStarting(state =>
             {
-                requestHandler.Handle(context);
+                _requestHandler.Handle((HttpContext)state);
                 return Task.CompletedTask;
-            });
+            }, context);
+
+            await next(context);
         }
     }
 }
