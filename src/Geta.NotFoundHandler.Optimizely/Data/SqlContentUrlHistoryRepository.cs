@@ -7,10 +7,10 @@ using System.Data;
 using System.Linq;
 using Geta.NotFoundHandler.Data;
 using Geta.NotFoundHandler.Optimizely.Core.AutomaticRedirects;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Geta.NotFoundHandler.Optimizely.Data
 {
@@ -25,18 +25,10 @@ namespace Geta.NotFoundHandler.Optimizely.Data
             _dataExecutor = dataExecutor;
         }
 
-        private static JsonSerializerSettings JsonSettings
+        private static readonly JsonSerializerOptions JsonSettings = new()
         {
-            get
-            {
-                var settings = new JsonSerializerSettings
-                {
-                    DateTimeZoneHandling = DateTimeZoneHandling.Utc, Formatting = Formatting.None
-                };
-                settings.Converters.Add(new StringEnumConverter());
-                return settings;
-            }
-        }
+            Converters = { new JsonStringEnumConverter() }
+        };
         
         private static byte[] CalculateMd5Hash(string input)
         {
@@ -173,14 +165,14 @@ namespace Geta.NotFoundHandler.Optimizely.Data
 
         private static string ToJson(ICollection<TypedUrl> urls)
         {
-            return JsonConvert.SerializeObject(urls, JsonSettings);
+            return JsonSerializer.Serialize(urls, JsonSettings);
         }
 
         private static ICollection<TypedUrl> FromJson(string value)
         {
             return string.IsNullOrEmpty(value)
                 ? new List<TypedUrl>()
-                : JsonConvert.DeserializeObject<List<TypedUrl>>(value, JsonSettings);
+                : JsonSerializer.Deserialize<List<TypedUrl>>(value, JsonSettings);
         }
 
         private static IEnumerable<ContentUrlHistory> ToContentUrlHistory(DataTable table)

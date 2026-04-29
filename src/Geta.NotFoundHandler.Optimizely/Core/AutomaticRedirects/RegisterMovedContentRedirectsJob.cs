@@ -3,15 +3,13 @@
 
 using System;
 using System.Linq;
-using EPiServer.PlugIn;
 using EPiServer.Scheduler;
 using Geta.NotFoundHandler.Optimizely.Infrastructure;
 
 namespace Geta.NotFoundHandler.Optimizely.Core.AutomaticRedirects
 {
-    [ScheduledPlugIn(DisplayName = "[Geta NotFoundHandler] Register content move redirects",
-                     GUID = "EC96ABEE-5DA4-404F-A0C8-451C77CA4983",
-                     SortIndex = 5555)]
+    [ScheduledJob(DisplayName = "[Geta NotFoundHandler] Register content move redirects",
+                  GUID = "EC96ABEE-5DA4-404F-A0C8-451C77CA4983")]
     public class RegisterMovedContentRedirectsJob : ScheduledJobBase
     {
         private readonly IContentUrlHistoryLoader _contentUrlHistoryLoader;
