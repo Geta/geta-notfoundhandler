@@ -33,7 +33,7 @@ public class Startup
         services.Configure<CompositeFileProviderOptions>(options =>
         {
             options.BasePathFileProviders.Add(new MappingPhysicalFileProvider(
-                                                  $"/EPiServer/{moduleName}",
+                                                  $"/Optimizely/{moduleName}",
                                                   string.Empty,
                                                   fullPath));
         });
