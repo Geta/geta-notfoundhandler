@@ -15,5 +15,5 @@
     <ProjectReference Include="..\Geta.NotFoundHandler\Geta.NotFoundHandler.csproj" />
   </ItemGroup>
 
-  <Import Project="modules\ModulesInclude.proj" />
+  <Import Project="modules\ModulesInclude.proj" Condition="Exists('modules\ModulesInclude.proj')" />
 </Project>
