@@ -9,11 +9,11 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\sub\geta-foundation-core\src\Foundation\Foundation.csproj" />
-    <ProjectReference Include="..\Geta.NotFoundHandler.Admin\Geta.NotFoundHandler.Admin.csproj"/>
-    <ProjectReference Include="..\Geta.NotFoundHandler.Optimizely.Commerce\Geta.NotFoundHandler.Optimizely.Commerce.csproj"/>
-    <ProjectReference Include="..\Geta.NotFoundHandler.Optimizely\Geta.NotFoundHandler.Optimizely.csproj"/>
-    <ProjectReference Include="..\Geta.NotFoundHandler\Geta.NotFoundHandler.csproj"/>
+    <ProjectReference Include="..\Geta.NotFoundHandler.Admin\Geta.NotFoundHandler.Admin.csproj" />
+    <ProjectReference Include="..\Geta.NotFoundHandler.Optimizely.Commerce\Geta.NotFoundHandler.Optimizely.Commerce.csproj" />
+    <ProjectReference Include="..\Geta.NotFoundHandler.Optimizely\Geta.NotFoundHandler.Optimizely.csproj" />
+    <ProjectReference Include="..\Geta.NotFoundHandler\Geta.NotFoundHandler.csproj" />
   </ItemGroup>
 
-  <Import Project="modules\ModulesInclude.proj"/>
+  <Import Project="modules\ModulesInclude.proj" />
 </Project>
