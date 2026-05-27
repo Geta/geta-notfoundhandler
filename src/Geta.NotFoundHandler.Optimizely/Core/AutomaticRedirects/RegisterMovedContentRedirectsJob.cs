@@ -5,6 +5,8 @@ using System;
 using System.Linq;
 using EPiServer.Scheduler;
 using Geta.NotFoundHandler.Optimizely.Infrastructure;
+using Geta.NotFoundHandler.Optimizely.Infrastructure.Configuration;
+using Microsoft.Extensions.Options;
 
 namespace Geta.NotFoundHandler.Optimizely.Core.AutomaticRedirects
 {
@@ -15,14 +17,17 @@ namespace Geta.NotFoundHandler.Optimizely.Core.AutomaticRedirects
         private readonly IContentUrlHistoryLoader _contentUrlHistoryLoader;
         private readonly JobStatusLogger _jobStatusLogger;
         private readonly IAutomaticRedirectsService _automaticRedirectsService;
+        private readonly int _batchSize;
         private bool _stopped;
 
         public RegisterMovedContentRedirectsJob(
             IAutomaticRedirectsService automaticRedirectsService,
-            IContentUrlHistoryLoader contentUrlHistoryLoader)
+            IContentUrlHistoryLoader contentUrlHistoryLoader,
+            IOptions<OptimizelyNotFoundHandlerOptions> options)
         {
             _automaticRedirectsService = automaticRedirectsService;
             _contentUrlHistoryLoader = contentUrlHistoryLoader;
+            _batchSize = options.Value.MovedContentBatchSize;
             _jobStatusLogger = new JobStatusLogger(OnStatusChanged);
 
             IsStoppable = true;
@@ -30,45 +35,59 @@ namespace Geta.NotFoundHandler.Optimizely.Core.AutomaticRedirects
 
         public override string Execute()
         {
-            var movedContent = _contentUrlHistoryLoader.GetAllMoved().ToList();
-            var totalCount = movedContent.Count;
             var successCount = 0;
             var failedCount = 0;
             var currentCount = 0;
+            var skip = 0;
 
-            _jobStatusLogger.LogWithStatus($"In total will process moved content: {totalCount}");
+            _jobStatusLogger.LogWithStatus($"Processing moved content in batches of {_batchSize}");
 
-            foreach (var content in movedContent)
+            // Page through the moved content rather than materialising the whole table up front.
+            // CreateRedirects only touches the redirects store, not ContentUrlHistory, so the moved
+            // set is stable for the duration of the run and skip-based paging never skips a key.
+            while (true)
             {
-                if (_stopped)
+                var batch = _contentUrlHistoryLoader.GetAllMoved(skip, _batchSize).ToList();
+
+                foreach (var content in batch)
                 {
-                    _jobStatusLogger.Log(
-                        $"Job was stopped, successful content handled before stopped: {successCount} out of total {totalCount} content");
-                    return _jobStatusLogger.ToString();
+                    if (_stopped)
+                    {
+                        _jobStatusLogger.Log(
+                            $"Job was stopped, successful content handled before stopped: {successCount} out of {currentCount} processed");
+                        return _jobStatusLogger.ToString();
+                    }
+
+                    currentCount++;
+
+                    try
+                    {
+                        _automaticRedirectsService.CreateRedirects(content.histories);
+                        successCount++;
+                    }
+                    catch (Exception ex)
+                    {
+                        _jobStatusLogger.Log($"Processing [{content.contentKey}] failed, exception: {ex}");
+                        failedCount++;
+                    }
+
+                    if (currentCount % 500 == 0)
+                    {
+                        _jobStatusLogger.Status(
+                            $"Processed {currentCount}, of whom successful {successCount}; failed: {failedCount}");
+                    }
                 }
 
-                currentCount++;
-
-                try
+                if (batch.Count < _batchSize)
                 {
-                    _automaticRedirectsService.CreateRedirects(content.histories);
-                    successCount++;
-                }
-                catch (Exception ex)
-                {
-                    _jobStatusLogger.Log($"Processing [{content.contentKey}] failed, exception: {ex}");
-                    failedCount++;
+                    break;
                 }
 
-                if (currentCount % 500 == 0)
-                {
-                    _jobStatusLogger.Status(
-                        $"Processed {currentCount} of whom successful {successCount} out of total {totalCount} content; failed: {failedCount}");
-                }
+                skip += _batchSize;
             }
 
             _jobStatusLogger.Log(
-                $"Processed {currentCount} of whom successful {successCount} out of total {totalCount} content; failed: {failedCount}");
+                $"Processed {currentCount}, of whom successful {successCount}; failed: {failedCount}");
 
             return _jobStatusLogger.ToString();
         }

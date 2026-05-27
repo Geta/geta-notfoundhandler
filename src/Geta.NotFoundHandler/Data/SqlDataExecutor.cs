@@ -16,12 +16,14 @@ namespace Geta.NotFoundHandler.Data
     {
         private readonly ILogger<SqlDataExecutor> _logger;
         private readonly string _connectionString;
+        private readonly int _commandTimeout;
 
         public SqlDataExecutor(
             IOptions<NotFoundHandlerOptions> options,
             ILogger<SqlDataExecutor> logger)
         {
             _connectionString = options.Value.ConnectionString;
+            _commandTimeout = options.Value.CommandTimeout;
             _logger = logger;
         }
 
@@ -42,6 +44,12 @@ namespace Geta.NotFoundHandler.Data
                 _logger.LogError(ex,
                                  "An error occurred in the ExecuteSQL method with the following sql: {SqlCommand}",
                                  sqlCommand);
+
+                // Previously the exception was swallowed here and execution fell through to
+                // 'return ds.Tables[0]'. On a failed Fill the DataSet has no tables, so that line
+                // threw IndexOutOfRangeException ("Cannot find table 0"), masking the real cause
+                // (e.g. a command timeout). Rethrow so callers see the actual failure.
+                throw;
             }
 
             return ds.Tables[0];
@@ -199,10 +207,11 @@ namespace Geta.NotFoundHandler.Data
             return parameter;
         }
 
-        private static SqlCommand CreateCommand(SqlConnection connection, string sqlCommand, params IDbDataParameter[] parameters)
+        private SqlCommand CreateCommand(SqlConnection connection, string sqlCommand, params IDbDataParameter[] parameters)
         {
             var command = connection.CreateCommand();
             command.CommandText = sqlCommand;
+            command.CommandTimeout = _commandTimeout;
 
             if (parameters != null)
             {

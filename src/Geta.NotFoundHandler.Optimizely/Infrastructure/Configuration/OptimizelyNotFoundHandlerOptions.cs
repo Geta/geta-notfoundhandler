@@ -16,6 +16,12 @@ namespace Geta.NotFoundHandler.Optimizely.Infrastructure.Configuration
         public bool AutomaticRedirectsEnabled { get; set; }
         public RedirectType AutomaticRedirectType { get; set; } = RedirectType.Temporary;
 
+        /// <summary>
+        /// Number of moved content keys the "Register content move redirects" job loads per page.
+        /// The job processes the table page-by-page so it scales to large NotFoundHandler tables.
+        /// </summary>
+        public int MovedContentBatchSize { get; set; } = 1000;
+
         private readonly List<Type> _contentKeyProviders = new();
         public IEnumerable<Type> ContentKeyProviders => _contentKeyProviders;
 
