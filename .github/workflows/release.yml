@@ -52,7 +52,12 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Create GitHub Release with Auto-Generated Notes
         run: |
-          gh release create ${{ github.ref_name }} --generate-notes     
+          $notes = @"
+          ## Release notes
+
+          - Removed the explicit ``System.Text.Json`` package reference. It now comes as a transitive dependency from Optimizely, so it no longer needs to be declared in the package.
+          "@
+          gh release create ${{ github.ref_name }} --notes "$notes" --generate-notes
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Loop through all .nupkg files in the current directory and upload them to the release

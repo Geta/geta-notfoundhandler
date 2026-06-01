@@ -4,26 +4,27 @@
 using System.Collections.Generic;
 using System.Linq;
 using EPiServer;
+using EPiServer.Applications;
 using EPiServer.Core;
-using EPiServer.Web;
 
 namespace Geta.NotFoundHandler.Optimizely.Core.AutomaticRedirects
 {
     public class CmsContentLinkProvider : IContentLinkProvider
     {
-        private readonly ISiteDefinitionRepository _siteDefinitionRepository;
+        private readonly IApplicationRepository _applicationRepository;
         private readonly IContentLoader _contentLoader;
 
-        public CmsContentLinkProvider(ISiteDefinitionRepository siteDefinitionRepository, IContentLoader contentLoader)
+        public CmsContentLinkProvider(IApplicationRepository applicationRepository, IContentLoader contentLoader)
         {
-            _siteDefinitionRepository = siteDefinitionRepository;
+            _applicationRepository = applicationRepository;
             _contentLoader = contentLoader;
         }
 
         public IEnumerable<ContentReference> GetAllLinks()
         {
-            var allSites = _siteDefinitionRepository.List();
-            return allSites.SelectMany(site => _contentLoader.GetDescendents(site.StartPage));
+            return _applicationRepository.List()
+                .OfType<IRoutableApplication>()
+                .SelectMany(app => _contentLoader.GetDescendents(app.EntryPoint));
         }
     }
 }

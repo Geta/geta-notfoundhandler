@@ -1,5 +1,4 @@
 ﻿@using EPiServer.Framework.Web.Resources
-@using EPiServer.Shell.Navigation
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -31,8 +30,8 @@
 </head> 
 <body>
     @Html.AntiForgeryToken()
-    @Html.CreatePlatformNavigationMenu()
-    <div @Html.ApplyPlatformNavigation()>
+    <platform-navigation />
+    <div>
         @RenderBody()
     </div>
 </body>
