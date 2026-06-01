@@ -30,7 +30,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="EPiServer.Commerce.Core" Version="15.0.0-preview1" />
+    <PackageReference Include="EPiServer.Commerce.Core" Version="15.0.0" />
     <PackageReference Include="MailKit" Version="4.16.0" />
     <PackageReference Include="System.Security.Cryptography.Xml" Version="10.0.7" />
   </ItemGroup>

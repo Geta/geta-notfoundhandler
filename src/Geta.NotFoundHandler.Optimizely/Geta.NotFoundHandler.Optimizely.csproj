@@ -23,7 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="EPiServer.CMS.UI.Core" Version="13.0.2" />
+    <PackageReference Include="EPiServer.CMS.UI.Core" Version="13.1.0" />
     <PackageReference Include="MailKit" Version="4.16.0" />
   </ItemGroup>
 
@@ -50,7 +50,7 @@
       <Pack>true</Pack>
       <PackageCopyToOutput>true</PackageCopyToOutput>
       <BuildAction>None</BuildAction>
-      <PackagePath>build\net6.0\$(MSBuildProjectName).targets</PackagePath>
+      <PackagePath>build\net6.0\$(MSBuildProjectName).targets;buildTransitive\net6.0\$(MSBuildProjectName).targets</PackagePath>
     </Content>
   </ItemGroup>
 
