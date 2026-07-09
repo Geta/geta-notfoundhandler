@@ -21,6 +21,7 @@ namespace Geta.NotFoundHandler.Infrastructure.Configuration
         /// <summary>
         /// Command timeout, in seconds, applied to SQL queries issued by <see cref="Data.SqlDataExecutor"/>.
         /// Exposed so sites with large NotFoundHandler tables can raise it past the SqlClient default of 30s.
+        /// Set to 0 for no timeout; negative values are treated as 0.
         /// </summary>
         public int CommandTimeout { get; set; } = 30;
         public SuggestionsCleanupOptions SuggestionsCleanupOptions { get; set; } = new();

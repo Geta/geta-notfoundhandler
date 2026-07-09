@@ -23,7 +23,8 @@ namespace Geta.NotFoundHandler.Data
             ILogger<SqlDataExecutor> logger)
         {
             _connectionString = options.Value.ConnectionString;
-            _commandTimeout = options.Value.CommandTimeout;
+            // SqlCommand.CommandTimeout throws on a negative value; clamp so a misconfiguration can't break every query. (0 = no timeout.)
+            _commandTimeout = Math.Max(0, options.Value.CommandTimeout);
             _logger = logger;
         }
 

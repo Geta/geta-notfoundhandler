@@ -42,7 +42,19 @@ public class SqlContentUrlHistoryRepositoryTests
 
         Assert.Equal(2, result.Count);
         Assert.Equal(2, result.Single(x => x.contentKey == "key-a").histories.Count);
-        Assert.Equal(1, result.Single(x => x.contentKey == "key-b").histories.Count);
+        Assert.Single(result.Single(x => x.contentKey == "key-b").histories);
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-5)]
+    public void GetAllMoved_paged_returns_empty_without_querying_when_take_is_not_positive(int take)
+    {
+        var result = _repository.GetAllMoved(0, take).ToList();
+
+        Assert.Empty(result);
+        // "FETCH NEXT 0 ROWS ONLY" (or a negative count) is invalid SQL, so no query should be issued.
+        A.CallTo(() => _dataExecutor.ExecuteQuery(A<string>._, A<IDbDataParameter[]>._)).MustNotHaveHappened();
     }
 
     [Fact]
