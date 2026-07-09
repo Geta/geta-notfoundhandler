@@ -85,6 +85,15 @@ namespace Geta.NotFoundHandler.Optimizely.Data
 
         public IEnumerable<(string contentKey, IReadOnlyCollection<ContentUrlHistory> histories)> GetAllMoved(int skip, int take)
         {
+            // Guard the inputs: "FETCH NEXT 0 ROWS ONLY" (or a negative count) is invalid SQL, and a
+            // negative offset would fail too, so a bad caller shouldn't reach the database.
+            if (take <= 0)
+            {
+                return Enumerable.Empty<(string, IReadOnlyCollection<ContentUrlHistory>)>();
+            }
+
+            skip = Math.Max(0, skip);
+
             // Page over the moved content keys (md5_ContentKey is the hash of ContentKey, so each key
             // maps to a single group and is never split across pages) and return their histories.
             var sqlCommand = $@"SELECT h.Id, h.ContentKey, h.Urls, h.CreatedUtc, h.md5_ContentKey
