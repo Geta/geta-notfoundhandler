@@ -27,7 +27,8 @@ namespace Geta.NotFoundHandler.Optimizely.Core.AutomaticRedirects
         {
             _automaticRedirectsService = automaticRedirectsService;
             _contentUrlHistoryLoader = contentUrlHistoryLoader;
-            _batchSize = options.Value.MovedContentBatchSize;
+            // Clamp to >= 1: a misconfigured 0/negative would page with FETCH NEXT 0 ROWS (invalid SQL) and fail the job.
+            _batchSize = Math.Max(1, options.Value.MovedContentBatchSize);
             _jobStatusLogger = new JobStatusLogger(OnStatusChanged);
 
             IsStoppable = true;

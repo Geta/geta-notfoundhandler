@@ -40,6 +40,33 @@ public class RegisterMovedContentRedirectsJobTests
     }
 
     [Fact]
+    public void Execute_stops_after_empty_page_when_total_is_exact_multiple_of_batch_size()
+    {
+        A.CallTo(() => _loader.GetAllMoved(0, 2)).Returns(Moved("a", "b"));
+        A.CallTo(() => _loader.GetAllMoved(2, 2)).Returns(Moved()); // full last page forces one extra, empty fetch
+        var job = CreateJob(batchSize: 2);
+
+        job.Execute();
+
+        A.CallTo(() => _loader.GetAllMoved(2, 2)).MustHaveHappened();
+        A.CallTo(() => _loader.GetAllMoved(4, 2)).MustNotHaveHappened();
+        A.CallTo(() => _redirectsService.CreateRedirects(A<IReadOnlyCollection<ContentUrlHistory>>._))
+            .MustHaveHappened(2, Times.Exactly);
+    }
+
+    [Fact]
+    public void Execute_clamps_non_positive_batch_size_to_one()
+    {
+        var job = CreateJob(batchSize: 0);
+
+        job.Execute();
+
+        // A configured 0/negative would page with "FETCH NEXT 0 ROWS ONLY" (invalid SQL); the page size must clamp to >= 1.
+        A.CallTo(() => _loader.GetAllMoved(0, 0)).MustNotHaveHappened();
+        A.CallTo(() => _loader.GetAllMoved(0, 1)).MustHaveHappened();
+    }
+
+    [Fact]
     public void Execute_continues_when_a_single_item_fails()
     {
         A.CallTo(() => _loader.GetAllMoved(0, 10)).Returns(Moved("good", "bad", "good"));
