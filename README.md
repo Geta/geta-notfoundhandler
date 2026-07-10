@@ -151,6 +151,8 @@ If the `bufferSize` is set to `0`, the `threshold` value will be ignored, and ev
 
 **LogWithHostname**: Set to `true` to include hostname in the log. Useful in a multisite environment with several hostnames/domains. Default is `false`
 
+**CommandTimeout**: Command timeout, in seconds, applied to SQL queries issued by the NotFound handler. Raise it past the SqlClient default of 30 if you have very large NotFound handler tables. Default is 30
+
 **ActiveStatusCodes**: A integerlist with the status codes that NotFoundHandler will be active on. (Ex. ```options.ActiveStatusCodes = new int[] { StatusCodes.Status404NotFound, StatusCodes.Status410Gone };```)
 
 ### Specifying ignored resources
@@ -319,7 +321,13 @@ An Optimizely scheduled job was added - <code>[Geta NotFoundHandler] Suggestions
 
 Additionally, there are two optimizely scheduled jobs responsible for:
 - *[Geta NotFoundHandler] Index content URLs* - as mentioned before, this job indexes URLs of content. Usually, it is required to run this job only once. All new content is automatically indexed. But if for some reason content publish events are not firing when creating new content (for example, during the import), then you should set this job to run frequently.
-- *[Geta NotFoundHandler] Register content move redirects* - this job creates redirects based on registered moved content. Normally, this job is not required at all, but there might be situations when content move is registered but redirect creation is not completed. This could happen during deployments. In this case, you can manually run this job or schedule it to run time to time to fix such issues.
+- *[Geta NotFoundHandler] Register content move redirects* - this job creates redirects based on registered moved content. Normally, this job is not required at all, but there might be situations when content move is registered but redirect creation is not completed. This could happen during deployments. In this case, you can manually run this job or schedule it to run time to time to fix such issues. The job processes the `NotFoundHandler.ContentUrlHistory` table page-by-page so it scales to large tables. You can tune the page size via `MovedContentBatchSize` (default 1000):
+```
+services.AddOptimizelyNotFoundHandler(o =>
+{
+    o.MovedContentBatchSize = 1000;
+});
+```
 
 
 # Troubleshooting
