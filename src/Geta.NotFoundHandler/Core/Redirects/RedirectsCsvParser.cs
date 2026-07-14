@@ -46,6 +46,12 @@ public class RedirectsCsvParser : IRedirectsParser
 
         foreach (var item in csvImportModels)
         {
+            if (!IsValidRedirect(item))
+            {
+                _logger.LogWarning("NotFoundHandler: Skipping import of invalid redirect. OldUrl: {oldUrl}; NewUrl: {newUrl}", item.OldUrl, item.NewUrl);
+                continue;
+            }
+
             // Create new custom redirect nodes
             var redirectType = GetRedirectType(item.RedirectType);
             var skipWildCardAppend = GetSkipWildCardAppend(item.WildcardSkippedAppend);
@@ -54,6 +60,12 @@ public class RedirectsCsvParser : IRedirectsParser
         }
 
         return redirects;
+    }
+
+    private static bool IsValidRedirect(CsvImportModel model)
+    {
+        return Uri.IsWellFormedUriString(model.OldUrl, UriKind.RelativeOrAbsolute)
+            && Uri.IsWellFormedUriString(model.NewUrl, UriKind.RelativeOrAbsolute);
     }
 
     private static bool GetSkipWildCardAppend(string skipWildCardAttr)
