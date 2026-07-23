@@ -20,17 +20,45 @@ namespace Geta.NotFoundHandler.Infrastructure.Configuration
     {
         private static readonly Action<AuthorizationPolicyBuilder> DefaultPolicy = p => p.RequireRole("Administrators");
 
+        [Obsolete("Use AddNotFoundHandler(Action<NotFoundHandlerOptions>, IConfiguration) instead.")]
         public static IServiceCollection AddNotFoundHandler(
             this IServiceCollection services,
             Action<NotFoundHandlerOptions> setupAction)
         {
-            return AddNotFoundHandler(services, setupAction, DefaultPolicy);
+            return services.AddNotFoundHandler(setupAction, DefaultPolicy);
         }
 
         public static IServiceCollection AddNotFoundHandler(
             this IServiceCollection services,
             Action<NotFoundHandlerOptions> setupAction,
+            IConfiguration configuration)
+        {
+            return services.AddNotFoundHandlerInternal(setupAction, DefaultPolicy, configuration);
+        }
+
+        [Obsolete("Use AddNotFoundHandler(Action<NotFoundHandlerOptions>, Action<AuthorizationPolicyBuilder>, IConfiguration) instead.")]
+        public static IServiceCollection AddNotFoundHandler(
+            this IServiceCollection services,
+            Action<NotFoundHandlerOptions> setupAction,
             Action<AuthorizationPolicyBuilder> configurePolicy)
+        {
+            return AddNotFoundHandlerInternal(services, setupAction, configurePolicy);
+        }
+
+        public static IServiceCollection AddNotFoundHandler(
+            this IServiceCollection services,
+            Action<NotFoundHandlerOptions> setupAction,
+            Action<AuthorizationPolicyBuilder> configurePolicy,
+            IConfiguration configuration)
+        {
+            return AddNotFoundHandlerInternal(services, setupAction, configurePolicy, configuration);
+        }
+
+        private static IServiceCollection AddNotFoundHandlerInternal(
+            this IServiceCollection services,
+            Action<NotFoundHandlerOptions> setupAction,
+            Action<AuthorizationPolicyBuilder> configurePolicy,
+            IConfiguration configuration = null)
         {
             services.AddTransient<IDataExecutor, SqlDataExecutor>();
 
@@ -80,18 +108,25 @@ namespace Geta.NotFoundHandler.Infrastructure.Configuration
                                                             x.GetRequiredService<IMemoryCache>()));
             services.AddTransient<IRegexRedirectsService, DefaultRegexRedirectsService>();
 
+            IConfigurationSection notFoundHandlerConfiguration = null;
+            
+            if (configuration != null)
+            {
+                notFoundHandlerConfiguration = configuration.GetSection(NotFoundHandlerOptions.Section);
+
+                services.Configure<NotFoundHandlerOptions>(notFoundHandlerConfiguration);
+            }
+
+            services
+                .AddTransient(_ => setupAction)
+                .ConfigureOptions<ConfigureNotFoundHandlerOptions>();
+
             var providerOptions = new NotFoundHandlerOptions();
             setupAction(providerOptions);
             foreach (var provider in providerOptions.Providers)
             {
                 services.AddTransient(typeof(INotFoundHandler), provider);
             }
-
-            services.AddOptions<NotFoundHandlerOptions>().Configure<IConfiguration>((options, configuration) =>
-            {
-                setupAction(options);
-                configuration.GetSection(NotFoundHandlerOptions.Section).Bind(options);
-            });
 
             services.AddAuthorization(options =>
             {
@@ -100,7 +135,7 @@ namespace Geta.NotFoundHandler.Infrastructure.Configuration
 
             services.AddSingleton<ISuggestionsCleanupService, SuggestionsCleanupService>();
 
-            services.EnableScheduler();
+            services.EnableScheduler(notFoundHandlerConfiguration);
             
             return services;
         }
