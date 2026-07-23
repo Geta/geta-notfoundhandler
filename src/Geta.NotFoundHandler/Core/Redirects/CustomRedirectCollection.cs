@@ -23,11 +23,6 @@ public class CustomRedirectCollection : IEnumerable<CustomRedirect>
     /// </summary>
     private readonly Dictionary<string, CustomRedirect> _quickLookupTable = new(StringComparer.OrdinalIgnoreCase);
 
-    /// <summary>
-    /// Cache of URLs sorted ZA for look up of partially matched URLs
-    /// </summary>
-    private KeyValuePair<string, CustomRedirect>[] _redirectsZACache;
-
     public CustomRedirectCollection()
     {
     }
@@ -87,74 +82,13 @@ public class CustomRedirectCollection : IEnumerable<CustomRedirect>
 
         // Add to quick look up table too
         _quickLookupTable.Add(oldUrl, customRedirect);
-
-        // clean cache
-        _redirectsZACache = null;
     }
 
     private CustomRedirect FindInternal(string url)
     {
         url = HttpUtility.UrlDecode(url) ?? string.Empty;
-        if (_quickLookupTable.TryGetValue(url, out var redirect))
-        {
-            return redirect;
-        }
-
-        // working with local copy to avoid multi-threading issues
-        var redirectsZA = _redirectsZACache;
-        if (redirectsZA == null)
-        {
-            redirectsZA = _quickLookupTable.OrderByDescending(x => x.Key, StringComparer.OrdinalIgnoreCase).ToArray();
-            _redirectsZACache = redirectsZA;
-        }
-
-        var path = url.AsPathSpan();
-        var query = url.AsQuerySpan();
-
-        // No exact match could be done, so we'll check if the 404 url
-        // starts with one of the urls we're matching against. This
-        // will be kind of a wild card match (even though we only check
-        // for the start of the url
-        // Example: http://www.mysite.com/news/mynews.html is not found
-        // We have defined an "<old>/news</old>" entry in the config
-        // file. We will get a match on the /news part of /news/myne...
-        // Depending on the skip wild card append setting, we will either
-        // redirect using the <new> url as is, or we'll append the 404
-        // url to the <new> url.
-        foreach (var redirectPair in redirectsZA)
-        {
-            var oldUrl = redirectPair.Key;
-            if (string.IsNullOrWhiteSpace(oldUrl))
-            {
-                continue;
-            }
-
-            var oldPath = oldUrl.AsPathSpan();
-            var oldQuery = oldUrl.AsQuerySpan();
-
-            // See if this "old" url (the one that cannot be found) starts with one
-            if (path.UrlPathMatch(oldPath) && query.StartsWith(oldQuery, StringComparison.InvariantCultureIgnoreCase))
-            {
-                var cr = redirectPair.Value;
-                if (cr.State == (int)RedirectState.Ignored)
-                {
-                    return null;
-                }
-
-                if (cr.WildCardSkipAppend)
-                {
-                    // Remove path from original url but keep query string.
-                    return CreateSubSegmentRedirect(path, query, cr, oldPath, true);
-                }
-
-                if (UrlIsOldUrlsSubSegment(path, oldUrl))
-                {
-                    return CreateSubSegmentRedirect(path, query, cr, oldPath);
-                }
-            }
-        }
-
-        return null;
+        
+        return _quickLookupTable.GetValueOrDefault(url);
     }
 
     private static CustomRedirect CreateSubSegmentRedirect(
