@@ -41,6 +41,7 @@ namespace Geta.NotFoundHandler.Infrastructure.Configuration
             services.AddSingleton<IRedirectHandler, CustomRedirectHandler>(s => s.GetRequiredService<CustomRedirectHandler>());
             services.AddSingleton<RedirectsEvents>();
             services.AddTransient<RequestHandler>();
+            services.AddTransient<NotFoundHandlerMiddleware>();
 
             services.AddSingleton<Func<IRedirectsService>>(x => x.GetService<IRedirectsService>);
             services.AddTransient<IRedirectsService, DefaultRedirectsService>();
