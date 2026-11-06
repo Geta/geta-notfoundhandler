@@ -168,6 +168,12 @@ namespace Geta.NotFoundHandler.Tests
                     "/en/about-us/news-events/news-events-wrong-word")]
         [InlineData("/en/about-us/", "/en/about-us/news-events", "http://localhost:80/en/about-us/news-events/wrong-page",
                     "/en/about-us/news-events/news-events/wrong-page")]
+        // https://github.com/Geta/geta-notfoundhandler/issues/137
+        [InlineData("/content", "/legacy", "/content/file/", "/legacy/file/")]
+        [InlineData("/content", "/legacy/", "/content/file", "/legacy/file")]
+        [InlineData("/content", "/legacy/", "/content/file/", "/legacy/file/")]
+        [InlineData("/content", "/", "/content/file", "/file")]
+        [InlineData("/content", "/legacy", "/content//file", "/legacy/file")]
         public void Find_should_append_sub_segment(string fromUrl, string toUrl, string notFoundUrl, string expected)
         {
             var redirect = new CustomRedirect(fromUrl, toUrl);
@@ -400,21 +406,34 @@ namespace Geta.NotFoundHandler.Tests
             Assert.Equal(expected, actual.NewUrl); 
         }
         
-        /// <summary>
-        /// https://github.com/Geta/geta-notfoundhandler/issues/137
-        /// </summary>
-        [Fact]
-        public void Find_does_add_slash_when_new_url_is_missing_trailing_slash()
+        [Theory]
+        [InlineData("/content//evil.com", "/evil.com")]
+        [InlineData("/content/%2Fevil.com", "/evil.com")]
+        [InlineData("/content/%5Cevil.com", "/evil.com")]
+        public void Find_does_not_build_protocol_relative_url_from_request_path(string notFoundUrl, string expected)
         {
-            var collection = new CustomRedirectCollection
-            {
-                new CustomRedirect("/content", "/legacy"),
-            };
+            _sut.Add(new CustomRedirect("/content", "/"));
 
-            var urlToFind = "/content/file/";
-            var expected = "/legacy/file/";
+            var actual = _sut.Find(notFoundUrl.ToUri());
 
-            var actual = collection.Find(urlToFind.ToUri());
+            Assert.Equal(expected, actual.NewUrl);
+        }
+
+        [Theory]
+        [InlineData("/content/", "/legacy", "/content//content", "/legacy")]
+        [InlineData("/content/", "/legacy", "/content//content/file", "/legacy/file")]
+        [InlineData("/", "/home", "/?param=value", "/home?param=value")]
+        [InlineData("/content//", "/legacy", "/content///content", "/legacy")]
+        [InlineData("/content/", "/legacy", "/content/content/file", "/legacy/file")]
+        public void Find_does_not_throw_when_sub_segment_repeats_old_url(
+            string fromUrl,
+            string toUrl,
+            string notFoundUrl,
+            string expected)
+        {
+            _sut.Add(new CustomRedirect(fromUrl, toUrl));
+
+            var actual = _sut.Find(notFoundUrl.ToUri());
 
             Assert.Equal(expected, actual.NewUrl);
         }

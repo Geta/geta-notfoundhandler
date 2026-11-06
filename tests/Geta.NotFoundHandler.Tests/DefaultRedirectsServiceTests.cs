@@ -5,14 +5,13 @@ using FakeItEasy;
 using Geta.NotFoundHandler.Core;
 using Geta.NotFoundHandler.Core.Redirects;
 using Geta.NotFoundHandler.Data;
-using Geta.NotFoundHandler.Tests.Base;
 using Xunit;
 
 namespace Geta.NotFoundHandler.Tests
 {
     public class DefaultRedirectsServiceTests
     {
-        private static readonly Uri DefaultOldUri = new Uri("http://example.com/old");
+        private static readonly Uri OldUri = new Uri("http://example.com/old");
 
         private readonly List<CustomRedirect> _storedRedirects;
         private readonly RedirectsEvents _redirectsEvents;
@@ -45,7 +44,7 @@ namespace Geta.NotFoundHandler.Tests
         [Fact]
         public void DeleteById_raises_redirects_updated()
         {
-            var redirect = GivenStoredRedirect(DefaultOldUri.PathAndQuery);
+            var redirect = GivenStoredRedirect();
             var raised = false;
             _redirectsEvents.OnRedirectsUpdated += _ => raised = true;
 
@@ -57,18 +56,18 @@ namespace Geta.NotFoundHandler.Tests
         [Fact]
         public void DeleteById_removes_redirect_from_redirect_handler()
         {
-            var redirect = GivenStoredRedirect(DefaultOldUri.PathAndQuery);
+            var redirect = GivenStoredRedirect();
             _redirectsInitializer.Initialize();
-            Assert.NotNull(_redirectHandler.Find(DefaultOldUri.PathAndQuery.ToUri()));
+            Assert.NotNull(_redirectHandler.Find(OldUri));
 
             _sut.DeleteById(redirect.Id.Value);
 
-            Assert.Null(_redirectHandler.Find(DefaultOldUri.PathAndQuery.ToUri()));
+            Assert.Null(_redirectHandler.Find(OldUri));
         }
 
-        private CustomRedirect GivenStoredRedirect(string oldUrl)
+        private CustomRedirect GivenStoredRedirect()
         {
-            var redirect = new CustomRedirect(oldUrl, "/new") { Id = Guid.NewGuid() };
+            var redirect = new CustomRedirect(OldUri.PathAndQuery, "/new") { Id = Guid.NewGuid() };
             _storedRedirects.Add(redirect);
             return redirect;
         }

@@ -16,6 +16,8 @@ namespace Geta.NotFoundHandler.Core.Redirects;
 /// </summary>
 public class CustomRedirectCollection : IEnumerable<CustomRedirect>
 {
+    private const string PathSeparators = "/\\";
+
     private readonly IEnumerable<INotFoundHandler> _providers = new List<INotFoundHandler>();
 
     /// <summary>
@@ -144,7 +146,7 @@ public class CustomRedirectCollection : IEnumerable<CustomRedirect>
                 if (cr.WildCardSkipAppend)
                 {
                     // Remove path from original url but keep query string.
-                    return CreateSubSegmentRedirect(path, query, cr, oldPath, true);
+                    return CreateSkipAppendRedirect(query, cr);
                 }
 
                 if (UrlIsOldUrlsSubSegment(path, oldUrl))
@@ -169,28 +171,24 @@ public class CustomRedirectCollection : IEnumerable<CustomRedirect>
         var newPath = newUrl.AsPathSpan();
         var newQuery = newUrl.AsQuerySpan();
 
-        var shouldAppendSegment = path.Length > oldPath.Length;
-        var appendSegment = ReadOnlySpan<char>.Empty;
-
-        if (shouldAppendSegment)
-        {
-            appendSegment = path[oldPath.Length..];
-        }
+        var oldSegment = oldPath.TrimEnd('/');
+        var oldName = oldSegment.TrimStart('/');
+        // Note: Strip every leading separator. Browsers read "\" as "/", so one left behind
+        // after a new path of "/" would form a protocol-relative url pointing at another host.
+        var appendSegment = path[oldSegment.Length..].TrimStart(PathSeparators);
 
         // Note: Guard against infinite buildup of redirects
-        while (appendSegment.UrlPathMatch(oldPath))
+        while (oldName.Length > 0 && appendSegment.UrlPathMatch(oldName))
         {
-            appendSegment = appendSegment[oldPath.Length..];
+            appendSegment = appendSegment[oldName.Length..].TrimStart(PathSeparators);
         }
 
-        appendSegment = appendSegment.RemoveLeadingSlash();
-
-        var pathHasTrailingSlash = path.EndsWith("/");
+        var requestHasTrailingSlash = path.EndsWith("/");
 
         var size = appendSegment.Length + query.Length + newQuery.Length + 1;
         var builder = new StringBuilder(size);
 
-        BuildPath(newPath, appendSegment, pathHasTrailingSlash, builder);
+        BuildPath(newPath, appendSegment, requestHasTrailingSlash, builder);
 
         var hasQuery = query.Length > 0 || newQuery.Length > 0;
         var hasEmptyPath = builder.Length == 0;
@@ -207,13 +205,7 @@ public class CustomRedirectCollection : IEnumerable<CustomRedirect>
         return redirCopy;
     }
 
-    // Remove path from original url but keep query string.
-    private static CustomRedirect CreateSubSegmentRedirect(
-        ReadOnlySpan<char> path,
-        ReadOnlySpan<char> query,
-        CustomRedirect cr,
-        ReadOnlySpan<char> oldPath,
-        bool isWildcard)
+    private static CustomRedirect CreateSkipAppendRedirect(ReadOnlySpan<char> query, CustomRedirect cr)
     {
         var redirCopy = new CustomRedirect(cr);
 
@@ -227,9 +219,8 @@ public class CustomRedirectCollection : IEnumerable<CustomRedirect>
         builder.Append(newPath);
 
         var hasQuery = query.Length > 0 || newQuery.Length > 0;
-        var pathHasTrailingSlash = newPath.EndsWith("/");
 
-        if (hasQuery && !pathHasTrailingSlash)
+        if (hasQuery && !newPath.EndsWith("/"))
         {
             builder.Append('/');
         }
@@ -242,31 +233,27 @@ public class CustomRedirectCollection : IEnumerable<CustomRedirect>
     }
 
     private static void BuildPath(
-        ReadOnlySpan<char> path,
+        ReadOnlySpan<char> newPath,
         ReadOnlySpan<char> appendSegment,
-        bool pathHasTrailingSlash,
+        bool requestHasTrailingSlash,
         StringBuilder builder)
     {
         var hasAppendSegment = appendSegment.Length > 0;
 
-        if (!hasAppendSegment && !pathHasTrailingSlash)
+        if (!hasAppendSegment && !requestHasTrailingSlash)
         {
-            path = path.RemoveTrailingSlash();
+            newPath = newPath.RemoveTrailingSlash();
         }
 
-        builder.Append(path);
+        builder.Append(newPath);
 
-        if (hasAppendSegment && !path.EndsWith("/"))
+        if (hasAppendSegment && !newPath.EndsWith("/"))
         {
             builder.Append('/');
         }
 
+        // Note: appendSegment is a suffix of the request path, so it already carries any trailing slash.
         builder.Append(appendSegment);
-
-        if (pathHasTrailingSlash && hasAppendSegment && !appendSegment.EndsWith("/"))
-        {
-            builder.Append('/');
-        }
     }
 
     private static void BuildQuery(ReadOnlySpan<char> baseQuery, ReadOnlySpan<char> newQuery, StringBuilder builder)
