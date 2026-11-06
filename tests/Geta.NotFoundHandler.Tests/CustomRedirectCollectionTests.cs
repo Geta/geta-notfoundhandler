@@ -166,14 +166,22 @@ namespace Geta.NotFoundHandler.Tests
         [Theory]
         [InlineData("/en/about-us/", "/en/about-us/news-events", "http://localhost:80/en/about-us/news-events-wrong-word",
                     "/en/about-us/news-events/news-events-wrong-word")]
-        [InlineData("/en/about-us/", "/en/about-us/news-events", "http://localhost:80/en/about-us/news-events/wrong-page",
-                    "/en/about-us/news-events/news-events/wrong-page")]
         // https://github.com/Geta/geta-notfoundhandler/issues/137
         [InlineData("/content", "/legacy", "/content/file/", "/legacy/file/")]
         [InlineData("/content", "/legacy/", "/content/file", "/legacy/file")]
         [InlineData("/content", "/legacy/", "/content/file/", "/legacy/file/")]
         [InlineData("/content", "/", "/content/file", "/file")]
         [InlineData("/content", "/legacy", "/content//file", "/legacy/file")]
+        // The first hop into a new url nested under the old one still redirects.
+        [InlineData("/en/people/", "/en/people/experts", "/en/people/fneksnfa", "/en/people/experts/fneksnfa")]
+        [InlineData("/catalog-content", "/catalog-content/true-catalog", "/catalog-content/page", "/catalog-content/true-catalog/page")]
+        [InlineData("/catalog-content", "/catalog-content/true-catalog", "/catalog-content/true-catalog-old", "/catalog-content/true-catalog/true-catalog-old")]
+        [InlineData("/a", "http://example.com/a/b", "/a/x", "http://example.com/a/b/x")]
+        [InlineData("/om-oss", "/om-oss/p%C3%A5ske", "/om-oss/x", "/om-oss/p%C3%A5ske/x")]
+        // A path that only looks nested on another host hasn't been redirected yet.
+        [InlineData("/a", "https://other.example/a/b", "http://localhost:80/a/b/x", "https://other.example/a/b/b/x")]
+        // A new url on the same path only changes the query string, so it isn't nested.
+        [InlineData("/page?id=1", "/page?id=2", "/page?id=1&utm=x", "/page?id=1&utm=x&id=2")]
         public void Find_should_append_sub_segment(string fromUrl, string toUrl, string notFoundUrl, string expected)
         {
             var redirect = new CustomRedirect(fromUrl, toUrl);
@@ -192,12 +200,35 @@ namespace Geta.NotFoundHandler.Tests
         [InlineData("/product/health", "/product/health-insurance", "http://localhost:80/product/health-insurance-article/what-hipaa-and-how-will-it-affect-your-small-business?q=article/what-hipaa-and-how-will-it-affect-your-small-business")]
         [InlineData("/resources/articles/smal", "/resources/articles/small-business", "http://localhost:80/resources/articles/small-business/understanding-financial-statements")]
         [InlineData("/bar", "/blog", "http://localhost:80/barr")]
+        // https://github.com/Geta/404handler/issues/46
+        [InlineData("/en/about-us/", "/en/about-us/news-events", "http://localhost:80/en/about-us/news-events/wrong-page")]
+        // https://github.com/Geta/geta-notfoundhandler/issues/78
+        [InlineData("/en/people/", "/en/people/experts", "http://localhost:80/en/people/experts/fneksnfa")]
+        // https://github.com/Geta/geta-notfoundhandler/issues/145
+        [InlineData("/catalog-content", "/catalog-content/true-catalog", "http://localhost:80/catalog-content/true-catalog")]
+        [InlineData("/catalog-content", "/catalog-content/true-catalog/", "http://localhost:80/catalog-content/true-catalog/page")]
+        [InlineData("/", "/home", "http://localhost:80/home/page")]
+        [InlineData("/a", "http://localhost/a/b", "http://localhost:80/a/b/x")]
+        [InlineData("/a", "https://LOCALHOST/a/b/?q=1", "http://localhost:80/a/b/x")]
+        [InlineData("/om-oss", "/om-oss/p%C3%A5ske", "http://localhost:80/om-oss/p%C3%A5ske/x")]
+        [InlineData("/om-oss", "http://localhost/om-oss/p%C3%A5ske", "http://localhost:80/om-oss/p%C3%A5ske/x")]
         public void Find_should_not_cause_redirect_loop(string fromUrl, string toUrl, string notFoundUrl)
         {
             var redirect = new CustomRedirect(fromUrl, toUrl);
             _sut.Add(redirect);
 
             var actual = _sut.Find(notFoundUrl.ToUri());
+
+            Assert.Null(actual);
+        }
+
+        [Fact]
+        public void Find_does_not_fall_through_to_a_broader_redirect_when_under_nested_new_url()
+        {
+            _sut.Add(new CustomRedirect("/en/people", "/en/people/experts"));
+            _sut.Add(new CustomRedirect("/en", "/en/home"));
+
+            var actual = _sut.Find("/en/people/experts/x".ToUri());
 
             Assert.Null(actual);
         }
@@ -325,6 +356,22 @@ namespace Geta.NotFoundHandler.Tests
             var actual = _sut.Find(requesttUrl.ToUri());
 
             Assert.NotNull(actual);
+        }
+
+        /// <summary>
+        /// https://github.com/Geta/geta-notfoundhandler/issues/176
+        /// </summary>
+        [Theory]
+        [InlineData("/contentassets/")]
+        [InlineData("/contentassets?a=1")]
+        [InlineData("/contentassets/moreurl")]
+        public void Find_keeps_deleted_state_with_partial_deleted_hit(string requestUrl)
+        {
+            _sut.Add(new CustomRedirect("/contentassets", RedirectState.Deleted));
+
+            var actual = _sut.Find(requestUrl.ToUri());
+
+            Assert.Equal((int)RedirectState.Deleted, actual.State);
         }
 
         /// <summary>
