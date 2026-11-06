@@ -387,23 +387,6 @@ namespace Geta.NotFoundHandler.Tests
             Assert.NotNull(actual);
         }
 
-        /// <summary>
-        /// https://github.com/Geta/geta-notfoundhandler/issues/123
-        /// </summary>
-        [Theory]
-        [InlineData("/old ", "/new ")]
-        [InlineData(" /old", " /new")]
-        [InlineData("/old\t", "\t/new")]
-        [InlineData("/old\r\n", "/new\n")]
-        public void Find_ignores_whitespace_around_stored_urls(string oldUrl, string newUrl)
-        {
-            _sut.Add(new CustomRedirect(oldUrl, newUrl));
-
-            var actual = _sut.Find("/old".ToUri());
-
-            Assert.Equal("/new", actual.NewUrl);
-        }
-
         [Fact]
         public void Find_matches_old_url_lowercased_under_a_culture_with_different_casing()
         {

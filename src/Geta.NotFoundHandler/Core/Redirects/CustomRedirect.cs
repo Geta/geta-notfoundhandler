@@ -24,15 +24,10 @@ namespace Geta.NotFoundHandler.Core.Redirects
         public string OldUrl
         {
             get => _oldUrl;
-            set => _oldUrl = value?.Trim().ToLowerInvariant();
+            set => _oldUrl = value?.ToLowerInvariant();
         }
 
-        private string _newUrl;
-        public string NewUrl
-        {
-            get => _newUrl;
-            set => _newUrl = value?.Trim();
-        }
+        public string NewUrl { get; set; }
 
         public int  State { get; set; }
 
