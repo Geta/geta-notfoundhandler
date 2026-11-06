@@ -151,7 +151,7 @@ public class CustomRedirectCollection : IEnumerable<CustomRedirect>
 
                 if (UrlIsOldUrlsSubSegment(path, oldUrl))
                 {
-                    // Note: Stop here, as a shorter old url would redirect the request somewhere unrelated.
+                    // Note: Don't try shorter old urls, as they would redirect the request somewhere unrelated.
                     return IsUnderNestedNewUrl(path, oldPath, cr.NewUrl, requestHost)
                         ? null
                         : CreateSubSegmentRedirect(path, query, cr, oldPath);
@@ -187,7 +187,11 @@ public class CustomRedirectCollection : IEnumerable<CustomRedirect>
     /// </summary>
     private static string RemoveRequestHost(string newUrl, string requestHost)
     {
-        // Note: Checking the scheme because "/a/b" parses as an absolute file url on Linux.
+        if (newUrl.StartsWith('/'))
+        {
+            return newUrl;
+        }
+
         var isOnRequestHost = Uri.TryCreate(newUrl, UriKind.Absolute, out var uri)
                               && (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps)
                               && uri.Host.Equals(requestHost, StringComparison.OrdinalIgnoreCase);
@@ -213,7 +217,7 @@ public class CustomRedirectCollection : IEnumerable<CustomRedirect>
         // after a new path of "/" would form a protocol-relative url pointing at another host.
         var appendSegment = path[oldSegment.Length..].TrimStart(PathSeparators);
 
-        // Note: Guard against infinite buildup of redirects
+        // Note: Collapse an old url repeated after itself (/a/a/file)
         while (oldName.Length > 0 && appendSegment.UrlPathMatch(oldName))
         {
             appendSegment = appendSegment[oldName.Length..].TrimStart(PathSeparators);

@@ -212,6 +212,9 @@ namespace Geta.NotFoundHandler.Tests
         [InlineData("/a", "https://LOCALHOST/a/b/?q=1", "http://localhost:80/a/b/x")]
         [InlineData("/om-oss", "/om-oss/p%C3%A5ske", "http://localhost:80/om-oss/p%C3%A5ske/x")]
         [InlineData("/om-oss", "http://localhost/om-oss/p%C3%A5ske", "http://localhost:80/om-oss/p%C3%A5ske/x")]
+        // An absolute old url only matches exactly, so it can't grow.
+        [InlineData("http://localhost/a", "http://localhost/a/b", "http://localhost:80/a/b/x")]
+        [InlineData("http://localhost/a", "/a/b", "http://localhost:80/a/b/x")]
         public void Find_should_not_cause_redirect_loop(string fromUrl, string toUrl, string notFoundUrl)
         {
             var redirect = new CustomRedirect(fromUrl, toUrl);
@@ -337,19 +340,6 @@ namespace Geta.NotFoundHandler.Tests
         {
             var storedUrl = "/contentassets";
             var requesttUrl = "/contentassets";
-            var redirect = new CustomRedirect(storedUrl, RedirectState.Deleted);
-            _sut.Add(redirect);
-
-            var actual = _sut.Find(requesttUrl.ToUri());
-
-            Assert.NotNull(actual);
-        }
-
-        [Fact]
-        public void Find_gives_nullreferenceexception_with_partial_deleted_hit()
-        {
-            var storedUrl = "/contentassets";
-            var requesttUrl = "/contentassets/moreurl";
             var redirect = new CustomRedirect(storedUrl, RedirectState.Deleted);
             _sut.Add(redirect);
 

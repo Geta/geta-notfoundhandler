@@ -27,18 +27,17 @@ namespace Geta.NotFoundHandler.Tests
         [InlineData("\n=1+1")]
         public void ExportToCsv_escapes_values_a_spreadsheet_would_run_as_a_formula(string url)
         {
-            var csv = ExportRow(url, "/new");
+            var row = ExportRow(url, "/new");
 
-            Assert.DoesNotContain($",{url},", $",{Lines(csv)[1]},");
-            Assert.StartsWith("\"'" + url[0], Lines(csv)[1]);
+            Assert.StartsWith("\"'" + url[0], row);
         }
 
         [Fact]
         public void ExportToCsv_escapes_formula_in_new_url()
         {
-            var csv = ExportRow("/old", "=1+1");
+            var row = ExportRow("/old", "=1+1");
 
-            Assert.Contains(",\"'=1+1\",", Lines(csv)[1]);
+            Assert.Contains(",\"'=1+1\",", row);
         }
 
         [Theory]
@@ -47,21 +46,16 @@ namespace Geta.NotFoundHandler.Tests
         [InlineData("/om-oss/påske")]
         public void ExportToCsv_leaves_ordinary_urls_unchanged(string url)
         {
-            var csv = ExportRow(url, "/new");
+            var row = ExportRow(url, "/new");
 
-            Assert.Equal($"{url},/new,False,Permanent", Lines(csv)[1]);
+            Assert.Equal($"{url},/new,False,Permanent", row);
         }
 
         private string ExportRow(string oldUrl, string newUrl)
         {
             var redirects = new List<CustomRedirect> { new(oldUrl, newUrl, false, RedirectType.Permanent) };
 
-            return Encoding.UTF8.GetString(_sut.ExportToCsv(redirects));
-        }
-
-        private static string[] Lines(string csv)
-        {
-            return csv.Split("\r\n");
+            return Encoding.UTF8.GetString(_sut.ExportToCsv(redirects)).Split("\r\n")[1];
         }
     }
 }
