@@ -153,6 +153,8 @@ If the `bufferSize` is set to `0`, the `threshold` value will be ignored, and ev
 
 **CommandTimeout**: Command timeout, in seconds, applied to SQL queries issued by the NotFound handler. Raise it past the SqlClient default of 30 if you have very large NotFound handler tables. Default is 30
 
+**DefaultRedirectType**: The redirect type pre-selected when adding a redirect, and used for redirects created from suggestions and by regex redirects. Default is `RedirectType.Temporary`. (Ex. ```options.DefaultRedirectType = RedirectType.Permanent;```)
+
 **ActiveStatusCodes**: A integerlist with the status codes that NotFoundHandler will be active on. (Ex. ```options.ActiveStatusCodes = new int[] { StatusCodes.Status404NotFound, StatusCodes.Status410Gone };```)
 
 ### Specifying ignored resources

@@ -188,6 +188,9 @@ namespace Geta.NotFoundHandler.Tests
         // Nothing to append to a new url of "/" must still redirect there, not to an empty url.
         [InlineData("/content", "/", "/content/content", "/")]
         [InlineData("/content/", "/", "/content", "/")]
+        // https://github.com/Geta/geta-notfoundhandler/issues/136
+        [InlineData("/careers/", "/en/careers", "/careers/test", "/en/careers/test")]
+        [InlineData("/careers/", "/en/careers", "/careers/search?term=x", "/en/careers/search?term=x")]
         public void Find_should_append_sub_segment(string fromUrl, string toUrl, string notFoundUrl, string expected)
         {
             var redirect = new CustomRedirect(fromUrl, toUrl);
@@ -382,6 +385,23 @@ namespace Geta.NotFoundHandler.Tests
             var actual = _sut.Find(requesttUrl.ToUri());
 
             Assert.NotNull(actual);
+        }
+
+        /// <summary>
+        /// https://github.com/Geta/geta-notfoundhandler/issues/123
+        /// </summary>
+        [Theory]
+        [InlineData("/old ", "/new ")]
+        [InlineData(" /old", " /new")]
+        [InlineData("/old\t", "\t/new")]
+        [InlineData("/old\r\n", "/new\n")]
+        public void Find_ignores_whitespace_around_stored_urls(string oldUrl, string newUrl)
+        {
+            _sut.Add(new CustomRedirect(oldUrl, newUrl));
+
+            var actual = _sut.Find("/old".ToUri());
+
+            Assert.Equal("/new", actual.NewUrl);
         }
 
         /// <summary>

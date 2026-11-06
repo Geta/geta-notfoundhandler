@@ -21,6 +21,11 @@ namespace Geta.NotFoundHandler.Optimizely.Core.AutomaticRedirects
         public virtual IEnumerable<CustomRedirect> CreateRedirects(IReadOnlyCollection<ContentUrlHistory> histories)
         {
             var ordered = histories.OrderByDescending(x => x.CreatedUtc).ToList();
+            if (ordered.Count == 0)
+            {
+                return Enumerable.Empty<CustomRedirect>();
+            }
+
             var destination = ordered.First();
 
             return ordered

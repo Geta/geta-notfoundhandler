@@ -29,7 +29,8 @@ namespace Geta.NotFoundHandler.Tests
         {
             var row = ExportRow(url, "/new");
 
-            Assert.StartsWith("\"'" + url[0], row);
+            // Note: CustomRedirect trims the url, so a leading tab or line break is gone before the export.
+            Assert.StartsWith("\"'" + url.TrimStart()[0], row);
         }
 
         [Fact]

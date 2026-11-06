@@ -20,6 +20,17 @@ public class RedirectBuilderTests
         _redirectBuilder = new(Options(RedirectType.Permanent));
     }
 
+    /// <summary>
+    /// https://github.com/Geta/geta-notfoundhandler/issues/169
+    /// </summary>
+    [Fact]
+    public void CreateRedirects_returns_nothing_when_content_has_no_history()
+    {
+        var redirects = _redirectBuilder.CreateRedirects(new List<ContentUrlHistory>());
+
+        Assert.Empty(redirects);
+    }
+
     [Fact]
     public void CreateRedirects_returns_primary_redirect()
     {
