@@ -25,14 +25,6 @@ namespace Geta.NotFoundHandler.Infrastructure.Processing
             return ReadOnlySpan<char>.Empty;
         }
 
-        public static ReadOnlySpan<char> RemoveLeadingSlash(this ReadOnlySpan<char> chars)
-        {
-            if (chars.StartsWith("/"))
-                return chars[1..];
-
-            return chars;
-        }
-
         public static ReadOnlySpan<char> RemoveTrailingSlash(this ReadOnlySpan<char> chars)
         {
             if (chars.EndsWith("/"))
