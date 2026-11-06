@@ -10,6 +10,10 @@ All notable changes to this project will be documented in this file.
 - Redirects and `410` responses for deleted URLs now also work when the application has already started writing the response body. The handler runs just before the response starts instead of after the pipeline finishes, when changing headers threw an exception.
 - A request whose status is in `ActiveStatusCodes` but has no matching redirect now keeps its status. Before, a response that hadn't started yet was forced to `404`, which broke sites using `ActiveStatusCodes` with `200`.
 - When a status code page is re-executed (`UseStatusCodePagesWithReExecute`), redirect lookup and logging use the URL the client requested, not the error page's URL.
+- Wildcard redirects now join the new URL and the appended path with exactly one slash. Before, the slash was chosen from the request URL instead of the new URL, so `/content` -> `/legacy` turned `/content/file/` into `/legacyfile/`, and `/content` -> `/legacy/` turned `/content/file` into `/legacy//file`.
+- Wildcard redirects no longer produce a protocol-relative URL from a request path with extra leading separators. Before, `/content` -> `/` turned `/content//evil.com` into a redirect to `//evil.com`, which is an open redirect.
+- `CustomRedirectCollection.Find` no longer throws `ArgumentOutOfRangeException` when the request repeats the old URL after extra slashes (`/content/` with `/content//content`) or when `/` is the old URL and the request is `/?param=value`.
+- The guard against redirects building up now also applies when the old URL ends in a slash, so `/content/` -> `/legacy` turns `/content/content/file` into `/legacy/file`, the same as `/content` -> `/legacy` already did.
 
 ## [7.1.0] - 2026-07-10
 
