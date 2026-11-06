@@ -1,10 +1,8 @@
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml;
-using CsvHelper;
 using Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin.Components.Card;
 using Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin.Infrastructure;
 using Geta.NotFoundHandler.Core.Redirects;
@@ -151,17 +149,7 @@ public class AdministerModel : PageModel
 
     private IActionResult ExportAsCsv(List<CustomRedirect> redirects)
     {
-        var documents = _redirectsCsvParser.Export(redirects);
-
-        using var memoryStream = new MemoryStream();
-        using (var tw = new StreamWriter(memoryStream, leaveOpen: true))
-        using (var csv = new CsvWriter(tw, CultureInfo.InvariantCulture))
-        {
-            csv.WriteRecords(documents);
-        }
-
-        memoryStream.Seek(0, SeekOrigin.Begin);
-        return File(memoryStream.ToArray(), "text/csv", "customRedirects.csv");
+        return File(_redirectsCsvParser.ExportToCsv(redirects), "text/csv", "customRedirects.csv");
     }
 
     private IActionResult BuildResponse(string message, CardType cardType)

@@ -53,20 +53,20 @@ public class CustomRedirectCollection : IEnumerable<CustomRedirect>
     {
         // Handle absolute addresses first
         var url = urlNotFound.AbsoluteUri;
-        var foundRedirect = FindInternal(url);
+        var foundRedirect = FindInternal(url, urlNotFound.Host);
 
         // Common case
         if (foundRedirect == null)
         {
             url = urlNotFound.PathAndQuery;
-            foundRedirect = FindInternal(url);
+            foundRedirect = FindInternal(url, urlNotFound.Host);
         }
 
         // Handle legacy databases with encoded values
         if (foundRedirect == null)
         {
             url = HttpUtility.HtmlEncode(url);
-            foundRedirect = FindInternal(url);
+            foundRedirect = FindInternal(url, urlNotFound.Host);
         }
 
         if (foundRedirect == null)
@@ -94,7 +94,7 @@ public class CustomRedirectCollection : IEnumerable<CustomRedirect>
         _redirectsZACache = null;
     }
 
-    private CustomRedirect FindInternal(string url)
+    private CustomRedirect FindInternal(string url, string requestHost)
     {
         url = HttpUtility.UrlDecode(url) ?? string.Empty;
         if (_quickLookupTable.TryGetValue(url, out var redirect))
@@ -151,12 +151,52 @@ public class CustomRedirectCollection : IEnumerable<CustomRedirect>
 
                 if (UrlIsOldUrlsSubSegment(path, oldUrl))
                 {
-                    return CreateSubSegmentRedirect(path, query, cr, oldPath);
+                    // Note: Don't try shorter old urls, as they would redirect the request somewhere unrelated.
+                    return IsUnderNestedNewUrl(path, oldPath, cr.NewUrl, requestHost)
+                        ? null
+                        : CreateSubSegmentRedirect(path, query, cr, oldPath);
                 }
             }
         }
 
         return null;
+    }
+
+    /// <summary>
+    /// With a new url nested under the old one (/a -> /a/b), a request already under the new url
+    /// has been redirected. Appending again would grow the url on every hop (/a/b/b/b...).
+    /// </summary>
+    private static bool IsUnderNestedNewUrl(
+        ReadOnlySpan<char> path,
+        ReadOnlySpan<char> oldPath,
+        string newUrl,
+        string requestHost)
+    {
+        // Note: The request and the old url are decoded before matching, so the new url has to be too.
+        var newPath = HttpUtility.UrlDecode(RemoveRequestHost(newUrl, requestHost)).AsPathSpan();
+
+        // Note: A new url on the same path only changes the query string, so it isn't nested.
+        var isNested = newPath.TrimEnd('/').Length > oldPath.TrimEnd('/').Length && newPath.UrlPathMatch(oldPath);
+
+        return isNested && path.UrlPathMatch(newPath);
+    }
+
+    /// <summary>
+    /// Makes a new url on the host of the request relative, so it compares to a relative old url.
+    /// A new url on another host stays as it is, because its path says nothing about this site.
+    /// </summary>
+    private static string RemoveRequestHost(string newUrl, string requestHost)
+    {
+        if (newUrl.StartsWith('/'))
+        {
+            return newUrl;
+        }
+
+        var isOnRequestHost = Uri.TryCreate(newUrl, UriKind.Absolute, out var uri)
+                              && (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps)
+                              && uri.Host.Equals(requestHost, StringComparison.OrdinalIgnoreCase);
+
+        return isOnRequestHost ? uri.PathAndQuery : newUrl;
     }
 
     private static CustomRedirect CreateSubSegmentRedirect(
@@ -177,7 +217,7 @@ public class CustomRedirectCollection : IEnumerable<CustomRedirect>
         // after a new path of "/" would form a protocol-relative url pointing at another host.
         var appendSegment = path[oldSegment.Length..].TrimStart(PathSeparators);
 
-        // Note: Guard against infinite buildup of redirects
+        // Note: Collapse an old url repeated after itself (/a/a/file)
         while (oldName.Length > 0 && appendSegment.UrlPathMatch(oldName))
         {
             appendSegment = appendSegment[oldName.Length..].TrimStart(PathSeparators);

@@ -14,6 +14,13 @@ All notable changes to this project will be documented in this file.
 - Wildcard redirects no longer produce a protocol-relative URL from a request path with extra leading separators. Before, `/content` -> `/` turned `/content//evil.com` into a redirect to `//evil.com`, which is an open redirect.
 - `CustomRedirectCollection.Find` no longer throws `ArgumentOutOfRangeException` when the request repeats the old URL after extra slashes (`/content/` with `/content//content`) or when `/` is the old URL and the request is `/?param=value`.
 - The guard against redirects building up now also applies when the old URL ends in a slash, so `/content/` -> `/legacy` turns `/content/content/file` into `/legacy/file`, the same as `/content` -> `/legacy` already did.
+- Redirects to a new URL nested under the old one no longer grow without end. With `/a` -> `/a/b`, `/a/x` still redirects to `/a/b/x`, but a request already under `/a/b` is now left as the 404 it is, instead of redirecting to `/a/b/b/x` and on until the browser gave up. This also applies when the new URL includes the host of the request or has encoded characters.
+- Setting `UseInternalScheduler` no longer crashes the application at startup with `No service for type 'Microsoft.Extensions.Logging.ILogger'`.
+- URLs under an entry in the Deleted list now return `410`. Before, a request such as `/gone/`, `/gone?a=1` or `/gone/child` lost the deleted state and was redirected, often to the home page.
+
+### Security
+
+- The CSV export now escapes values a spreadsheet would run as a formula (starting with `=`, `@`, `+`, `-`, tab, carriage return or line feed), whichever way they got into the database. An escaped value is prefixed with `'`, and importing that file keeps the prefix as part of the value. Only the start of a value is checked, so a formula after a `;` inside a value isn't escaped, which can matter in spreadsheets that use `;` as the list separator.
 
 ## [7.1.0] - 2026-07-10
 

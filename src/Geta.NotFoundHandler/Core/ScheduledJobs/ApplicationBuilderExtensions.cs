@@ -18,7 +18,7 @@ public static class ApplicationBuilderExtensions
         var services = app.ApplicationServices;
 
         var options = services.GetRequiredService<IOptions<NotFoundHandlerOptions>>().Value;
-        var logger = services.GetRequiredService<ILogger>();
+        var logger = services.GetRequiredService<ILogger<SuggestionsCleanupJob>>();
 
         services.UseScheduler(scheduler =>
             {

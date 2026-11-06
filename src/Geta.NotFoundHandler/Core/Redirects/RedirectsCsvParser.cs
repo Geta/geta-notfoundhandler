@@ -8,6 +8,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using CsvHelper;
+using CsvHelper.Configuration;
 using Geta.NotFoundHandler.Models;
 using Microsoft.Extensions.Logging;
 
@@ -85,5 +86,28 @@ public class RedirectsCsvParser : IRedirectsParser
                 RedirectType = item.RedirectType.ToString(),
                 WildcardSkippedAppend = item.WildCardSkipAppend.ToString()
             }).ToList();
+    }
+
+    /// <summary>
+    /// Writes the redirects as CSV. Values a spreadsheet would run as a formula are escaped,
+    /// whichever way they got into the database.
+    /// </summary>
+    public virtual byte[] ExportToCsv(List<CustomRedirect> redirects)
+    {
+        var configuration = new CsvConfiguration(CultureInfo.InvariantCulture)
+        {
+            InjectionOptions = InjectionOptions.Escape,
+            // Note: The CsvHelper defaults without the line feed, which OWASP lists too.
+            InjectionCharacters = ['=', '@', '+', '-', '\t', '\r', '\n']
+        };
+
+        using var memoryStream = new MemoryStream();
+        using (var writer = new StreamWriter(memoryStream, leaveOpen: true))
+        using (var csv = new CsvWriter(writer, configuration))
+        {
+            csv.WriteRecords(Export(redirects));
+        }
+
+        return memoryStream.ToArray();
     }
 }
