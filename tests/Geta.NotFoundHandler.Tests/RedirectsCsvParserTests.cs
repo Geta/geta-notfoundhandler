@@ -40,6 +40,31 @@ namespace Geta.NotFoundHandler.Tests
             Assert.Contains(",\"'=1+1\",", row);
         }
 
+        /// <summary>
+        /// Spreadsheets using ";" as the list separator would put what follows it in a cell of its own.
+        /// </summary>
+        [Theory]
+        [InlineData("/x;=1+1;", "/x%3B=1+1;")]
+        [InlineData("/x;@sum(1+1)", "/x%3B@sum(1+1)")]
+        [InlineData("/x; +1+1", "/x%3B +1+1")]
+        [InlineData("/x;-1+1", "/x%3B-1+1")]
+        [InlineData("/x;'=1+1", "/x%3B'=1+1")]
+        [InlineData("/x;\tpage", "/x%3B\tpage")]
+        public void ExportToCsv_encodes_separator_before_a_formula_inside_a_value(string url, string expected)
+        {
+            var row = ExportRow(url, url);
+
+            Assert.Equal($"{expected},{expected},False,Permanent", row);
+        }
+
+        [Fact]
+        public void ExportToCsv_leaves_separator_before_ordinary_text()
+        {
+            var row = ExportRow("/x;page=1", "/new");
+
+            Assert.Equal("/x;page=1,/new,False,Permanent", row);
+        }
+
         [Theory]
         [InlineData("/about")]
         [InlineData("https://example.com/a?b=1")]

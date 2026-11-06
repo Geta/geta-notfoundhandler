@@ -246,6 +246,21 @@ namespace Geta.NotFoundHandler.Tests
             Assert.False(actual);
         }
 
+        [Fact]
+        public void HandleRequest_returns_false_when_absolute_redirect_is_same_as_not_found()
+        {
+            var sameUri = new Uri("https://example.com/same");
+            var redirect = new CustomRedirect(sameUri.ToString(), RedirectState.Saved)
+            {
+                NewUrl = sameUri.AbsoluteUri
+            };
+            WhenRedirectFound(redirect);
+
+            var actual = _sut.HandleRequest(DefaultOldUri, sameUri, out var _);
+
+            Assert.False(actual);
+        }
+
         private void WhenRedirectFound(CustomRedirect redirect)
         {
             A.CallTo(() => _redirectHandler.Find(A<Uri>._)).Returns(redirect);

@@ -344,6 +344,8 @@ For example, if we have a redirect: `/a` to `/b`, then:
 - with wildcard setting it will redirect `/a/1` to `/b`
 - without wildcard setting it will redirect `/a/1` to `/b/1`
 
+A request is only redirected once by a rule that would match it again afterwards. For example, with a redirect from `/a` to `/a/b`, `/a/1` redirects to `/a/b/1`, and a request already under `/a/b` stays a 404.
+
 ## 🏁 Getting Started
 
 ### 📦 Prerequisites

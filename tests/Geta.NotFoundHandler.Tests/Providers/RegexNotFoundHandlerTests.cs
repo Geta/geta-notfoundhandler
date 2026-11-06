@@ -24,6 +24,38 @@ public class RegexNotFoundHandlerTests
         _sut = new RegexRedirectNotFoundHandler(_fakeRegexRedirectLoader, fakeLogger, fakeOptions);
     }
 
+    [Theory]
+    [InlineData("/$1", "https://test.example.com/x//evil.com", "/evil.com")]
+    [InlineData("/$1", @"https://test.example.com/x/\evil.com", "/evil.com")]
+    [InlineData("$1", "https://test.example.com/x///evil.com", "/evil.com")]
+    [InlineData("/$1", "https://test.example.com/x/page", "/page")]
+    [InlineData("//cdn.example.com/$1", "https://test.example.com/x/page", "//cdn.example.com/page")]
+    [InlineData("https://other.example.com/$1", "https://test.example.com/x//page", "https://other.example.com//page")]
+    [InlineData("$1", "https://test.example.com/x/https://evil.com/a", "/https://evil.com/a")]
+    [InlineData("$1", "https://test.example.com/x/https:evil.com", "/https:evil.com")]
+    [InlineData("$1", "https://test.example.com/x/https://test.example.com@evil.com", "/https://test.example.com@evil.com")]
+    [InlineData("$1", "https://test.example.com/x/https://test.example.com/a", "https://test.example.com/a")]
+    public void RewriteUrl_does_not_let_the_request_choose_the_host(string format, string url, string expected)
+    {
+        A.CallTo(() => _fakeRegexRedirectLoader.GetAll())
+            .Returns(new List<RegexRedirect> { RegexRedirect(@"^https?://[^/]+/x/(.*)$", format) });
+
+        var result = _sut.RewriteUrl(url);
+
+        Assert.Equal(expected, result.NewUrl);
+    }
+
+    [Fact]
+    public void RewriteUrl_keeps_a_host_named_in_the_format_when_the_scheme_is_captured()
+    {
+        A.CallTo(() => _fakeRegexRedirectLoader.GetAll())
+            .Returns(new List<RegexRedirect> { RegexRedirect(@"^(https?)://old\.example\.com/(.*)$", "$1://new.example.com/$2") });
+
+        var result = _sut.RewriteUrl("https://old.example.com/page");
+
+        Assert.Equal("https://new.example.com/page", result.NewUrl);
+    }
+
     [Fact]
     public void RewriteUrl_regex_matches_url_with_named_groups()
     {

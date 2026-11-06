@@ -4,23 +4,36 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Security
+
+- Wildcard and regex redirects no longer let a request choose the host of the redirect. Before, `/content` -> `/` turned `/content//evil.com` into a redirect to `//evil.com`, and the regex format `/$1` did the same, as did `$1` capturing `https://evil.com`. A format that names a host itself, such as `//cdn.example.com/$1`, is left alone, and a capture naming the host of the request stays as it is. A rule that relied on `$1` capturing another host from the request now redirects to a path on the site.
+- The CSV export now escapes values a spreadsheet would run as a formula, whichever way they got into the database. A value starting with `=`, `@`, `+`, `-`, tab, carriage return or line feed is prefixed with `'`. A `;` followed by one of those characters inside a value is written as `%3B`, because spreadsheets using `;` as the list separator would otherwise start a new cell there.
+
+### Changed
+
+Check these when upgrading, as they change how existing rules and integrations behave:
+
+- A redirect that would only append to itself now stops. With `/a` -> `/a/b`, `/a/x` still redirects to `/a/b/x`, but a request already under `/a/b` stays a 404. With `/a` -> `/a?x=1`, `/a?y=2` still redirects to `/a?y=2&x=1`, and that URL stays a 404. Before, these grew on every hop until the browser gave up.
+- URLs under an entry in the Deleted list now return `410`. Before, `/gone/`, `/gone?a=1` and `/gone/child` were redirected, often to the home page.
+- A request with no matching redirect keeps the status the application gave it. Before, a response that hadn't started yet was forced to `404`. `RequestHandler.SetStatusCodeAndShow404` is now only called for deleted URLs, so a subclass overriding it no longer runs for unmatched requests.
+- `HttpContextExtensions.SetStatusCode` no longer clears the response, so a custom page keeps its headers when its status changes to `410`.
+- CSV export: an imported file that was exported with escaped values keeps the `'` prefix and the `%3B` as part of the value.
+
+### Known issues
+
+- With `UseInternalScheduler`, the cleanup job runs in a plain ASP.NET Core host, but it didn't fire in the Optimizely CMS 13 sample site, for reasons not yet known. On Optimizely sites, use the *[Geta NotFoundHandler] Suggestions cleanup job* scheduled job.
+- Two rules pointing into each other (`/a` -> `/b/c` and `/b` -> `/a/d`) can still grow on every hop.
+
 ### Fixed
 
 - Deleting a redirect from the admin redirects list (`IRedirectsService.DeleteById`) now raises `RedirectsEvents.RedirectsUpdated`, like every other write on `DefaultRedirectsService`. Before, the deleted redirect kept applying until the application restarted or another redirect was saved, and `OptimizelySyncEvents` never told the other instances.
 - Redirects and `410` responses for deleted URLs now also work when the application starts writing the response body inside the pipeline. The handler now runs just before that response starts. Before, it only ran after the pipeline finished, when changing headers threw an exception. A response that hasn't started by then is still handled at that point, so `UseStatusCodePages*` registered before the handler only sees requests the handler didn't redirect. A redirect applied to a response the application is already writing still carries that body, because it can't be stopped at that point; browsers follow the `Location` header.
-- A request whose status is in `ActiveStatusCodes` but has no matching redirect now keeps its status. Before, a response that hadn't started yet was forced to `404`, which broke sites using `ActiveStatusCodes` with `200`.
 - When a status code page is re-executed (`UseStatusCodePagesWithReExecute`), redirect lookup and logging use the URL the client requested, not the error page's URL.
 - Wildcard redirects now join the new URL and the appended path with exactly one slash. Before, the slash was chosen from the request URL instead of the new URL, so `/content` -> `/legacy` turned `/content/file/` into `/legacyfile/`, and `/content` -> `/legacy/` turned `/content/file` into `/legacy//file`.
-- Wildcard redirects no longer produce a protocol-relative URL from a request path with extra leading separators. Before, `/content` -> `/` turned `/content//evil.com` into a redirect to `//evil.com`, which is an open redirect.
+- A wildcard redirect to `/` no longer sends an empty `Location` header when there is nothing to append (`/content` -> `/` with `/content/content`), which made browsers request the same URL again.
 - `CustomRedirectCollection.Find` no longer throws `ArgumentOutOfRangeException` when the request repeats the old URL after extra slashes (`/content/` with `/content//content`) or when `/` is the old URL and the request is `/?param=value`.
 - The guard against redirects building up now also applies when the old URL ends in a slash, so `/content/` -> `/legacy` turns `/content/content/file` into `/legacy/file`, the same as `/content` -> `/legacy` already did.
-- Redirects to a new URL nested under the old one no longer grow without end. With `/a` -> `/a/b`, `/a/x` still redirects to `/a/b/x`, but a request already under `/a/b` is now left as the 404 it is, instead of redirecting to `/a/b/b/x` and on until the browser gave up. This also applies when the new URL includes the host of the request or has encoded characters.
 - Setting `UseInternalScheduler` no longer crashes the application at startup with `No service for type 'Microsoft.Extensions.Logging.ILogger'`.
-- URLs under an entry in the Deleted list now return `410`. Before, a request such as `/gone/`, `/gone?a=1` or `/gone/child` lost the deleted state and was redirected, often to the home page.
-
-### Security
-
-- The CSV export now escapes values a spreadsheet would run as a formula (starting with `=`, `@`, `+`, `-`, tab, carriage return or line feed), whichever way they got into the database. An escaped value is prefixed with `'`, and importing that file keeps the prefix as part of the value. Only the start of a value is checked, so a formula after a `;` inside a value isn't escaped, which can matter in spreadsheets that use `;` as the list separator.
 
 ## [7.1.0] - 2026-07-10
 

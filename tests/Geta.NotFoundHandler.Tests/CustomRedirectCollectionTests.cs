@@ -182,6 +182,12 @@ namespace Geta.NotFoundHandler.Tests
         [InlineData("/a", "https://other.example/a/b", "http://localhost:80/a/b/x", "https://other.example/a/b/b/x")]
         // A new url on the same path only changes the query string, so it isn't nested.
         [InlineData("/page?id=1", "/page?id=2", "/page?id=1&utm=x", "/page?id=1&utm=x&id=2")]
+        [InlineData("/a", "/a?x=1", "/a?y=2", "/a?y=2&x=1")]
+        // The same host on another port is another site.
+        [InlineData("/a", "https://site.example:8443/a/b", "https://site.example/a/b/x", "https://site.example:8443/a/b/b/x")]
+        // Nothing to append to a new url of "/" must still redirect there, not to an empty url.
+        [InlineData("/content", "/", "/content/content", "/")]
+        [InlineData("/content/", "/", "/content", "/")]
         public void Find_should_append_sub_segment(string fromUrl, string toUrl, string notFoundUrl, string expected)
         {
             var redirect = new CustomRedirect(fromUrl, toUrl);
@@ -215,6 +221,21 @@ namespace Geta.NotFoundHandler.Tests
         // An absolute old url only matches exactly, so it can't grow.
         [InlineData("http://localhost/a", "http://localhost/a/b", "http://localhost:80/a/b/x")]
         [InlineData("http://localhost/a", "/a/b", "http://localhost:80/a/b/x")]
+        // A new url that only changes the query string has already been applied.
+        [InlineData("/page?id=1", "/page?id=2", "http://localhost:80/page?id=1&utm=x&id=2")]
+        [InlineData("/a", "/a?x=1", "http://localhost:80/a?y=2&x=1")]
+        [InlineData("/a", "/a?x=1&z=2", "http://localhost:80/a?y=2&x=1&z=2")]
+        // The same goes for an absolute old url, which is compared to the absolute request.
+        [InlineData("http://localhost/a", "/a?x=1", "http://localhost:80/a?y=2&x=1")]
+        [InlineData("http://localhost/a", "http://localhost/a?x=1", "http://localhost:80/a?x=1")]
+        // A browser doesn't send the fragment of the new url back.
+        [InlineData("/a", "/a?x=1#top", "http://localhost:80/a?x=1")]
+        [InlineData("/a", "/a/b#top", "http://localhost:80/a/b")]
+        // The lookup for legacy values html encodes the request, which must not get past the check.
+        [InlineData("/a", "/a/it's", "http://localhost:80/a/it's/x")]
+        [InlineData("/a", "/a/b&c", "http://localhost:80/a/b&c/x")]
+        [InlineData("/a", "/a?x=1&amp;z=2", "http://localhost:80/a?y=2&x=1&z=2")]
+        [InlineData("/a", "//localhost/a/b", "http://localhost:80/a/b/x")]
         public void Find_should_not_cause_redirect_loop(string fromUrl, string toUrl, string notFoundUrl)
         {
             var redirect = new CustomRedirect(fromUrl, toUrl);
@@ -223,6 +244,21 @@ namespace Geta.NotFoundHandler.Tests
             var actual = _sut.Find(notFoundUrl.ToUri());
 
             Assert.Null(actual);
+        }
+
+        [Theory]
+        [InlineData("/a", "/a?x=1", "http://localhost:80/a/?y=2&x=1", null)]
+        [InlineData("/a", "/a?x=1", "http://localhost:80/a?y=2", "/a/?y=2&x=1")]
+        // Everything under the old url still goes to the new url.
+        [InlineData("/a", "/a?x=1", "http://localhost:80/a/c?x=1", "/a/?x=1")]
+        [InlineData("/a", "/a/b", "http://localhost:80/a/b/c", "/a/b")]
+        public void Find_should_stop_a_skip_append_redirect_growing(string fromUrl, string toUrl, string notFoundUrl, string expected)
+        {
+            _sut.Add(new CustomRedirect(fromUrl, toUrl, true, RedirectType.Permanent));
+
+            var actual = _sut.Find(notFoundUrl.ToUri());
+
+            Assert.Equal(expected, actual?.NewUrl);
         }
 
         [Fact]
