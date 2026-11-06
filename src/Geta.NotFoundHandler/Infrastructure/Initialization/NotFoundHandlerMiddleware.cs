@@ -7,24 +7,26 @@ using Microsoft.AspNetCore.Http;
 
 namespace Geta.NotFoundHandler.Infrastructure.Initialization
 {
-    public class NotFoundHandlerMiddleware : IMiddleware
+    public class NotFoundHandlerMiddleware
     {
-        private readonly RequestHandler _requestHandler;
+        private readonly RequestDelegate _next;
 
-        public NotFoundHandlerMiddleware(RequestHandler requestHandler)
+        public NotFoundHandlerMiddleware(RequestDelegate next)
         {
-            _requestHandler = requestHandler;
+            _next = next;
         }
 
-        public async Task InvokeAsync(HttpContext context, RequestDelegate next)
+        public async Task InvokeAsync(HttpContext context, RequestHandler requestHandler)
         {
+            // Headers can no longer be changed once the application starts writing the body,
+            // so the request has to be handled just before the response starts.
             context.Response.OnStarting(state =>
             {
-                _requestHandler.Handle((HttpContext)state);
+                requestHandler.Handle((HttpContext)state);
                 return Task.CompletedTask;
             }, context);
 
-            await next(context);
+            await _next(context);
         }
     }
 }

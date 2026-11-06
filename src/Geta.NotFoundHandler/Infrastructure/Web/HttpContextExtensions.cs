@@ -38,7 +38,6 @@ namespace Geta.NotFoundHandler.Infrastructure.Web
         {
             if (!context.Response.HasStarted)
             {
-                context.Response.Clear();
                 context.Response.StatusCode = statusCode;
             }
             

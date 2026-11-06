@@ -7,6 +7,9 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 
 - Deleting a redirect from the admin redirects list (`IRedirectsService.DeleteById`) now raises `RedirectsEvents.RedirectsUpdated`, like every other write on `DefaultRedirectsService`. Before, the deleted redirect kept applying until the application restarted or another redirect was saved, and `OptimizelySyncEvents` never told the other instances.
+- Redirects and `410` responses for deleted URLs now also work when the application has already started writing the response body. The handler runs just before the response starts instead of after the pipeline finishes, when changing headers threw an exception.
+- A request whose status is in `ActiveStatusCodes` but has no matching redirect now keeps its status. Before, a response that hadn't started yet was forced to `404`, which broke sites using `ActiveStatusCodes` with `200`.
+- When a status code page is re-executed (`UseStatusCodePagesWithReExecute`), redirect lookup and logging use the URL the client requested, not the error page's URL.
 
 ## [7.1.0] - 2026-07-10
 

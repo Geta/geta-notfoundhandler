@@ -70,24 +70,7 @@ namespace Geta.NotFoundHandler.Core
 
             LogDebug("Handling 404 request.", context);
 
-            Uri notFoundUri;
-
-            if (context.Features.Get<IStatusCodeReExecuteFeature>() is StatusCodeReExecuteFeature statusCodeReExecuteFeature)
-            {
-                var request = context.Request;
-                var absoluteUrl = $"{request.Scheme}://{request.Host}{statusCodeReExecuteFeature.OriginalPathBase}{statusCodeReExecuteFeature.OriginalPath}{statusCodeReExecuteFeature.OriginalQueryString}";
-    
-                if (!Uri.TryCreate(absoluteUrl, UriKind.Absolute, out notFoundUri))
-                {
-                    // Fallback to current request URL if construction fails
-                    notFoundUri = new Uri(context.Request.GetDisplayUrl());
-                }
-            }
-            else
-            {
-                notFoundUri = new Uri(context.Request.GetDisplayUrl());
-            }
-
+            var notFoundUri = GetNotFoundUri(context);
 
             if (IsResourceFile(notFoundUri))
             {
@@ -113,8 +96,28 @@ namespace Geta.NotFoundHandler.Core
                 context
                     .Redirect(newUrl.NewUrl, newUrl.RedirectType);
             }
+            else if (canHandleRedirect && newUrl.State == (int)RedirectState.Deleted)
+            {
+                LogDebug("Handled deleted URL", context);
+
+                SetStatusCodeAndShow404(context, 410);
+            }
 
             MarkHandled(context);
+        }
+
+        /// <summary>
+        /// Gets the URL the client asked for. When a status code page is being re-executed,
+        /// the current request is the error page, so the original URL has to be used instead.
+        /// </summary>
+        private static Uri GetNotFoundUri(HttpContext context)
+        {
+            var request = context.Request;
+            var reExecuteFeature = context.Features.Get<IStatusCodeReExecuteFeature>();
+
+            return reExecuteFeature == null
+                ? new Uri(request.GetDisplayUrl())
+                : new Uri($"{request.Scheme}://{request.Host}{reExecuteFeature.OriginalPathBase}{reExecuteFeature.OriginalPath}{reExecuteFeature.OriginalQueryString}");
         }
 
         public static bool IsHandled(HttpContext context)
