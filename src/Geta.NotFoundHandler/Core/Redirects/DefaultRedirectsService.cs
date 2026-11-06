@@ -159,6 +159,8 @@ namespace Geta.NotFoundHandler.Core.Redirects
             {
                 _repository.Delete(match);
             }
+
+            _redirectsEvents.RedirectsUpdated();
         }
 
         public CustomRedirect Get(Guid id)
