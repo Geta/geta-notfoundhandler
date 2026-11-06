@@ -17,7 +17,7 @@ namespace Geta.NotFoundHandler.Core.Redirects;
 
 public class RedirectsCsvParser : IRedirectsParser
 {
-    private static readonly Regex FormulaAfterSeparator = new(@";(?=[\s""']*[=@+\-])", RegexOptions.Compiled);
+    private static readonly Regex FormulaAfterSeparator = new(@";(?=[\s""']*[=@+\-\t\r\n])");
 
     private readonly ILogger<RedirectsCsvParser> _logger;
 

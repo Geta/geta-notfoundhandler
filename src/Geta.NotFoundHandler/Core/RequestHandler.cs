@@ -153,7 +153,8 @@ namespace Geta.NotFoundHandler.Core
                 }
 
                 if (redirect.State.Equals((int)RedirectState.Saved)
-                    && string.Compare(redirect.NewUrl, urlNotFound.PathAndQuery, StringComparison.InvariantCultureIgnoreCase) != 0)
+                    && string.Compare(redirect.NewUrl, urlNotFound.PathAndQuery, StringComparison.InvariantCultureIgnoreCase) != 0
+                    && string.Compare(redirect.NewUrl, urlNotFound.AbsoluteUri, StringComparison.InvariantCultureIgnoreCase) != 0)
                 {
                     // Found it, however, we need to make sure we're not running in an
                     // infinite loop. The new url must not be the referer to this page

@@ -146,7 +146,9 @@ public class CustomRedirectCollection : IEnumerable<CustomRedirect>
                 if (cr.WildCardSkipAppend)
                 {
                     // Remove path from original url but keep query string.
-                    return CreateSkipAppendRedirect(query, cr);
+                    return HasQueryAlreadyBeenAdded(path, query, cr.NewUrl, requestAuthority)
+                        ? null
+                        : CreateSkipAppendRedirect(query, cr);
                 }
 
                 if (UrlIsOldUrlsSubSegment(path, oldUrl))
@@ -174,18 +176,36 @@ public class CustomRedirectCollection : IEnumerable<CustomRedirect>
         string newUrl,
         string requestAuthority)
     {
-        // Note: The request and the old url are decoded before matching, so the new url has to be too.
-        var localNewUrl = HttpUtility.UrlDecode(RemoveRequestAuthority(newUrl, requestAuthority));
+        var localNewUrl = ToLocalNewUrl(newUrl, requestAuthority);
         var newPath = localNewUrl.AsPathSpan();
+        var localOldPath = ToLocalUrl(oldPath.ToString(), requestAuthority).AsSpan();
+        var localPath = ToLocalUrl(path.ToString(), requestAuthority).AsSpan();
 
-        if (!newPath.UrlPathMatch(oldPath) || !path.UrlPathMatch(newPath))
+        if (!newPath.UrlPathMatch(localOldPath) || !localPath.UrlPathMatch(newPath))
         {
             return false;
         }
 
-        var isNested = newPath.TrimEnd('/').Length > oldPath.TrimEnd('/').Length;
+        var isNested = newPath.TrimEnd('/').Length > localOldPath.TrimEnd('/').Length;
 
         return isNested || QueryContains(query, localNewUrl.AsQuerySpan());
+    }
+
+    /// <summary>
+    /// A redirect skipping the wildcard append sends everything under the old url to the same new url,
+    /// so only a request for that new url itself, with the query string already added, has been redirected.
+    /// </summary>
+    private static bool HasQueryAlreadyBeenAdded(
+        ReadOnlySpan<char> path,
+        ReadOnlySpan<char> query,
+        string newUrl,
+        string requestAuthority)
+    {
+        var localNewUrl = ToLocalNewUrl(newUrl, requestAuthority);
+        var localPath = ToLocalUrl(path.ToString(), requestAuthority).AsSpan();
+
+        return localPath.TrimEnd('/').Equals(localNewUrl.AsPathSpan().TrimEnd('/'), StringComparison.OrdinalIgnoreCase)
+               && QueryContains(query, localNewUrl.AsQuerySpan());
     }
 
     private static bool QueryContains(ReadOnlySpan<char> query, ReadOnlySpan<char> other)
@@ -203,21 +223,42 @@ public class CustomRedirectCollection : IEnumerable<CustomRedirect>
     }
 
     /// <summary>
-    /// Makes a new url on the site of the request relative, so it compares to a relative old url.
-    /// A new url on another site stays as it is, because its path says nothing about this one.
+    /// A browser never sends the fragment back, so it can't be part of what the request is compared to.
     /// </summary>
-    private static string RemoveRequestAuthority(string newUrl, string requestAuthority)
+    private static string ToLocalNewUrl(string newUrl, string requestAuthority)
     {
-        if (newUrl.StartsWith('/'))
+        var decodedUrl = HttpUtility.HtmlDecode(newUrl);
+        var fragmentIndex = decodedUrl.IndexOf('#');
+
+        return ToLocalUrl(fragmentIndex < 0 ? decodedUrl : decodedUrl[..fragmentIndex], requestAuthority);
+    }
+
+    /// <summary>
+    /// Gives a url in the form the request is compared in. The request is url decoded before matching and
+    /// html encoded in the lookup for legacy values, and it's absolute in the lookup for absolute old urls.
+    /// </summary>
+    private static string ToLocalUrl(string url, string requestAuthority)
+    {
+        return HttpUtility.UrlDecode(RemoveRequestAuthority(HttpUtility.HtmlDecode(url), requestAuthority));
+    }
+
+    /// <summary>
+    /// Makes a url on the site of the request relative, so it compares to a relative url.
+    /// A url on another site stays as it is, because its path says nothing about this one.
+    /// </summary>
+    private static string RemoveRequestAuthority(string url, string requestAuthority)
+    {
+        var isProtocolRelative = url.StartsWith("//", StringComparison.Ordinal);
+        if (url.StartsWith('/') && !isProtocolRelative)
         {
-            return newUrl;
+            return url;
         }
 
-        var isOnRequestSite = Uri.TryCreate(newUrl, UriKind.Absolute, out var uri)
+        var isOnRequestSite = Uri.TryCreate(isProtocolRelative ? Uri.UriSchemeHttp + ":" + url : url, UriKind.Absolute, out var uri)
                               && (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps)
                               && uri.Authority.Equals(requestAuthority, StringComparison.OrdinalIgnoreCase);
 
-        return isOnRequestSite ? uri.PathAndQuery : newUrl;
+        return isOnRequestSite ? uri.PathAndQuery : url;
     }
 
     private static CustomRedirect CreateSubSegmentRedirect(

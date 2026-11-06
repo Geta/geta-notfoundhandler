@@ -49,6 +49,7 @@ namespace Geta.NotFoundHandler.Tests
         [InlineData("/x; +1+1", "/x%3B +1+1")]
         [InlineData("/x;-1+1", "/x%3B-1+1")]
         [InlineData("/x;'=1+1", "/x%3B'=1+1")]
+        [InlineData("/x;\tpage", "/x%3B\tpage")]
         public void ExportToCsv_encodes_separator_before_a_formula_inside_a_value(string url, string expected)
         {
             var row = ExportRow(url, url);
