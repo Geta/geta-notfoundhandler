@@ -201,4 +201,5 @@ FakesAssemblies/
 .idea/*
 
 wwwroot
-modules
+modules/*
+!modules/ModulesInclude.proj

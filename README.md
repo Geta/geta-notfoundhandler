@@ -2,9 +2,8 @@
 # NotFound Handler for ASP.NET Core and Optimizely
 
 [![Build](https://github.com/Geta/geta-notfoundhandler/actions/workflows/build.yml/badge.svg)](https://github.com/Geta/geta-notfoundhandler/actions/workflows/build.yml)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=Geta_geta-notfoundhandler&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=Geta_geta-notfoundhandler)
-[![Platform](https://img.shields.io/badge/Platform-.NET%205-blue.svg?style=flat)](https://docs.microsoft.com/en-us/dotnet/)
-[![Platform](https://img.shields.io/badge/Optimizely-%2012-orange.svg?style=flat)](http://world.episerver.com/cms/)
+[![Platform](https://img.shields.io/badge/Platform-.NET%2010-blue.svg?style=flat)](https://docs.microsoft.com/en-us/dotnet/)
+[![Platform](https://img.shields.io/badge/Optimizely-%2013-orange.svg?style=flat)](http://world.episerver.com/cms/)
 
 ## Description
 
@@ -151,6 +150,8 @@ Logging of 404 requests is buffered to shield your application from Denial of Se
 If the `bufferSize` is set to `0`, the `threshold` value will be ignored, and every request will be logged immediately.
 
 **LogWithHostname**: Set to `true` to include hostname in the log. Useful in a multisite environment with several hostnames/domains. Default is `false`
+
+**CommandTimeout**: Command timeout, in seconds, applied to SQL queries issued by the NotFound handler. Raise it past the SqlClient default of 30 if you have very large NotFound handler tables. Default is 30
 
 **ActiveStatusCodes**: A integerlist with the status codes that NotFoundHandler will be active on. (Ex. ```options.ActiveStatusCodes = new int[] { StatusCodes.Status404NotFound, StatusCodes.Status410Gone };```)
 
@@ -320,7 +321,13 @@ An Optimizely scheduled job was added - <code>[Geta NotFoundHandler] Suggestions
 
 Additionally, there are two optimizely scheduled jobs responsible for:
 - *[Geta NotFoundHandler] Index content URLs* - as mentioned before, this job indexes URLs of content. Usually, it is required to run this job only once. All new content is automatically indexed. But if for some reason content publish events are not firing when creating new content (for example, during the import), then you should set this job to run frequently.
-- *[Geta NotFoundHandler] Register content move redirects* - this job creates redirects based on registered moved content. Normally, this job is not required at all, but there might be situations when content move is registered but redirect creation is not completed. This could happen during deployments. In this case, you can manually run this job or schedule it to run time to time to fix such issues.
+- *[Geta NotFoundHandler] Register content move redirects* - this job creates redirects based on registered moved content. Normally, this job is not required at all, but there might be situations when content move is registered but redirect creation is not completed. This could happen during deployments. In this case, you can manually run this job or schedule it to run time to time to fix such issues. The job processes the `NotFoundHandler.ContentUrlHistory` table page-by-page so it scales to large tables. You can tune the page size via `MovedContentBatchSize` (default 1000):
+```
+services.AddOptimizelyNotFoundHandler(o =>
+{
+    o.MovedContentBatchSize = 1000;
+});
+```
 
 
 # Troubleshooting

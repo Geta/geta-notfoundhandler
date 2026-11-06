@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="15.0">
+    <!-- Copy all Foundation modules to customer project on build -->
+    <Target Name="CopyAllFoundationModulesToCustomerProjectOnBuild" BeforeTargets="BeforeBuild">
+        <PropertyGroup>
+            <SourceFolder>..\..\sub\geta-foundation-core\src\Foundation\modules</SourceFolder>
+            <DestinationFolder>modules</DestinationFolder>
+        </PropertyGroup>
+
+        <ItemGroup>
+            <FilesToCopy Remove="@(FilesToCopy)" />
+            <FilesToCopy Include="$([MSBuild]::EnsureTrailingSlash('$(SourceFolder)'))**\*.*"/>
+        </ItemGroup>
+
+        <Message Text="Copy all Foundation modules to customer project on build from: [$(SourceFolder)] to: [$(DestinationFolder)]" Importance="high"/>
+
+        <Copy SourceFiles="@(FilesToCopy)" DestinationFolder="$([MSBuild]::EnsureTrailingSlash('$(DestinationFolder)'))%(RecursiveDir)"/>
+    </Target>
+    
+    <!-- Static assets from Foundation are served via the project reference through ASP.NET Core's
+         static web assets pipeline in CMS 13. No explicit copy is needed. -->
+
+    <!-- *************** Copying Foundation modules from build to publish folder *************** -->
+    <Target Name="CopyingFoundationModulesFromBuildToPublishFolder" BeforeTargets="PrepareForPublish">
+        <PropertyGroup>
+            <SourceFolder>modules</SourceFolder>
+            <DestinationFolder>$(PublishDir)\modules</DestinationFolder>
+        </PropertyGroup>
+
+        <ItemGroup>
+            <FilesToCopy Remove="@(FilesToCopy)" />
+            <FilesToCopy Include="$([MSBuild]::EnsureTrailingSlash('$(SourceFolder)'))**\*.*"/>
+        </ItemGroup>
+
+        <Message Text="Copying Foundation modules from build to publish folder from: [$(SourceFolder)] to: [$(DestinationFolder)]" Importance="high"/>
+
+        <Copy SourceFiles="@(FilesToCopy)" DestinationFolder="$([MSBuild]::EnsureTrailingSlash('$(DestinationFolder)'))%(RecursiveDir)"/>
+    </Target>
+</Project>
