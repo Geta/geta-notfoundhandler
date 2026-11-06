@@ -32,6 +32,42 @@ public class RedirectBuilderTests
     }
 
     [Fact]
+    public void CreateRedirects_skips_only_the_language_without_a_primary_url()
+    {
+        var histories = new List<ContentUrlHistory>
+        {
+            new()
+            {
+                Id = Guid.NewGuid(),
+                ContentKey = DefaultContentKey,
+                CreatedUtc = DateTime.Parse("2022-01-01"),
+                Urls = new List<TypedUrl>
+                {
+                    new() { Url = "/en/old", Type = UrlType.Primary, Language = "en" },
+                    new() { Url = "/no/old", Type = UrlType.Primary, Language = "no" }
+                }
+            },
+            new()
+            {
+                Id = Guid.NewGuid(),
+                ContentKey = DefaultContentKey,
+                CreatedUtc = DateTime.Parse("2022-01-02"),
+                Urls = new List<TypedUrl>
+                {
+                    new() { Url = "/en/new", Type = UrlType.Seo, Language = "en" },
+                    new() { Url = "/no/new", Type = UrlType.Primary, Language = "no" }
+                }
+            }
+        };
+
+        var redirects = _redirectBuilder.CreateRedirects(histories).ToList();
+
+        var redirect = Assert.Single(redirects);
+        Assert.Equal("/no/old", redirect.OldUrl);
+        Assert.Equal("/no/new", redirect.NewUrl);
+    }
+
+    [Fact]
     public void CreateRedirects_returns_primary_redirect()
     {
         var oldUrl = "/initial";

@@ -28,6 +28,7 @@ Check these when upgrading, as they change how existing rules and integrations b
 
 - The CMS navigation shows again on the add-on's page in the CMS on CMS 13. The layout's `<platform-navigation />` wasn't bound to its tag helper, so the browser got an empty element.
 - Automatic redirects no longer fail with `Sequence contains no elements` for content with no URL history.
+- A content language with no primary URL no longer stops automatic redirects for the remaining languages.
 - Whitespace around old and new URLs is now ignored, so a trailing space or tab in a form or an imported file no longer silently breaks a redirect.
 - The module copy on build skips unchanged files, so a running site holding the file no longer fails the build.
 - Deleting a redirect from the admin redirects list (`IRedirectsService.DeleteById`) now raises `RedirectsEvents.RedirectsUpdated`, like every other write on `DefaultRedirectsService`. Before, the deleted redirect kept applying until the application restarted or another redirect was saved, and `OptimizelySyncEvents` never told the other instances.

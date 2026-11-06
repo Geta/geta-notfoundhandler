@@ -54,7 +54,7 @@ namespace Geta.NotFoundHandler.Optimizely.Core.AutomaticRedirects
                     .ToList();
             
                 var destinationPrimary = languageSpecificDestinationUrls.FirstOrDefault(x => x.Type == UrlType.Primary);
-                if (destinationPrimary == null) yield break;
+                if (destinationPrimary == null) continue;
 
                 foreach (var source in sourceHistory.Urls.Where(x => x.Language == language))
                 {

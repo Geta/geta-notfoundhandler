@@ -113,7 +113,8 @@ namespace Geta.NotFoundHandler.Core.Redirects
 
         public void DeleteByOldUrl(string oldUrl, bool notifyUpdated)
         {
-            var match = _redirectLoader.GetByOldUrl(oldUrl);
+            // Note: CustomRedirect trims the old url it stores, so the lookup has to as well.
+            var match = _redirectLoader.GetByOldUrl(oldUrl?.Trim());
             if (match != null)
             {
                 _repository.Delete(match);

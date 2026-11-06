@@ -29,6 +29,8 @@ namespace Geta.NotFoundHandler.Tests
             A.CallTo(() => redirectLoader.GetAll()).ReturnsLazily(() => _storedRedirects.ToList());
             A.CallTo(() => redirectLoader.Get(A<Guid>._))
                 .ReturnsLazily((Guid id) => _storedRedirects.FirstOrDefault(x => x.Id == id));
+            A.CallTo(() => redirectLoader.GetByOldUrl(A<string>._))
+                .ReturnsLazily((string oldUrl) => _storedRedirects.FirstOrDefault(x => x.OldUrl == oldUrl));
 
             _redirectsEvents = new RedirectsEvents();
             _sut = new DefaultRedirectsService(repository, redirectLoader, _redirectsEvents);
@@ -63,6 +65,19 @@ namespace Geta.NotFoundHandler.Tests
             _sut.DeleteById(redirect.Id.Value);
 
             Assert.Null(_redirectHandler.Find(OldUri));
+        }
+
+        [Theory]
+        [InlineData("/old")]
+        [InlineData(" /old")]
+        [InlineData("/old\t")]
+        public void DeleteByOldUrl_ignores_whitespace_around_the_url(string oldUrl)
+        {
+            GivenStoredRedirect();
+
+            _sut.DeleteByOldUrl(oldUrl);
+
+            Assert.Empty(_storedRedirects);
         }
 
         private CustomRedirect GivenStoredRedirect()

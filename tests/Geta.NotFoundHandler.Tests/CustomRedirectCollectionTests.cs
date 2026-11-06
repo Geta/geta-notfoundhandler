@@ -404,6 +404,26 @@ namespace Geta.NotFoundHandler.Tests
             Assert.Equal("/new", actual.NewUrl);
         }
 
+        [Fact]
+        public void Find_matches_old_url_lowercased_under_a_culture_with_different_casing()
+        {
+            var culture = System.Globalization.CultureInfo.CurrentCulture;
+            try
+            {
+                // Note: In Turkish, "I" lowercases to a dotless "ı".
+                System.Globalization.CultureInfo.CurrentCulture = new System.Globalization.CultureInfo("tr-TR");
+                _sut.Add(new CustomRedirect("/INFO", "/new"));
+            }
+            finally
+            {
+                System.Globalization.CultureInfo.CurrentCulture = culture;
+            }
+
+            var actual = _sut.Find("/info".ToUri());
+
+            Assert.Equal("/new", actual.NewUrl);
+        }
+
         /// <summary>
         /// https://github.com/Geta/geta-notfoundhandler/issues/176
         /// </summary>

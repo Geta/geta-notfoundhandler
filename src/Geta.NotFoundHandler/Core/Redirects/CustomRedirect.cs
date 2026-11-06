@@ -24,7 +24,7 @@ namespace Geta.NotFoundHandler.Core.Redirects
         public string OldUrl
         {
             get => _oldUrl;
-            set => _oldUrl = value?.Trim().ToLower();
+            set => _oldUrl = value?.Trim().ToLowerInvariant();
         }
 
         private string _newUrl;

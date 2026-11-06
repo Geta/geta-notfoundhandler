@@ -73,7 +73,7 @@ namespace Geta.NotFoundHandler.Core.Redirects
 
             foreach (var redirect in redirects)
             {
-                if (string.IsNullOrWhiteSpace(redirect.OldUrl) || string.IsNullOrWhiteSpace(redirect.NewUrl))
+                if (string.IsNullOrEmpty(redirect.OldUrl) || string.IsNullOrEmpty(redirect.NewUrl))
                 {
                     continue;
                 }
@@ -81,7 +81,7 @@ namespace Geta.NotFoundHandler.Core.Redirects
                 var urlElement = document.CreateElement(string.Empty, "url", string.Empty);
 
                 var oldElement = document.CreateElement(string.Empty, OldUrl, string.Empty);
-                oldElement.AppendChild(document.CreateTextNode(redirect.OldUrl.Trim()));
+                oldElement.AppendChild(document.CreateTextNode(redirect.OldUrl));
                 if (redirect.WildCardSkipAppend)
                 {
                     var wildCardAttribute = document.CreateAttribute(string.Empty, SkipWildcard, string.Empty);
@@ -94,7 +94,7 @@ namespace Geta.NotFoundHandler.Core.Redirects
                 oldElement.Attributes.Append(redirectTypeAttribute);
 
                 var newElement = document.CreateElement(string.Empty, NewUrl, string.Empty);
-                newElement.AppendChild(document.CreateTextNode(redirect.NewUrl.Trim()));
+                newElement.AppendChild(document.CreateTextNode(redirect.NewUrl));
 
                 urlElement.AppendChild(oldElement);
                 urlElement.AppendChild(newElement);
