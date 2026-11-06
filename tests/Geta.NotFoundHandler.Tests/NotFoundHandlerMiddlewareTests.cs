@@ -1,6 +1,7 @@
 // Copyright (c) Geta Digital. All rights reserved.
 // Licensed under Apache-2.0. See the LICENSE file in the project root for more information
 
+using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
@@ -26,6 +27,7 @@ namespace Geta.NotFoundHandler.Tests
         private const string CustomPage = "<h1>custom page</h1>";
 
         private readonly List<string> _loggedUrls = new();
+        private Exception _logFailure;
 
         [Fact]
         public async Task Redirects_when_application_already_wrote_response_body()
@@ -70,59 +72,81 @@ namespace Geta.NotFoundHandler.Tests
         {
             var response = await GetAsync(
                 "/page",
-                context =>
-                {
-                    context.Response.StatusCode = StatusCodes.Status200OK;
-                    return Task.CompletedTask;
-                },
+                _ => Task.CompletedTask,
                 activeStatusCodes: new[] { StatusCodes.Status200OK });
 
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         }
 
         [Fact]
-        public async Task Does_not_handle_status_code_that_is_not_active()
-        {
-            var response = await GetAsync(
-                "/old",
-                context =>
-                {
-                    context.Response.StatusCode = StatusCodes.Status200OK;
-                    return Task.CompletedTask;
-                },
-                redirects: Saved("/old", "/new"));
-
-            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            Assert.Null(response.Headers.Location);
-        }
-
-        [Fact]
         public async Task Re_executed_status_code_page_redirects_using_original_url()
         {
-            var response = await GetAsync("/old/sub?a=1", NotFoundOrErrorPage, Saved("/old", "/new"), reExecute: true);
+            var response = await GetAsync("/old/sub?a=1", NotFoundOrErrorPage, Saved("/old", "/new"), inner: ReExecute);
 
             Assert.Equal(HttpStatusCode.MovedPermanently, response.StatusCode);
             Assert.Equal("/new/sub?a=1", response.Headers.Location?.ToString());
         }
 
         [Fact]
+        public async Task Redirects_without_rendering_status_code_page_registered_before_handler()
+        {
+            var paths = new List<string>();
+
+            var response = await GetAsync("/old", Recording(paths), Saved("/old", "/new"), outer: ReExecute);
+
+            Assert.Equal(HttpStatusCode.MovedPermanently, response.StatusCode);
+            Assert.Equal("/new", response.Headers.Location?.ToString());
+            Assert.Equal(new[] { "/old" }, paths);
+        }
+
+        [Fact]
+        public async Task Shows_410_status_code_page_for_deleted_url()
+        {
+            var paths = new List<string>();
+
+            var response = await GetAsync("/gone", Recording(paths), Deleted("/gone"), outer: ReExecute);
+
+            Assert.Equal(HttpStatusCode.Gone, response.StatusCode);
+            Assert.Equal(new[] { "/gone", "/error/410" }, paths);
+        }
+
+        [Fact]
+        public async Task Keeps_custom_page_when_handling_fails_as_response_starts()
+        {
+            _logFailure = new InvalidOperationException("Logging failed");
+
+            var response = await GetAsync("/missing", WriteNotFoundPage);
+
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+            Assert.Equal(CustomPage, await response.Content.ReadAsStringAsync());
+        }
+
+        [Fact]
+        public async Task Does_not_fail_when_response_started_before_handler()
+        {
+            var response = await GetAsync(
+                "/old",
+                _ => Task.CompletedTask,
+                Saved("/old", "/new"),
+                outer: app => app.Use(async (context, next) =>
+                {
+                    context.Response.StatusCode = StatusCodes.Status404NotFound;
+                    await context.Response.StartAsync();
+                    await next();
+                }));
+
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+            Assert.Null(response.Headers.Location);
+        }
+
+        [Fact]
         public async Task Re_executed_status_code_page_logs_original_url_once()
         {
-            var response = await GetAsync("/missing", NotFoundOrErrorPage, reExecute: true);
+            var response = await GetAsync("/missing", NotFoundOrErrorPage, inner: ReExecute);
 
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
             Assert.Equal(CustomPage, await response.Content.ReadAsStringAsync());
             Assert.Equal(new[] { "/missing" }, _loggedUrls);
-        }
-
-        [Fact]
-        public async Task Re_executed_status_code_page_returns_410_for_deleted_url()
-        {
-            var response = await GetAsync("/gone", NotFoundOrErrorPage, Deleted("/gone"), reExecute: true);
-
-            Assert.Equal(HttpStatusCode.Gone, response.StatusCode);
-            Assert.Equal(CustomPage, await response.Content.ReadAsStringAsync());
-            Assert.Equal("text/html", response.Content.Headers.ContentType?.MediaType);
         }
 
         private static Task NotFoundWithoutBody(HttpContext context)
@@ -148,6 +172,20 @@ namespace Geta.NotFoundHandler.Tests
             await context.Response.WriteAsync(CustomPage);
         }
 
+        private static RequestDelegate Recording(List<string> paths)
+        {
+            return context =>
+            {
+                paths.Add(context.Request.Path);
+                return NotFoundOrErrorPage(context);
+            };
+        }
+
+        private static void ReExecute(IApplicationBuilder app)
+        {
+            app.UseStatusCodePagesWithReExecute("/error/{0}");
+        }
+
         private static CustomRedirect Saved(string oldUrl, string newUrl)
         {
             return new CustomRedirect(oldUrl, newUrl, false, RedirectType.Permanent);
@@ -162,7 +200,8 @@ namespace Geta.NotFoundHandler.Tests
             string url,
             RequestDelegate application,
             CustomRedirect redirects = null,
-            bool reExecute = false,
+            Action<IApplicationBuilder> outer = null,
+            Action<IApplicationBuilder> inner = null,
             int[] activeStatusCodes = null)
         {
             var collection = new CustomRedirectCollection();
@@ -177,7 +216,15 @@ namespace Geta.NotFoundHandler.Tests
             var requestLogger = A.Fake<IRequestLogger>();
             A.CallTo(() => requestLogger.ShouldLogRequest(A<string>._)).Returns(true);
             A.CallTo(() => requestLogger.LogRequest(A<string>._, A<string>._))
-                .Invokes((string loggedUrl, string _) => _loggedUrls.Add(loggedUrl));
+                .Invokes((string loggedUrl, string _) =>
+                {
+                    if (_logFailure != null)
+                    {
+                        throw _logFailure;
+                    }
+
+                    _loggedUrls.Add(loggedUrl);
+                });
 
             var options = new NotFoundHandlerOptions();
             if (activeStatusCodes != null)
@@ -195,26 +242,19 @@ namespace Geta.NotFoundHandler.Tests
             builder.ConfigureServices(services =>
             {
                 services.AddSingleton(requestHandler);
-                services.AddRouting();
             });
             builder.Configure(app =>
             {
-                if (reExecute)
-                {
-                    app.UseStatusCodePagesWithReExecute("/error/{0}");
-                }
-
+                outer?.Invoke(app);
                 app.UseMiddleware<NotFoundHandlerMiddleware>();
+                inner?.Invoke(app);
                 app.Run(application);
             });
 
             using var server = builder.Build();
             using var client = server.CreateClient();
 
-            var response = await client.GetAsync(url);
-            await response.Content.LoadIntoBufferAsync();
-
-            return response;
+            return await client.GetAsync(url);
         }
     }
 }
