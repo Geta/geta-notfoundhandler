@@ -9,6 +9,7 @@
         <Copy
                 SourceFiles="@(SourceScripts)"
                 DestinationFolder="$(MSBuildProjectDirectory)\modules\_protected\%(RecursiveDir)"
+                SkipUnchangedFiles="true"
         />
     </Target>
 </Project>

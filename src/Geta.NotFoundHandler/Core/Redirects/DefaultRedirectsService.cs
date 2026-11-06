@@ -66,6 +66,11 @@ namespace Geta.NotFoundHandler.Core.Redirects
 
         public void AddOrUpdate(CustomRedirect redirect, bool notifyUpdated)
         {
+            // Note: Forms and imported files can carry whitespace that would silently stop the redirect
+            // matching. Rows saved earlier stay as they are, so an upgrade doesn't change what they do.
+            redirect.OldUrl = redirect.OldUrl?.Trim();
+            redirect.NewUrl = redirect.NewUrl?.Trim();
+
             var match = _redirectLoader.GetByOldUrl(redirect.OldUrl);
 
             if (!HasChanged(match, redirect))
@@ -113,7 +118,8 @@ namespace Geta.NotFoundHandler.Core.Redirects
 
         public void DeleteByOldUrl(string oldUrl, bool notifyUpdated)
         {
-            var match = _redirectLoader.GetByOldUrl(oldUrl);
+            // Note: Try it as given first, as rows saved before urls were trimmed can still have whitespace.
+            var match = _redirectLoader.GetByOldUrl(oldUrl) ?? _redirectLoader.GetByOldUrl(oldUrl?.Trim());
             if (match != null)
             {
                 _repository.Delete(match);

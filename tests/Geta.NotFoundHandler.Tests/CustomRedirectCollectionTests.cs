@@ -188,6 +188,9 @@ namespace Geta.NotFoundHandler.Tests
         // Nothing to append to a new url of "/" must still redirect there, not to an empty url.
         [InlineData("/content", "/", "/content/content", "/")]
         [InlineData("/content/", "/", "/content", "/")]
+        // https://github.com/Geta/geta-notfoundhandler/issues/136
+        [InlineData("/careers/", "/en/careers", "/careers/test", "/en/careers/test")]
+        [InlineData("/careers/", "/en/careers", "/careers/search?term=x", "/en/careers/search?term=x")]
         public void Find_should_append_sub_segment(string fromUrl, string toUrl, string notFoundUrl, string expected)
         {
             var redirect = new CustomRedirect(fromUrl, toUrl);
@@ -382,6 +385,26 @@ namespace Geta.NotFoundHandler.Tests
             var actual = _sut.Find(requesttUrl.ToUri());
 
             Assert.NotNull(actual);
+        }
+
+        [Fact]
+        public void Find_matches_old_url_lowercased_under_a_culture_with_different_casing()
+        {
+            var culture = System.Globalization.CultureInfo.CurrentCulture;
+            try
+            {
+                // Note: In Turkish, "I" lowercases to a dotless "ı".
+                System.Globalization.CultureInfo.CurrentCulture = new System.Globalization.CultureInfo("tr-TR");
+                _sut.Add(new CustomRedirect("/INFO", "/new"));
+            }
+            finally
+            {
+                System.Globalization.CultureInfo.CurrentCulture = culture;
+            }
+
+            var actual = _sut.Find("/info".ToUri());
+
+            Assert.Equal("/new", actual.NewUrl);
         }
 
         /// <summary>

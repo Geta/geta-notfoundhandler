@@ -23,6 +23,12 @@ namespace Geta.NotFoundHandler.Optimizely.Core.AutomaticRedirects
         public void CreateRedirects(IReadOnlyCollection<ContentUrlHistory> histories)
         {
             var redirects = _redirectBuilder.CreateRedirects(histories).ToList();
+            if (redirects.Count == 0)
+            {
+                // Note: Saving nothing would still reload the redirects on every instance, twice.
+                return;
+            }
+
             _redirectsService.AddOrUpdate(redirects);
             var urlsToRemove = redirects.Where(x => x.NewUrl == x.OldUrl).Select(x => x.OldUrl);
             _redirectsService.DeleteByOldUrl(urlsToRemove);

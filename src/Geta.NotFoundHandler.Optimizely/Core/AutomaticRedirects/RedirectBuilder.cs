@@ -21,6 +21,11 @@ namespace Geta.NotFoundHandler.Optimizely.Core.AutomaticRedirects
         public virtual IEnumerable<CustomRedirect> CreateRedirects(IReadOnlyCollection<ContentUrlHistory> histories)
         {
             var ordered = histories.OrderByDescending(x => x.CreatedUtc).ToList();
+            if (ordered.Count == 0)
+            {
+                return Enumerable.Empty<CustomRedirect>();
+            }
+
             var destination = ordered.First();
 
             return ordered
@@ -49,7 +54,7 @@ namespace Geta.NotFoundHandler.Optimizely.Core.AutomaticRedirects
                     .ToList();
             
                 var destinationPrimary = languageSpecificDestinationUrls.FirstOrDefault(x => x.Type == UrlType.Primary);
-                if (destinationPrimary == null) yield break;
+                if (destinationPrimary == null) continue;
 
                 foreach (var source in sourceHistory.Urls.Where(x => x.Language == language))
                 {

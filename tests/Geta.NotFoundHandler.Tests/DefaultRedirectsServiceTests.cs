@@ -25,10 +25,14 @@ namespace Geta.NotFoundHandler.Tests
             var repository = A.Fake<IRepository<CustomRedirect>>();
             A.CallTo(() => repository.Delete(A<CustomRedirect>._))
                 .Invokes((CustomRedirect redirect) => _storedRedirects.Remove(redirect));
+            A.CallTo(() => repository.Save(A<CustomRedirect>._))
+                .Invokes((CustomRedirect redirect) => _storedRedirects.Add(redirect));
             var redirectLoader = A.Fake<IRedirectLoader>();
             A.CallTo(() => redirectLoader.GetAll()).ReturnsLazily(() => _storedRedirects.ToList());
             A.CallTo(() => redirectLoader.Get(A<Guid>._))
                 .ReturnsLazily((Guid id) => _storedRedirects.FirstOrDefault(x => x.Id == id));
+            A.CallTo(() => redirectLoader.GetByOldUrl(A<string>._))
+                .ReturnsLazily((string oldUrl) => _storedRedirects.FirstOrDefault(x => x.OldUrl == oldUrl));
 
             _redirectsEvents = new RedirectsEvents();
             _sut = new DefaultRedirectsService(repository, redirectLoader, _redirectsEvents);
@@ -63,6 +67,57 @@ namespace Geta.NotFoundHandler.Tests
             _sut.DeleteById(redirect.Id.Value);
 
             Assert.Null(_redirectHandler.Find(OldUri));
+        }
+
+        [Theory]
+        [InlineData("/old")]
+        [InlineData(" /old")]
+        [InlineData("/old\t")]
+        public void DeleteByOldUrl_ignores_whitespace_around_the_url(string oldUrl)
+        {
+            GivenStoredRedirect();
+
+            _sut.DeleteByOldUrl(oldUrl);
+
+            Assert.Empty(_storedRedirects);
+        }
+
+        [Fact]
+        public void DeleteByOldUrl_finds_a_row_saved_earlier_with_whitespace()
+        {
+            _storedRedirects.Add(new CustomRedirect("/old\t", "/new") { Id = Guid.NewGuid() });
+
+            _sut.DeleteByOldUrl("/old\t");
+
+            Assert.Empty(_storedRedirects);
+        }
+
+        /// <summary>
+        /// https://github.com/Geta/geta-notfoundhandler/issues/123
+        /// </summary>
+        [Theory]
+        [InlineData("/old ", "/new ")]
+        [InlineData(" /old", " /new")]
+        [InlineData("/old\t", "\t/new")]
+        [InlineData("/old\r\n", "/new\n")]
+        public void AddOrUpdate_removes_whitespace_around_urls(string oldUrl, string newUrl)
+        {
+            _sut.AddOrUpdate(new CustomRedirect(oldUrl, newUrl));
+
+            var saved = Assert.Single(_storedRedirects);
+            Assert.Equal("/old", saved.OldUrl);
+            Assert.Equal("/new", saved.NewUrl);
+        }
+
+        [Fact]
+        public void AddOrUpdate_leaves_a_row_saved_earlier_with_whitespace_unused()
+        {
+            _storedRedirects.Add(new CustomRedirect("/old\t", "/first") { Id = Guid.NewGuid() });
+
+            _sut.AddOrUpdate(new CustomRedirect("/old", "/second"));
+            _redirectsInitializer.Initialize();
+
+            Assert.Equal("/second", _redirectHandler.Find(OldUri).NewUrl);
         }
 
         private CustomRedirect GivenStoredRedirect()

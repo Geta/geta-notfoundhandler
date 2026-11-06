@@ -26,6 +26,11 @@ Check these when upgrading, as they change how existing rules and integrations b
 
 ### Fixed
 
+- The CMS navigation shows again on the add-on's page in the CMS on CMS 13. The layout's `<platform-navigation />` wasn't bound to its tag helper, so the browser got an empty element.
+- Automatic redirects no longer fail with `Sequence contains no elements` for content with no URL history.
+- A content language with no primary URL no longer stops automatic redirects for the remaining languages.
+- Whitespace around old and new URLs is now removed when a redirect is saved, so a trailing space or tab in a form or an imported file no longer silently breaks it. Redirects saved earlier aren't changed: save them again to clean them up.
+- The module copy on build skips unchanged files, so a running site holding the file no longer fails the build.
 - Deleting a redirect from the admin redirects list (`IRedirectsService.DeleteById`) now raises `RedirectsEvents.RedirectsUpdated`, like every other write on `DefaultRedirectsService`. Before, the deleted redirect kept applying until the application restarted or another redirect was saved, and `OptimizelySyncEvents` never told the other instances.
 - Redirects and `410` responses for deleted URLs now also work when the application starts writing the response body inside the pipeline. The handler now runs just before that response starts. Before, it only ran after the pipeline finished, when changing headers threw an exception. A response that hasn't started by then is still handled at that point, so `UseStatusCodePages*` registered before the handler only sees requests the handler didn't redirect. A redirect applied to a response the application is already writing still carries that body, because it can't be stopped at that point; browsers follow the `Location` header.
 - When a status code page is re-executed (`UseStatusCodePagesWithReExecute`), redirect lookup and logging use the URL the client requested, not the error page's URL.
