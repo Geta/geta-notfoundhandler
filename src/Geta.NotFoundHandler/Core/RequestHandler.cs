@@ -7,6 +7,7 @@ using Geta.NotFoundHandler.Core.Redirects;
 using Geta.NotFoundHandler.Core.Suggestions;
 using Geta.NotFoundHandler.Infrastructure.Configuration;
 using Geta.NotFoundHandler.Infrastructure.Web;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.Extensions.Logging;
@@ -69,7 +70,7 @@ namespace Geta.NotFoundHandler.Core
 
             LogDebug("Handling 404 request.", context);
 
-            var notFoundUri = new Uri(context.Request.GetDisplayUrl());
+            var notFoundUri = GetNotFoundUri(context);
 
             if (IsResourceFile(notFoundUri))
             {
@@ -101,14 +102,22 @@ namespace Geta.NotFoundHandler.Core
 
                 SetStatusCodeAndShow404(context, 410);
             }
-            else
-            {
-                LogDebug("Not handled. Current URL is ignored or no redirect found.", context);
-
-                SetStatusCodeAndShow404(context);
-            }
 
             MarkHandled(context);
+        }
+
+        /// <summary>
+        /// Gets the URL the client asked for. When a status code page is being re-executed,
+        /// the current request is the error page, so the original URL has to be used instead.
+        /// </summary>
+        private static Uri GetNotFoundUri(HttpContext context)
+        {
+            var request = context.Request;
+            var reExecuteFeature = context.Features.Get<IStatusCodeReExecuteFeature>();
+
+            return reExecuteFeature == null
+                ? new Uri(request.GetDisplayUrl())
+                : new Uri($"{request.Scheme}://{request.Host}{reExecuteFeature.OriginalPathBase}{reExecuteFeature.OriginalPath}{reExecuteFeature.OriginalQueryString}");
         }
 
         public static bool IsHandled(HttpContext context)

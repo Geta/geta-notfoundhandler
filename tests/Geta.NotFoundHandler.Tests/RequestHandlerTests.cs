@@ -93,7 +93,7 @@ namespace Geta.NotFoundHandler.Tests
         }
 
         [Fact]
-        public void Handle_sets_404_response_when_unable_redirect()
+        public void Handle_keeps_404_response_when_unable_redirect()
         {
             WhenRedirectRequestNotHandled();
 
