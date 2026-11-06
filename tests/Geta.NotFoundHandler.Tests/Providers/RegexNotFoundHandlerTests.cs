@@ -24,6 +24,23 @@ public class RegexNotFoundHandlerTests
         _sut = new RegexRedirectNotFoundHandler(_fakeRegexRedirectLoader, fakeLogger, fakeOptions);
     }
 
+    [Theory]
+    [InlineData("/$1", "https://test.example.com/x//evil.com", "/evil.com")]
+    [InlineData("/$1", @"https://test.example.com/x/\evil.com", "/evil.com")]
+    [InlineData("$1", "https://test.example.com/x///evil.com", "/evil.com")]
+    [InlineData("/$1", "https://test.example.com/x/page", "/page")]
+    [InlineData("//cdn.example.com/$1", "https://test.example.com/x/page", "//cdn.example.com/page")]
+    [InlineData("https://other.example.com/$1", "https://test.example.com/x//page", "https://other.example.com//page")]
+    public void RewriteUrl_does_not_let_the_request_choose_the_host(string format, string url, string expected)
+    {
+        A.CallTo(() => _fakeRegexRedirectLoader.GetAll())
+            .Returns(new List<RegexRedirect> { RegexRedirect(@"^https?://[^/]+/x/(.*)$", format) });
+
+        var result = _sut.RewriteUrl(url);
+
+        Assert.Equal(expected, result.NewUrl);
+    }
+
     [Fact]
     public void RewriteUrl_regex_matches_url_with_named_groups()
     {

@@ -36,7 +36,7 @@ public class RegexRedirectNotFoundHandler : INotFoundHandler
                 var match = redirect.OldUrlRegex.Match(url);
                 if (match.Success)
                 {
-                    var newUrl = match.Result(redirect.NewUrlFormat);
+                    var newUrl = KeepOnSite(match.Result(redirect.NewUrlFormat), redirect.NewUrlFormat);
                     return new RewriteResult(newUrl, _options.DefaultRedirectType);
                 }
             }
@@ -53,5 +53,21 @@ public class RegexRedirectNotFoundHandler : INotFoundHandler
         }
 
         return RewriteResult.Empty;
+    }
+
+    /// <summary>
+    /// Text captured from the request must not turn a relative format such as "/$1" into a
+    /// protocol-relative url pointing at another host. A format that names a host itself is left alone.
+    /// </summary>
+    private static string KeepOnSite(string newUrl, string format)
+    {
+        return IsProtocolRelative(newUrl) && !IsProtocolRelative(format)
+            ? "/" + newUrl.TrimStart('/', '\\')
+            : newUrl;
+    }
+
+    private static bool IsProtocolRelative(string url)
+    {
+        return url.Length > 1 && url[0] is '/' or '\\' && url[1] is '/' or '\\';
     }
 }

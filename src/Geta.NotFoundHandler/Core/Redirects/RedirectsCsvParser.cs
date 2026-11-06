@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using CsvHelper;
 using CsvHelper.Configuration;
 using Geta.NotFoundHandler.Models;
@@ -16,6 +17,8 @@ namespace Geta.NotFoundHandler.Core.Redirects;
 
 public class RedirectsCsvParser : IRedirectsParser
 {
+    private static readonly Regex FormulaAfterSeparator = new(@";(?=[\s""']*[=@+\-])", RegexOptions.Compiled);
+
     private readonly ILogger<RedirectsCsvParser> _logger;
 
     public RedirectsCsvParser(ILogger<RedirectsCsvParser> logger)
@@ -101,13 +104,29 @@ public class RedirectsCsvParser : IRedirectsParser
             InjectionCharacters = ['=', '@', '+', '-', '\t', '\r', '\n']
         };
 
+        var records = Export(redirects);
+        foreach (var record in records)
+        {
+            record.OldUrl = EncodeSeparatorBeforeFormula(record.OldUrl);
+            record.NewUrl = EncodeSeparatorBeforeFormula(record.NewUrl);
+        }
+
         using var memoryStream = new MemoryStream();
         using (var writer = new StreamWriter(memoryStream, leaveOpen: true))
         using (var csv = new CsvWriter(writer, configuration))
         {
-            csv.WriteRecords(Export(redirects));
+            csv.WriteRecords(records);
         }
 
         return memoryStream.ToArray();
+    }
+
+    /// <summary>
+    /// A spreadsheet using ";" as the list separator would put what follows it in a cell of its own,
+    /// which the check on the start of a value can't see. "%3B" means the same in a url.
+    /// </summary>
+    private static string EncodeSeparatorBeforeFormula(string url)
+    {
+        return url == null ? null : FormulaAfterSeparator.Replace(url, "%3B");
     }
 }
