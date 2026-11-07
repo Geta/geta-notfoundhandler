@@ -435,8 +435,11 @@ public class CustomRedirectCollection : IEnumerable<CustomRedirect>
         var patterns = _ignorePatternsCache;
         if (patterns == null)
         {
+            // Note: The key is url decoded. A row with an encoded %2A is a literal url, so the saved value has to have the *.
             patterns = _quickLookupTable
-                .Where(x => x.Value.State == (int)RedirectState.Ignored && IgnorePattern.IsPattern(x.Key))
+                .Where(x => x.Value.State == (int)RedirectState.Ignored
+                            && IgnorePattern.IsPattern(x.Value.OldUrl)
+                            && IgnorePattern.IsPattern(x.Key))
                 .ToArray();
             _ignorePatternsCache = patterns;
         }
@@ -451,7 +454,7 @@ public class CustomRedirectCollection : IEnumerable<CustomRedirect>
 
         foreach (var pattern in patterns)
         {
-            if (IgnorePattern.IsMatch(pattern.Key, localUrl) || IgnorePattern.IsMatch(pattern.Key, absoluteUrl))
+            if (IgnorePattern.IsMatch(pattern.Key, IgnorePattern.IsAbsolute(pattern.Key) ? absoluteUrl : localUrl))
             {
                 return pattern.Value;
             }

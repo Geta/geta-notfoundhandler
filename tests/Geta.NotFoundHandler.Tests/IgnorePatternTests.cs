@@ -53,7 +53,12 @@ namespace Geta.NotFoundHandler.Tests
         [InlineData("/*/admin", "/en/admin")]
         [InlineData("/*/admin", "/en/no/admin")]
         [InlineData("/search?q=*", "/search?q=a")]
+        [InlineData("/?*", "/?a=1")]
+        [InlineData("/*?*", "/a?b=1")]
+        [InlineData("*?x=1", "/a?x=1")]
+        [InlineData(@"/a\b/*", "/a%5Cb/c")]
         [InlineData("https://example.com/api/*", "/api/users")]
+        [InlineData("HTTPS://EXAMPLE.COM/api/*", "/api/users")]
         public void A_url_matching_a_pattern_is_not_logged(string pattern, string url)
         {
             _redirects.Add(new CustomRedirect(pattern, RedirectState.Ignored));
@@ -71,6 +76,15 @@ namespace Geta.NotFoundHandler.Tests
         [InlineData("/*/admin", "/admin")]
         [InlineData("https://example.com/api/*", "/other/users")]
         [InlineData("https://other.com/api/*", "/api/users")]
+        [InlineData("*.com*", "/a")]
+        [InlineData("*.*", "/a")]
+        [InlineData("*example*", "/a")]
+        [InlineData("*s*", "/a")]
+        [InlineData("/a?b=*", "/axb=1")]
+        [InlineData("/?*", "/a")]
+        [InlineData(@"/a\*", "/a")]
+        [InlineData(@"/a\b/*", "/ab/c")]
+        [InlineData("/a%2A", "/ab")]
         public void A_url_not_matching_a_pattern_is_logged(string pattern, string url)
         {
             _redirects.Add(new CustomRedirect(pattern, RedirectState.Ignored));
@@ -85,6 +99,14 @@ namespace Geta.NotFoundHandler.Tests
         [InlineData("/*")]
         [InlineData("/**")]
         [InlineData("/*/*")]
+        [InlineData("http*")]
+        [InlineData("https*")]
+        [InlineData("https://*")]
+        [InlineData("https://*/*")]
+        [InlineData("https://example.com*")]
+        [InlineData("https://example.com/*")]
+        [InlineData("HTTPS://EXAMPLE.COM/*")]
+        [InlineData("http*://example.com/*")]
         public void Something_matching_everything_is_not_a_pattern(string url)
         {
             _redirects.Add(new CustomRedirect(url, RedirectState.Ignored));
@@ -171,6 +193,7 @@ namespace Geta.NotFoundHandler.Tests
         [Theory]
         [InlineData("/old")]
         [InlineData("/*")]
+        [InlineData("https://example.com/*")]
         public void Ignoring_a_url_only_deletes_the_suggestions_for_that_url(string url)
         {
             var repository = A.Fake<ISuggestionRepository>();

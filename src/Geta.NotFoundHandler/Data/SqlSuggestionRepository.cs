@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using Geta.NotFoundHandler.Core.Redirects;
 using Geta.NotFoundHandler.Core.Suggestions;
 using X.PagedList;
 
@@ -114,11 +115,14 @@ namespace Geta.NotFoundHandler.Data
 
         public void DeleteMatching(string pattern)
         {
-            // Note: Suggestions include the host with LogWithHostname on, while /api/* has to match them on the path.
+            // Note: Suggestions include the host with LogWithHostname on, while /api/* has to match them on the path,
+            // and shouldn't match on the host, the same as when a request is matched.
+            var comparedUrl = IgnorePattern.IsAbsolute(pattern)
+                ? "[OldUrl]"
+                : "CASE WHEN [OldUrl] LIKE 'http%://%' THEN SUBSTRING([OldUrl], CHARINDEX('/', [OldUrl], CHARINDEX('://', [OldUrl]) + 3), 2000) ELSE [OldUrl] END";
+
             var sqlCommand = $@"DELETE FROM {SuggestionsTable}
-                                WHERE [OldUrl] LIKE @pattern ESCAPE '\'
-                                   OR ([OldUrl] LIKE 'http%://%'
-                                       AND SUBSTRING([OldUrl], CHARINDEX('/', [OldUrl], CHARINDEX('://', [OldUrl]) + 3), 2000) LIKE @pattern ESCAPE '\')";
+                                WHERE {comparedUrl} LIKE @pattern ESCAPE '\'";
 
             var patternParam = _dataExecutor.CreateParameter("pattern", DbType.String, 4000);
             patternParam.Value = ToLikePattern(pattern);

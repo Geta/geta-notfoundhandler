@@ -52,7 +52,15 @@ public class IgnoredModel : AbstractSortablePageModel
         {
             ModelState.AddModelError(
                 $"{nameof(NewPattern)}.{nameof(IgnorePatternModel.Pattern)}",
-                "Enter a url starting with /, * or http, with a * in it and more than wildcards and slashes, such as /api/* or *.php.");
+                "Enter a url starting with /, * or http://, with a * in it and more than wildcards and slashes in the path, such as /api/* or *.php.");
+        }
+
+        // Note: Saving replaces a row with the same old url, which would silently remove a redirect.
+        if (ModelState.IsValid && IsSavedAsAnotherState(pattern))
+        {
+            ModelState.AddModelError(
+                $"{nameof(NewPattern)}.{nameof(IgnorePatternModel.Pattern)}",
+                $"{pattern} is already saved as a redirect or a deleted url. Remove it there first.");
         }
 
         if (!ModelState.IsValid)
@@ -82,9 +90,17 @@ public class IgnoredModel : AbstractSortablePageModel
         // Note: Requests are matched by path or whole url, so anything else would never match.
         var hasValidStart = pattern.StartsWith('/')
                             || pattern.StartsWith('*')
-                            || pattern.StartsWith("http", StringComparison.OrdinalIgnoreCase);
+                            || IgnorePattern.IsAbsolute(pattern);
 
         return hasValidStart && IgnorePattern.IsPattern(pattern);
+    }
+
+    private bool IsSavedAsAnotherState(string pattern)
+    {
+        return _redirectsService
+            .GetAll()
+            .Any(x => x.State != (int)RedirectState.Ignored
+                      && string.Equals(x.OldUrl, pattern, StringComparison.OrdinalIgnoreCase));
     }
 
     private void Load()
