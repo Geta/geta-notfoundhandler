@@ -43,6 +43,11 @@ namespace Geta.NotFoundHandler.Core.Suggestions
         {
             SaveIgnoredRedirect(oldUrl);
             DeleteSuggestionsFor(oldUrl);
+
+            if (IgnorePattern.IsPattern(oldUrl))
+            {
+                _suggestionRepository.DeleteMatching(oldUrl);
+            }
         }
 
         public void DeleteAll()

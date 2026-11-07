@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using Geta.NotFoundHandler.Core.Redirects;
 using Geta.NotFoundHandler.Core.Suggestions;
 using X.PagedList;
 
@@ -110,6 +111,33 @@ namespace Geta.NotFoundHandler.Data
             oldUrlParam.Value = oldUrl;
 
             _dataExecutor.ExecuteNonQuery(sqlCommand, oldUrlParam);
+        }
+
+        public void DeleteMatching(string pattern)
+        {
+            // Note: Suggestions include the host with LogWithHostname on, while /api/* has to match them on the path,
+            // and shouldn't match on the host, the same as when a request is matched.
+            var comparedUrl = IgnorePattern.IsAbsolute(pattern)
+                ? "[OldUrl]"
+                : "CASE WHEN [OldUrl] LIKE 'http%://%' THEN SUBSTRING([OldUrl], CHARINDEX('/', [OldUrl], CHARINDEX('://', [OldUrl]) + 3), 2000) ELSE [OldUrl] END";
+
+            var sqlCommand = $@"DELETE FROM {SuggestionsTable}
+                                WHERE {comparedUrl} LIKE @pattern ESCAPE '\'";
+
+            var patternParam = _dataExecutor.CreateParameter("pattern", DbType.String, 4000);
+            patternParam.Value = ToLikePattern(pattern);
+
+            _dataExecutor.ExecuteNonQuery(sqlCommand, patternParam);
+        }
+
+        private static string ToLikePattern(string pattern)
+        {
+            return pattern
+                .Replace(@"\", @"\\")
+                .Replace("%", @"\%")
+                .Replace("_", @"\_")
+                .Replace("[", @"\[")
+                .Replace('*', '%');
         }
 
         public void Save(string oldUrl, string referer, DateTime requestedOn)

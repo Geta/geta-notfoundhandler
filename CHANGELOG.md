@@ -8,6 +8,7 @@ All notable changes to this project will be documented in this file.
 
 - Redirects can be set to *Exact match*, so a redirect from `/a` no longer also applies to `/a/b`. `/a/` and `/a?b=c` still match, as the query string isn't part of it. It's available on the Redirects tab, and in imported and exported CSV and XML files. Files without it still import, as a redirect that isn't exact. An import or an automatic redirect for an old url that's already saved replaces the row, so it clears the setting unless it sets it too, as it does with the wildcard setting and the redirect type.
 - Each regex redirect can have its own redirect type. Rules saved earlier keep following `DefaultRedirectType` until you edit them, which saves the type shown on the form.
+- Patterns on the *Ignored* tab, such as `/api/*` or `*.php`, stop every url matching them from being logged as a suggestion, and remove the suggestions already logged for them. A pattern only stops suggestions, so a redirect or regex redirect that applies to a url keeps working. It's the same idea as `IgnoreSuggestionsUrlRegexPattern`, but editors can do it without a deploy.
 
 ### Security
 
@@ -25,6 +26,8 @@ Check these when upgrading, as they change how existing rules and integrations b
 - URLs under an entry in the Deleted list now return `410`. Before, `/gone/`, `/gone?a=1` and `/gone/child` were redirected, often to the home page.
 - A request with no matching redirect keeps the status the application gave it. Before, a response that hadn't started yet was forced to `404`. `RequestHandler.SetStatusCodeAndShow404` is now only called for deleted URLs, so a subclass overriding it no longer runs for unmatched requests.
 - `HttpContextExtensions.SetStatusCode` no longer clears the response, so a custom page keeps its headers when its status changes to `410`.
+- An ignored url with a `*` in it, which used to only ignore that literal url, is now a pattern. `/*`, `https://example.com/*` and others with nothing but wildcards and slashes in the path aren't, as they would stop all suggestions. Neither is one with an encoded `%2A` instead of a `*`.
+- `ISuggestionRepository` has a new `DeleteMatching` method, which does nothing unless a class implementing it adds it, so suggestions stay in the list when adding a pattern. `IgnoredModel` takes an `ISuggestionService`.
 - CSV export: an imported file that was exported with escaped values keeps the `'` prefix and the `%3B` as part of the value.
 - Automatic redirects are no longer created for urls with an extension in `IgnoredResourceExtensions`, as requests for those urls aren't redirected. Rows created earlier stay until you delete them. Check this if you override `RequestHandler.IsResourceFile` to redirect such files, or have pages with a url like `/docs/node.js` with no trailing slash and children below them, as those children used to be redirected through that row. `RedirectBuilder` takes an `IOptions<NotFoundHandlerOptions>`.
 - A regex rule anchored at a `/`, such as `^/en/(.*)`, now matches against the path and query. It used to never match, as rules see the whole url, so one that has been sitting unused starts redirecting. Check your rules for this before upgrading. All other rules still only see the whole url.

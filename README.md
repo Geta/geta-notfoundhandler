@@ -182,6 +182,12 @@ services.AddNotFoundHandler(o =>
 
 When a URL matches the specified regex pattern, suggestions will be skipped.
 
+Editors can do the same without a deploy, by adding a pattern with `*` as the wildcard on the *Ignored* tab, such as `/api/*`, `*.php` or `https://example.com/api/*`. A `*` also matches slashes and the query string. Adding one removes the suggestions already logged for those URLs, as far as they're stored in the same form. A pattern naming a host doesn't remove suggestions logged without one, and an encoded suggestion such as `/a%20b` doesn't match the pattern `/a b*`. They stay in the list until you delete them, but aren't logged again.
+
+A pattern starting with `http` is compared to the whole URL, and any other pattern to the path and query, so `*.com*` doesn't match on the host. The scheme has to match too, so use `http*://example.com/api/*` for both. `*` is the only wildcard, so a `?` is just a `?`.
+
+A pattern only stops suggestions. A redirect or a regex redirect that applies to a URL keeps working. `/*` and `https://example.com/*` aren't treated as patterns, as they would match everything: set `Logging` to `LoggerMode.Off` for that.
+
 
 ## Restricting access to the Admin UI
 
