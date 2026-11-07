@@ -4,6 +4,7 @@
 @using Microsoft.AspNetCore.Mvc.TagHelpers
 @model Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin.DeletedModel
 
+@await Component.InvokeAsync("Card", new { message = Model.Confirmation, cardType = CardType.Success })
 @await Component.InvokeAsync("Card", new { message = Model.Message })
 
 <form method="post">

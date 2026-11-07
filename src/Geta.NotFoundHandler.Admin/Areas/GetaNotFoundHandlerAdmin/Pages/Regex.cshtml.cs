@@ -52,6 +52,8 @@ public class RegexModel : AbstractSortablePageModel
         {
             _regexRedirectsService.Create(RegexRedirect.OldUrlRegex, RegexRedirect.NewUrlFormat, RegexRedirect.OrderNumber);
 
+            Confirmation = $"Saved the regex redirect from {RegexRedirect.OldUrlRegex} to {RegexRedirect.NewUrlFormat}.";
+
             return RedirectToPage();
         }
 
@@ -62,6 +64,8 @@ public class RegexModel : AbstractSortablePageModel
     public IActionResult OnPostDelete(Guid id)
     {
         _regexRedirectsService.Delete(id);
+
+        Confirmation = "Deleted the regex redirect.";
 
         return RedirectToPage();
     }
@@ -77,6 +81,9 @@ public class RegexModel : AbstractSortablePageModel
                                           EditRedirect.OldUrlRegex,
                                           EditRedirect.NewUrlFormat,
                                           EditRedirect.OrderNumber);
+
+            Confirmation = $"Saved the regex redirect from {EditRedirect.OldUrlRegex} to {EditRedirect.NewUrlFormat}.";
+
             return RedirectToPage();
         }
 

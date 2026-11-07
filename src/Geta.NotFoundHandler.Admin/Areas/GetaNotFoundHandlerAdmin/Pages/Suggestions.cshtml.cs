@@ -1,18 +1,18 @@
 using System.Collections.Generic;
 using System.Linq;
+using Geta.NotFoundHandler.Admin.Areas.GetaNotFoundHandlerAdmin.Pages.Base;
 using Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin.Models;
 using Geta.NotFoundHandler.Core.Suggestions;
 using Geta.NotFoundHandler.Infrastructure;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using X.PagedList;
 using X.PagedList.Extensions;
 
 namespace Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin;
 
 [Authorize(Constants.PolicyName)]
-public class SuggestionsModel : PageModel
+public class SuggestionsModel : AbstractAdminPageModel
 {
     private readonly ISuggestionService _suggestionService;
 
@@ -45,12 +45,16 @@ public class SuggestionsModel : PageModel
 
         _suggestionService.AddRedirect(new SuggestionRedirect(item.OldUrl, item.NewUrl));
 
+        Confirmation = $"Saved the redirect from {item.OldUrl} to {item.NewUrl}.";
+
         return RedirectToPage();
     }
 
     public IActionResult OnPostIgnore(string oldUrl)
     {
         _suggestionService.IgnoreSuggestion(oldUrl);
+
+        Confirmation = $"Ignored {oldUrl}.";
 
         return RedirectToPage();
     }

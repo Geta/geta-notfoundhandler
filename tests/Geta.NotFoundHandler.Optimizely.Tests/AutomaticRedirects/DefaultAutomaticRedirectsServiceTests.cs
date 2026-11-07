@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using FakeItEasy;
 using Geta.NotFoundHandler.Core.Redirects;
+using Geta.NotFoundHandler.Infrastructure.Configuration;
 using Geta.NotFoundHandler.Optimizely.Core.AutomaticRedirects;
 using Geta.NotFoundHandler.Optimizely.Infrastructure.Configuration;
 using Microsoft.Extensions.Options;
@@ -16,7 +17,8 @@ public class DefaultAutomaticRedirectsServiceTests
     public DefaultAutomaticRedirectsServiceTests()
     {
         var redirectBuilder = new RedirectBuilder(
-            new OptionsWrapper<OptimizelyNotFoundHandlerOptions>(new OptimizelyNotFoundHandlerOptions()));
+            new OptionsWrapper<OptimizelyNotFoundHandlerOptions>(new OptimizelyNotFoundHandlerOptions()),
+            new OptionsWrapper<NotFoundHandlerOptions>(new NotFoundHandlerOptions()));
         _sut = new DefaultAutomaticRedirectsService(_redirectsService, redirectBuilder);
     }
 

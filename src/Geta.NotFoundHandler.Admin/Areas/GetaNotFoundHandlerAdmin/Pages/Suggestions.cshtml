@@ -1,6 +1,7 @@
 ﻿@page "{handler?}"
 @model Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin.SuggestionsModel
 
+@await Component.InvokeAsync("Card", new { message = Model.Confirmation, cardType = CardType.Success })
 @await Component.InvokeAsync("Card", new { message = Model.Message })
 
 <div class="table-responsive mt-3">

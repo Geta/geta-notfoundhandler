@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Geta.NotFoundHandler.Core.Redirects;
+using Geta.NotFoundHandler.Infrastructure.Configuration;
 using Geta.NotFoundHandler.Optimizely.Infrastructure.Configuration;
 using Microsoft.Extensions.Options;
 
@@ -12,10 +13,14 @@ namespace Geta.NotFoundHandler.Optimizely.Core.AutomaticRedirects
     public class RedirectBuilder
     {
         private readonly OptimizelyNotFoundHandlerOptions _configuration;
+        private readonly NotFoundHandlerOptions _notFoundHandlerOptions;
 
-        public RedirectBuilder(IOptions<OptimizelyNotFoundHandlerOptions> options)
+        public RedirectBuilder(
+            IOptions<OptimizelyNotFoundHandlerOptions> options,
+            IOptions<NotFoundHandlerOptions> notFoundHandlerOptions)
         {
             _configuration = options.Value;
+            _notFoundHandlerOptions = notFoundHandlerOptions.Value;
         }
 
         public virtual IEnumerable<CustomRedirect> CreateRedirects(IReadOnlyCollection<ContentUrlHistory> histories)
@@ -59,6 +64,13 @@ namespace Geta.NotFoundHandler.Optimizely.Core.AutomaticRedirects
                 foreach (var source in sourceHistory.Urls.Where(x => x.Language == language))
                 {
                     var sourceUrl = source.Url;
+
+                    // Note: The request handler skips these, so a redirect for one could never be used.
+                    if (_notFoundHandlerOptions.IsIgnoredResource(sourceUrl))
+                    {
+                        continue;
+                    }
+
                     var destinationUrl = GetDestinationUrl(source, languageSpecificDestinationUrls, destinationPrimary);
 
                     yield return new CustomRedirect(sourceUrl, destinationUrl, false, _configuration.AutomaticRedirectType);

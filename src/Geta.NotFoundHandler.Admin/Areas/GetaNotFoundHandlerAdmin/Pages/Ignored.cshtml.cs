@@ -41,6 +41,8 @@ public class IgnoredModel : AbstractSortablePageModel
     {
         _redirectsService.DeleteByOldUrl(oldUrl);
 
+        Confirmation = $"Removed {oldUrl} from the ignored suggestions.";
+
         return RedirectToPage();
     }
 

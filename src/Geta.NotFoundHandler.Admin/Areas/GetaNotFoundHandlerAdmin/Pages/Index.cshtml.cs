@@ -63,6 +63,8 @@ public class IndexModel : AbstractSortablePageModel
 
             _redirectsService.AddOrUpdate(customRedirect);
 
+            Confirmation = $"Saved the redirect from {customRedirect.OldUrl} to {customRedirect.NewUrl}.";
+
             return RedirectToPage();
         }
 
@@ -77,6 +79,8 @@ public class IndexModel : AbstractSortablePageModel
         if (request.Id != null)
         {
             _redirectsService.DeleteById(request.Id.Value);
+
+            Confirmation = "Deleted the redirect.";
         }
 
         ApplyRequest(request);
@@ -100,6 +104,8 @@ public class IndexModel : AbstractSortablePageModel
                 NewUrl = EditRedirect.NewUrl,
                 WildCardSkipAppend = EditRedirect.WildCardSkipAppend
             });
+
+            Confirmation = $"Saved the redirect from {EditRedirect.OldUrl} to {EditRedirect.NewUrl}.";
 
             return RedirectToPage(request);
         }
