@@ -46,6 +46,7 @@ Check these when upgrading, as they change how existing rules and integrations b
 
 ### Fixed
 
+- The Redirects tab keeps its sort order after deleting or editing a redirect, as it already did with the search and the page. Before, the list went back to the default order.
 - Editing a regex redirect keeps its place in the order. Before, the edit form didn't send the order number, which moved the rule to the top, where it was tried first.
 - The admin pages confirm that a redirect was saved, deleted or ignored. Before, the page just reloaded.
 - Redirects that keep leading to more redirects now end in a 404 after `MaxRedirectHops` redirects in a row (default 10), with a warning in the log, and stay that way for up to 30 seconds. Before, two rules pointing into each other (`/a` -> `/b/c` and `/b` -> `/a/d`) or a regex rule matching its own result (`^/(.*)$` -> `/en/$1`) went on until the browser gave up. Each server counts on its own, so behind a load balancer without session affinity, the browser's limit can still be reached first. Browsers follow remembered permanent redirects without asking the server, so permanent redirects sending a url back and forth still end in the browser's error, and permanent redirects that grow do so after a few visits.

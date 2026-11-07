@@ -42,10 +42,9 @@ public class IndexModel : AbstractSortablePageModel
 
     public bool HasQuery => !string.IsNullOrEmpty(Query);
 
-    public void OnGet(RedirectsRequest request, string sortColumn, SortDirection? sortDirection)
+    public void OnGet(RedirectsRequest request)
     {
         ApplyRequest(request);
-        ApplySort(sortColumn, sortDirection);
 
         Load();
     }
@@ -114,6 +113,8 @@ public class IndexModel : AbstractSortablePageModel
             return RedirectToPage(request);
         }
 
+        ApplyRequest(request);
+
         Load();
         return Page();
     }
@@ -141,5 +142,7 @@ public class IndexModel : AbstractSortablePageModel
         }
 
         Query = request.Query ?? Query;
+
+        ApplySort(request.SortColumn, request.SortDirection);
     }
 }
