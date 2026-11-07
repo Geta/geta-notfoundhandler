@@ -184,6 +184,8 @@
                                                 class="mt-3 btn btn-primary"
                                                 asp-route-pagenumber="@Model.Items.PageNumber"
                                                 asp-route-query="@Model.Query"
+                                                asp-route-sortcolumn="@Model.SortColumn"
+                                                asp-route-sortdirection="@Model.SortDirection"
                                                 asp-page-handler="update">Update
                                         </button>
                                     </form>
@@ -211,7 +213,9 @@
                                 asp-page-handler="delete"
                                 asp-route-id="@item.Id"
                                 asp-route-pagenumber="@Model.Items.PageNumber"
-                                asp-route-query="@Model.Query">
+                                asp-route-query="@Model.Query"
+                                asp-route-sortcolumn="@Model.SortColumn"
+                                asp-route-sortdirection="@Model.SortDirection">
                                 <span data-feather="trash-2"></span> delete
                             </button>
                         </form>
