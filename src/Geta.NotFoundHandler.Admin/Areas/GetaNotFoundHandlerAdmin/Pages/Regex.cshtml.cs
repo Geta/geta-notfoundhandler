@@ -101,7 +101,12 @@ public class RegexModel : AbstractSortablePageModel
         var items = FindRedirects();
         Message = $"There are currently stored {items.Count()} Regex redirects.";
         Items = items;
-        RegexRedirect = new RegexRedirectModel { OrderNumber = items.Select(x => x.OrderNumber).DefaultIfEmpty().Max() + 1 };
+        RegexRedirect = new RegexRedirectModel
+        {
+            OrderNumber = items.Select(x => x.OrderNumber).DefaultIfEmpty().Max() + 1,
+            // Note: A form coming back with a validation error keeps the type that was chosen.
+            RedirectType = RegexRedirect?.RedirectType
+        };
     }
 
     private IEnumerable<RegexRedirect> FindRedirects()

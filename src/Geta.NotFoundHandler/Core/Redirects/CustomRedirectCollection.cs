@@ -140,7 +140,7 @@ public class CustomRedirectCollection : IEnumerable<CustomRedirect>
                 var cr = redirectPair.Value;
 
                 // Note: Leave it to a shorter old url, which may still apply to the request.
-                if (cr.ExactMatch && !path.TrimEnd('/').Equals(oldPath.TrimEnd('/'), StringComparison.OrdinalIgnoreCase))
+                if (cr.ExactMatch && !IsExactMatch(path, query, oldPath, oldQuery))
                 {
                     continue;
                 }
@@ -211,8 +211,27 @@ public class CustomRedirectCollection : IEnumerable<CustomRedirect>
         var localNewUrl = ToLocalNewUrl(newUrl, requestAuthority);
         var localPath = ToLocalUrl(path.ToString(), requestAuthority).AsSpan();
 
-        return localPath.TrimEnd('/').Equals(localNewUrl.AsPathSpan().TrimEnd('/'), StringComparison.OrdinalIgnoreCase)
-               && QueryContains(query, localNewUrl.AsQuerySpan());
+        return IsSamePath(localPath, localNewUrl.AsPathSpan()) && QueryContains(query, localNewUrl.AsQuerySpan());
+    }
+
+    /// <summary>
+    /// The request is already known to start with the old url. Further query parameters are fine, but the
+    /// query string of the old url has to end on a whole parameter, so /a?x=1 doesn't match /a?x=12.
+    /// </summary>
+    private static bool IsExactMatch(
+        ReadOnlySpan<char> path,
+        ReadOnlySpan<char> query,
+        ReadOnlySpan<char> oldPath,
+        ReadOnlySpan<char> oldQuery)
+    {
+        var endsOnWholeParameter = oldQuery.Length <= 1 || query.Length == oldQuery.Length || query[oldQuery.Length] == '&';
+
+        return endsOnWholeParameter && IsSamePath(path, oldPath);
+    }
+
+    private static bool IsSamePath(ReadOnlySpan<char> path, ReadOnlySpan<char> otherPath)
+    {
+        return path.TrimEnd('/').Equals(otherPath.TrimEnd('/'), StringComparison.OrdinalIgnoreCase);
     }
 
     private static bool QueryContains(ReadOnlySpan<char> query, ReadOnlySpan<char> other)

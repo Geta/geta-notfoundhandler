@@ -312,6 +312,15 @@ namespace Geta.NotFoundHandler.Tests
         }
 
         [Fact]
+        public void Find_matches_whole_query_parameters_of_an_exact_match()
+        {
+            _sut.Add(new CustomRedirect("/a?x=1", "/b") { ExactMatch = true });
+
+            Assert.Equal("/b?x=1&y=2", _sut.Find("http://localhost:80/a?x=1&y=2".ToUri())?.NewUrl);
+            Assert.Null(_sut.Find("http://localhost:80/a?x=12".ToUri()));
+        }
+
+        [Fact]
         public void Find_leaves_urls_below_to_a_shorter_redirect_with_an_exact_match()
         {
             _sut.Add(new CustomRedirect("/a/b", "/exact") { ExactMatch = true });

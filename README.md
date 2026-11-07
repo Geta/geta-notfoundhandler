@@ -365,7 +365,7 @@ By default, a redirect also applies to the urls below its old url, as described 
 - `/a` and `/a/` redirect to `/b`, and `/a?c=d` redirects to `/b?c=d`
 - `/a/1` isn't touched by this redirect, so it stays a 404 unless another redirect matches it
 
-The query string isn't part of the exact match, so links with tracking parameters still redirect. In a redirects file, use the `ExactMatch` column in a CSV file, and the `exactMatch="true"` attribute on `<old>` in an XML file.
+The query string of the request isn't part of the exact match, so links with tracking parameters still redirect. An old url with a query string of its own needs those parameters in full, so `/a?x=1` matches `/a?x=1&y=2` but not `/a?x=12`. In a redirects file, use the `ExactMatch` column in a CSV file, and the `exactMatch="true"` attribute on `<old>` in an XML file.
 
 ## Redirect loops
 

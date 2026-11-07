@@ -3,8 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using FakeItEasy;
 using Geta.NotFoundHandler.Core;
+using Geta.NotFoundHandler.Core.Providers.RegexRedirects;
 using Geta.NotFoundHandler.Core.Redirects;
 using Geta.NotFoundHandler.Data;
+using Geta.NotFoundHandler.Infrastructure.Configuration;
+using Microsoft.Extensions.Options;
 using Xunit;
 
 namespace Geta.NotFoundHandler.Tests
@@ -27,6 +30,38 @@ namespace Geta.NotFoundHandler.Tests
             var copy = new CustomRedirect(new CustomRedirect("/a", "/b") { ExactMatch = true });
 
             Assert.True(copy.ExactMatch);
+        }
+    }
+
+    public class DefaultRegexRedirectsServiceTests
+    {
+        private static readonly Guid Id = Guid.NewGuid();
+
+        private readonly IRepository<RegexRedirect> _repository = A.Fake<IRepository<RegexRedirect>>();
+        private readonly DefaultRegexRedirectsService _sut;
+
+        public DefaultRegexRedirectsServiceTests()
+        {
+            var factory = new RegexRedirectFactory(Options.Create(new NotFoundHandlerOptions()));
+            var loader = A.Fake<IRegexRedirectLoader>();
+            A.CallTo(() => loader.Get(Id)).Returns(factory.Create(Id, "^/a$", "/b", 1, redirectType: RedirectType.Permanent));
+
+            _sut = new DefaultRegexRedirectsService(factory,
+                                                    _repository,
+                                                    loader,
+                                                    A.Fake<IRegexRedirectOrderUpdater>(),
+                                                    new RedirectsEvents());
+        }
+
+        [Theory]
+        [InlineData(null, RedirectType.Permanent)]
+        [InlineData(RedirectType.Temporary, RedirectType.Temporary)]
+        public void Update_only_changes_the_redirect_type_when_given_one(RedirectType? redirectType, RedirectType expected)
+        {
+            _sut.Update(Id, "^/a$", "/c", 1, redirectType);
+
+            A.CallTo(() => _repository.Save(A<RegexRedirect>.That.Matches(x => x.RedirectType == expected)))
+                .MustHaveHappenedOnceExactly();
         }
     }
 

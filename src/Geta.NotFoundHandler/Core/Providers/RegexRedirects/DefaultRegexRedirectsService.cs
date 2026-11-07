@@ -41,7 +41,12 @@ public class DefaultRegexRedirectsService : IRegexRedirectsService
     {
         var original = _redirectLoader.Get(id);
         var isIncrease = original.OrderNumber < orderNumber;
-        var regexRedirect = _regexRedirectFactory.Create(id, oldUrlRegex, newUrlFormat, orderNumber, redirectType: redirectType);
+        // Note: Code calling this without a type isn't asking to change it.
+        var regexRedirect = _regexRedirectFactory.Create(id,
+                                                         oldUrlRegex,
+                                                         newUrlFormat,
+                                                         orderNumber,
+                                                         redirectType: redirectType ?? original.RedirectType);
         _repository.Save(regexRedirect);
         _orderUpdater.UpdateOrder(isIncrease);
         _redirectsEvents.RegexRedirectsUpdated();

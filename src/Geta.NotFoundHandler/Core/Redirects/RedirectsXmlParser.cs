@@ -140,13 +140,13 @@ namespace Geta.NotFoundHandler.Core.Redirects
 
                 foreach (XmlNode oldNode in oldNodes)
                 {
-                    var skipWildCardAppend = GetSkipWildCardAppend(oldNode);
+                    var skipWildCardAppend = GetBoolAttribute(oldNode, SkipWildcard);
                     var redirectType = GetRedirectType(oldNode);
 
                     // Create new custom redirect nodes
                     var redirect = new CustomRedirect(oldNode.InnerText, newNode.InnerText, skipWildCardAppend, redirectType)
                     {
-                        ExactMatch = GetExactMatch(oldNode)
+                        ExactMatch = GetBoolAttribute(oldNode, ExactMatch)
                     };
                     redirects.Add(redirect);
                 }
@@ -155,20 +155,9 @@ namespace Geta.NotFoundHandler.Core.Redirects
             return redirects;
         }
 
-        private static bool GetSkipWildCardAppend(XmlNode oldNode)
+        private static bool GetBoolAttribute(XmlNode oldNode, string attributeName)
         {
-            var skipWildCardAttr = oldNode.Attributes?[SkipWildcard];
-            if (skipWildCardAttr != null && bool.TryParse(skipWildCardAttr.Value, out var skipWildCardAppend))
-            {
-                return skipWildCardAppend;
-            }
-
-            return false;
-        }
-
-        private static bool GetExactMatch(XmlNode oldNode)
-        {
-            return bool.TryParse(oldNode.Attributes?[ExactMatch]?.Value, out var exactMatch) && exactMatch;
+            return bool.TryParse(oldNode.Attributes?[attributeName]?.Value, out var value) && value;
         }
 
         private static RedirectType GetRedirectType(XmlNode oldNode)

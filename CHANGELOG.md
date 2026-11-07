@@ -6,7 +6,7 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
-- Redirects can be set to *Exact match*, so a redirect from `/a` no longer also applies to `/a/b`. `/a/` and `/a?b=c` still match, as the query string isn't part of it. It's available on the Redirects tab, and in imported and exported CSV and XML files. Files without it still import, as a redirect that isn't exact.
+- Redirects can be set to *Exact match*, so a redirect from `/a` no longer also applies to `/a/b`. `/a/` and `/a?b=c` still match, as the query string isn't part of it. It's available on the Redirects tab, and in imported and exported CSV and XML files. Files without it still import, as a redirect that isn't exact. An import or an automatic redirect for an old url that's already saved replaces the row, so it clears the setting unless it sets it too, as it does with the wildcard setting and the redirect type.
 - Each regex redirect can have its own redirect type. Rules saved earlier keep following `DefaultRedirectType` until you edit them, which saves the type shown on the form.
 
 ### Security
@@ -19,7 +19,7 @@ All notable changes to this project will be documented in this file.
 Check these when upgrading, as they change how existing rules and integrations behave:
 
 - The database version goes from 2 to 3. At startup, the application adds `ExactMatch` to `NotFoundHandler.Redirects` and `RedirectType` to `NotFoundHandler.RegexRedirects`, so its database user needs permission to alter those tables. If that fails, an error is logged and reading the redirects then fails at startup.
-- `IRegexRedirectsService.Create` and `Update`, `RegexRedirectFactory.Create` and `CreateNew`, and the `RegexRedirect` constructor take an optional `RedirectType?`. Calling code still compiles, but code implementing the interface or overriding the factory needs updating.
+- `IRegexRedirectsService.Create` and `Update`, `RegexRedirectFactory.Create` and `CreateNew`, and the `RegexRedirect` constructor take an optional `RedirectType?`. Calling code still compiles, and `Update` without a type keeps the type of the rule, but code implementing the interface or overriding the factory needs updating.
 - The CSV export has a new `ExactMatch` column.
 - A redirect that would only append to itself now stops. With `/a` -> `/a/b`, `/a/x` still redirects to `/a/b/x`, but a request already under `/a/b` stays a 404. With `/a` -> `/a?x=1`, `/a?y=2` still redirects to `/a?y=2&x=1`, and that URL stays a 404. Before, these grew on every hop until the browser gave up.
 - URLs under an entry in the Deleted list now return `410`. Before, `/gone/`, `/gone?a=1` and `/gone/child` were redirected, often to the home page.
@@ -42,6 +42,7 @@ Check these when upgrading, as they change how existing rules and integrations b
 
 ### Fixed
 
+- Editing a regex redirect keeps its place in the order. Before, the edit form didn't send the order number, which moved the rule to the top, where it was tried first.
 - The admin pages confirm that a redirect was saved, deleted or ignored. Before, the page just reloaded.
 - A regex rule whose new url matches the rule again (`^/(.*)$` -> `/en/$1`) grows on every hop when the new url is also not found.
 

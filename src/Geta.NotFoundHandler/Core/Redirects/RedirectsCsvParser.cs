@@ -52,10 +52,10 @@ public class RedirectsCsvParser : IRedirectsParser
         {
             // Create new custom redirect nodes
             var redirectType = GetRedirectType(item.RedirectType);
-            var skipWildCardAppend = GetSkipWildCardAppend(item.WildcardSkippedAppend);
+            var skipWildCardAppend = GetBool(item.WildcardSkippedAppend);
             var redirect = new CustomRedirect(item.OldUrl, item.NewUrl, skipWildCardAppend, redirectType)
             {
-                ExactMatch = bool.TryParse(item.ExactMatch, out var exactMatch) && exactMatch
+                ExactMatch = GetBool(item.ExactMatch)
             };
             redirects.Add(redirect);
         }
@@ -63,14 +63,9 @@ public class RedirectsCsvParser : IRedirectsParser
         return redirects;
     }
 
-    private static bool GetSkipWildCardAppend(string skipWildCardAttr)
+    private static bool GetBool(string value)
     {
-        if (!string.IsNullOrWhiteSpace(skipWildCardAttr) && bool.TryParse(skipWildCardAttr, out var skipWildCardAppend))
-        {
-            return skipWildCardAppend;
-        }
-
-        return false;
+        return bool.TryParse(value, out var result) && result;
     }
 
     private RedirectType GetRedirectType(string redirectTypeAttr)
