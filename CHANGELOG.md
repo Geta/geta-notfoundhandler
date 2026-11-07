@@ -31,22 +31,21 @@ Check these when upgrading, as they change how existing rules and integrations b
 - `X.PagedList` is upgraded from 8.4.3 to 10.5.9, which moves `ToPagedList` to the `X.PagedList.Extensions` namespace. Code of your own calling it needs that using.
 - The results of the *Index content URLs* and *Register content move redirects* jobs are now only a summary. Details of what failed are written to the log, and the jobs take an `ILogger` in their constructors.
 - Each instance now checks the database for redirect changes every 5 minutes, which adds one query per instance per check that hashes every row of the redirects table. Set `RedirectsRefreshInterval` to `TimeSpan.Zero` to turn it off. A loader implementing `IRedirectLoader` can add `GetChecksum` to take part, and without it the check is skipped.
+- A chain of more than `MaxRedirectHops` redirects in a row (default 10) now ends in a 404 with a warning in the log, also when it has no loop. Before, a browser followed it up to its own limit, around 20. Raise the limit if you have longer chains, or set it to `0` to turn this off.
+- `RequestHandler` takes a `RedirectLoopGuard`. This matters only if you construct or inherit from it yourself.
+- A redirect that would only request the same url again now stays a 404 in more cases, such as `/a` -> `/a#top`, `//example.com/a` or an empty new url. Moving to another scheme on the same url still redirects.
 - A handler failing on `RedirectsEvents` no longer stops the others, and the failure now reaches the caller as an `AggregateException`.
 - `OptimizelySyncEvents` takes an `ILogger<OptimizelySyncEvents>`, and `RedirectsInitializer` takes an `IRedirectLoader`. This matters only if you construct or inherit from them yourself.
 
 ### Known issues
 
-- Two rules pointing into each other (`/a` -> `/b/c` and `/b` -> `/a/d`) can still grow on every hop.
 - The confirmations in the admin UI use the TempData cookie, so on a site requiring cookie consent they don't show until the editor has consented.
 
 ### Fixed
 
 - Editing a regex redirect keeps its place in the order. Before, the edit form didn't send the order number, which moved the rule to the top, where it was tried first.
 - The admin pages confirm that a redirect was saved, deleted or ignored. Before, the page just reloaded.
-- A regex rule whose new url matches the rule again (`^/(.*)$` -> `/en/$1`) grows on every hop when the new url is also not found.
-
-### Fixed
-
+- Redirects that keep leading to more redirects now end in a 404 after `MaxRedirectHops` redirects in a row (default 10), with a warning in the log, and stay that way for up to 30 seconds. Before, two rules pointing into each other (`/a` -> `/b/c` and `/b` -> `/a/d`) or a regex rule matching its own result (`^/(.*)$` -> `/en/$1`) went on until the browser gave up. Each server counts on its own, so behind a load balancer without session affinity, the browser's limit can still be reached first. Browsers follow remembered permanent redirects without asking the server, so permanent redirects sending a url back and forth still end in the browser's error, and permanent redirects that grow do so after a few visits.
 - Regex redirects are no longer recompiled on every unmatched request. The cache held a query that built them again each time it was read.
 - Instances that miss an update no longer stay out of date until a restart. A check every 5 minutes picks up redirects and regex redirects that never reached an instance.
 - Two reloads at the same time could leave an instance without a new redirect, when a slow load that read the table before the save finished last.

@@ -55,7 +55,7 @@ namespace Geta.NotFoundHandler.Tests.Hosting
             var logger = NullLogger<RequestHandler>.Instance;
             var options = Options.Create(new NotFoundHandlerOptions());
 
-            var requestHandler = new RequestHandler(redirectHandler, requestLogger, options, logger);
+            var requestHandler = new RequestHandler(redirectHandler, requestLogger, options, logger, new RedirectLoopGuard(options));
 
             ConfigureServices(services =>
             {

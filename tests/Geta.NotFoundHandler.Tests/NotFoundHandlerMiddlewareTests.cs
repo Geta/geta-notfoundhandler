@@ -236,7 +236,8 @@ namespace Geta.NotFoundHandler.Tests
                 redirectHandler,
                 requestLogger,
                 Options.Create(options),
-                NullLogger<RequestHandler>.Instance);
+                NullLogger<RequestHandler>.Instance,
+                new RedirectLoopGuard(Options.Create(options)));
 
             var builder = new TestServerBuilder();
             builder.ConfigureServices(services =>

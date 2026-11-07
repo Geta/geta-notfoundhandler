@@ -21,17 +21,20 @@ namespace Geta.NotFoundHandler.Core
         private readonly IRequestLogger _requestLogger;
         private readonly ILogger<RequestHandler> _logger;
         private readonly NotFoundHandlerOptions _configuration;
+        private readonly RedirectLoopGuard _redirectLoopGuard;
         private const string HandledRequestItemKey = "NotFoundHandler:handled";
 
         public RequestHandler(
             IRedirectHandler redirectHandler,
             IRequestLogger requestLogger,
             IOptions<NotFoundHandlerOptions> options,
-            ILogger<RequestHandler> logger)
+            ILogger<RequestHandler> logger,
+            RedirectLoopGuard redirectLoopGuard)
         {
             _configuration = options.Value;
             _requestLogger = requestLogger ?? throw new ArgumentNullException(nameof(requestLogger));
             _logger = logger;
+            _redirectLoopGuard = redirectLoopGuard ?? throw new ArgumentNullException(nameof(redirectLoopGuard));
             _redirectHandler = redirectHandler ?? throw new ArgumentNullException(nameof(redirectHandler));
         }
 
@@ -152,12 +155,20 @@ namespace Geta.NotFoundHandler.Core
                     return true;
                 }
 
-                if (redirect.State.Equals((int)RedirectState.Saved)
-                    && string.Compare(redirect.NewUrl, urlNotFound.PathAndQuery, StringComparison.InvariantCultureIgnoreCase) != 0
-                    && string.Compare(redirect.NewUrl, urlNotFound.AbsoluteUri, StringComparison.InvariantCultureIgnoreCase) != 0)
+                if (redirect.State.Equals((int)RedirectState.Saved) && !IsSameUrl(urlNotFound, redirect.NewUrl))
                 {
-                    // Found it, however, we need to make sure we're not running in an
-                    // infinite loop. The new url must not be the referer to this page
+                    // Found it, however, rules can lead to each other, so we need to
+                    // make sure we're not running in an infinite loop.
+                    if (!_redirectLoopGuard.TryRedirect(urlNotFound, redirect.NewUrl))
+                    {
+                        _logger.LogWarning(
+                            "Stopped redirecting {Url} to {NewUrl} after {MaxRedirectHops} redirects in a row. Check the redirects for a loop.",
+                            GetLogUrl(urlNotFound),
+                            redirect.NewUrl,
+                            _configuration.MaxRedirectHops);
+                        return false;
+                    }
+
                     foundRedirect = redirect;
                     return true;
                 }
@@ -165,7 +176,7 @@ namespace Geta.NotFoundHandler.Core
             else
             {
                 // Safe logging
-                var logUrl = _configuration.LogWithHostname ? urlNotFound.ToString() : urlNotFound.PathAndQuery;
+                var logUrl = GetLogUrl(urlNotFound);
 
                 if (_requestLogger.ShouldLogRequest(logUrl))
                 {
@@ -174,6 +185,21 @@ namespace Geta.NotFoundHandler.Core
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// Whether a redirect would only request the same url again. A browser doesn't send the fragment,
+        /// so /a -> /a#top is one of them. Another scheme isn't, as that's how a site moves to https.
+        /// </summary>
+        private static bool IsSameUrl(Uri url, string newUrl)
+        {
+            return Uri.TryCreate(url, newUrl, out var target)
+                   && string.Equals(target.GetLeftPart(UriPartial.Query), url.GetLeftPart(UriPartial.Query), StringComparison.OrdinalIgnoreCase);
+        }
+
+        private string GetLogUrl(Uri url)
+        {
+            return _configuration.LogWithHostname ? url.ToString() : url.PathAndQuery;
         }
 
         public virtual void SetStatusCodeAndShow404(HttpContext context, int statusCode = 404)
