@@ -17,11 +17,14 @@ namespace Geta.NotFoundHandler.Core.Redirects;
 public sealed class RedirectLoopGuard : IDisposable
 {
     private const int MaxTrackedUrls = 10_000;
-    private static readonly TimeSpan HopLifetime = TimeSpan.FromMinutes(1);
 
-    // Note: A browser follows a redirect right away, so this only has to outlive one hop. When it's full,
-    // a url is just not counted, and the browser's own limit still applies.
-    private readonly MemoryCache _hops = new(new MemoryCacheOptions { SizeLimit = MaxTrackedUrls });
+    // Note: A browser follows a redirect right away, so this only has to outlive one hop. It's also how long
+    // a url that was stopped stays stopped, so how long it takes for a corrected rule to work.
+    private static readonly TimeSpan HopLifetime = TimeSpan.FromSeconds(30);
+
+    // Note: When it's full, the oldest counts go, and the browser's own limit still applies to those urls.
+    // Compacting a larger part at a time avoids sorting all the entries over and over under a flood of urls.
+    private readonly MemoryCache _hops = new(new MemoryCacheOptions { SizeLimit = MaxTrackedUrls, CompactionPercentage = 0.25 });
     private readonly int _maxHops;
 
     public RedirectLoopGuard(IOptions<NotFoundHandlerOptions> options)
@@ -41,13 +44,10 @@ public sealed class RedirectLoopGuard : IDisposable
         }
 
         var key = ToKey(url);
-        var hops = _hops.TryGetValue(key, out int counted) ? counted : 0;
+        var hops = _hops.Get<int>(key);
 
         if (hops >= _maxHops)
         {
-            // Note: Start over, so a corrected rule works for the next request. The other urls of a loop
-            // hold counts too, and would stop that request again if only this url was forgotten.
-            _hops.Clear();
             return false;
         }
 
@@ -59,14 +59,9 @@ public sealed class RedirectLoopGuard : IDisposable
         var targetKey = ToKey(target);
 
         // Note: A url redirecting to another spelling of itself (http://site/a -> https://site/a) would raise
-        // its own count, which then adds up over separate requests. The fragment isn't sent, so /a -> /a#top is a loop.
-        if (targetKey == key && target.GetLeftPart(UriPartial.Query) != url.GetLeftPart(UriPartial.Query))
-        {
-            return true;
-        }
-
-        // Note: Only raise a count, or a request coming into a loop from outside would reset it.
-        if (!_hops.TryGetValue(targetKey, out int existing) || existing <= hops)
+        // its own count, which then adds up over separate requests. Only raise a count, or a request coming
+        // into a loop from outside would reset it.
+        if (targetKey != key && _hops.Get<int>(targetKey) <= hops)
         {
             _hops.Set(targetKey, hops + 1, new MemoryCacheEntryOptions { Size = 1, AbsoluteExpirationRelativeToNow = HopLifetime });
         }
@@ -84,7 +79,6 @@ public sealed class RedirectLoopGuard : IDisposable
     /// The scheme is left out, as a request can reach the site over another one than a proxy forwards.
     /// The host is in its ASCII form and the rest decoded, as a new url can be written differently than
     /// the request following it arrives: a browser and the server encode more than <see cref="Uri"/> does.
-    /// Case is kept, as a browser keeps it, so a rule correcting the case of a url isn't seen as a loop.
     /// </summary>
     private static int ToKey(Uri url)
     {

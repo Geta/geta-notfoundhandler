@@ -155,9 +155,7 @@ namespace Geta.NotFoundHandler.Core
                     return true;
                 }
 
-                if (redirect.State.Equals((int)RedirectState.Saved)
-                    && string.Compare(redirect.NewUrl, urlNotFound.PathAndQuery, StringComparison.InvariantCultureIgnoreCase) != 0
-                    && string.Compare(redirect.NewUrl, urlNotFound.AbsoluteUri, StringComparison.InvariantCultureIgnoreCase) != 0)
+                if (redirect.State.Equals((int)RedirectState.Saved) && !IsSameUrl(urlNotFound, redirect.NewUrl))
                 {
                     // Found it, however, rules can lead to each other, so we need to
                     // make sure we're not running in an infinite loop.
@@ -187,6 +185,16 @@ namespace Geta.NotFoundHandler.Core
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// Whether a redirect would only request the same url again. A browser doesn't send the fragment,
+        /// so /a -> /a#top is one of them. Another scheme isn't, as that's how a site moves to https.
+        /// </summary>
+        private static bool IsSameUrl(Uri url, string newUrl)
+        {
+            return Uri.TryCreate(url, newUrl, out var target)
+                   && string.Equals(target.GetLeftPart(UriPartial.Query), url.GetLeftPart(UriPartial.Query), StringComparison.OrdinalIgnoreCase);
         }
 
         private string GetLogUrl(Uri url)

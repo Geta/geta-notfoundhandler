@@ -212,7 +212,7 @@ namespace Geta.NotFoundHandler.Tests
         [Fact]
         public void HandleRequest_returns_true_when_redirect_found_with_saved_state()
         {
-            var redirect = new CustomRedirect("http://example.com/found", RedirectState.Saved);
+            var redirect = new CustomRedirect("http://example.com/found", RedirectState.Saved) { NewUrl = "/new" };
             WhenRedirectFound(redirect);
 
             var actual = _sut.HandleRequest(DefaultOldUri, new Uri("http://example.com/path"), out var _);
@@ -223,7 +223,7 @@ namespace Geta.NotFoundHandler.Tests
         [Fact]
         public void HandleRequest_returns_redirect_when_redirect_found_with_saved_state()
         {
-            var redirect = new CustomRedirect("http://example.com/found", RedirectState.Saved);
+            var redirect = new CustomRedirect("http://example.com/found", RedirectState.Saved) { NewUrl = "/new" };
             WhenRedirectFound(redirect);
 
             _sut.HandleRequest(DefaultOldUri, new Uri("http://example.com/path"), out var actual);
