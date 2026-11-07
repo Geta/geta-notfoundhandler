@@ -23,9 +23,6 @@ public class IndexModel : AbstractSortablePageModel
         _redirectsService = redirectsService;
     }
 
-    [TempData]
-    public string Confirmation { get; set; }
-
     public string Message { get; set; }
 
     public IPagedList<CustomRedirect> Items { get; set; } = Enumerable.Empty<CustomRedirect>().ToPagedList();

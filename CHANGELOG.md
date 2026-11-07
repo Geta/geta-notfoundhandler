@@ -18,12 +18,13 @@ Check these when upgrading, as they change how existing rules and integrations b
 - A request with no matching redirect keeps the status the application gave it. Before, a response that hadn't started yet was forced to `404`. `RequestHandler.SetStatusCodeAndShow404` is now only called for deleted URLs, so a subclass overriding it no longer runs for unmatched requests.
 - `HttpContextExtensions.SetStatusCode` no longer clears the response, so a custom page keeps its headers when its status changes to `410`.
 - CSV export: an imported file that was exported with escaped values keeps the `'` prefix and the `%3B` as part of the value.
-- Automatic redirects are no longer created for urls with an extension in `IgnoredResourceExtensions`, as they could never be used. Rows created earlier stay until you delete them. `RedirectBuilder` takes an `IOptions<NotFoundHandlerOptions>`.
+- Automatic redirects are no longer created for urls with an extension in `IgnoredResourceExtensions`, as requests for those urls aren't redirected. Rows created earlier stay until you delete them. Check this if you override `RequestHandler.IsResourceFile` to redirect such files, or have pages with a url like `/docs/node.js` with no trailing slash and children below them, as those children used to be redirected through that row. `RedirectBuilder` takes an `IOptions<NotFoundHandlerOptions>`.
 
 ### Known issues
 
 - With `UseInternalScheduler`, the cleanup job runs in a plain ASP.NET Core host, but it didn't fire in the Optimizely CMS 13 sample site, for reasons not yet known. On Optimizely sites, use the *[Geta NotFoundHandler] Suggestions cleanup job* scheduled job.
 - Two rules pointing into each other (`/a` -> `/b/c` and `/b` -> `/a/d`) can still grow on every hop.
+- The confirmations in the admin UI use the TempData cookie, so on a site requiring cookie consent they don't show until the editor has consented.
 
 ### Fixed
 

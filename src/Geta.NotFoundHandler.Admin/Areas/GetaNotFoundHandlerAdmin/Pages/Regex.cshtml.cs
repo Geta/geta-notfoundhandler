@@ -27,9 +27,6 @@ public class RegexModel : AbstractSortablePageModel
         _redirectLoader = redirectLoader;
     }
 
-    [TempData]
-    public string Confirmation { get; set; }
-
     public string Message { get; set; }
 
     public IEnumerable<RegexRedirect> Items { get; set; } = Enumerable.Empty<RegexRedirect>();

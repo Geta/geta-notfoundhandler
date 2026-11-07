@@ -18,9 +18,7 @@ public class RedirectBuilderTests
 
     public RedirectBuilderTests()
     {
-        _redirectBuilder = new(
-            Options(RedirectType.Permanent),
-            Microsoft.Extensions.Options.Options.Create(new NotFoundHandlerOptions()));
+        _redirectBuilder = Builder(RedirectType.Permanent);
     }
 
     /// <summary>
@@ -59,9 +57,7 @@ public class RedirectBuilderTests
     [Fact]
     public void CreateRedirects_keeps_a_resource_url_when_the_site_no_longer_ignores_that_extension()
     {
-        var builder = new RedirectBuilder(
-            Options(RedirectType.Permanent),
-            Microsoft.Extensions.Options.Options.Create(new NotFoundHandlerOptions { IgnoredResourceExtensions = new[] { "css" } }));
+        var builder = Builder(RedirectType.Permanent, new NotFoundHandlerOptions { IgnoredResourceExtensions = new[] { "css" } });
 
         var redirects = builder.CreateRedirects(new List<ContentUrlHistory>
         {
@@ -245,7 +241,7 @@ public class RedirectBuilderTests
     [InlineData(RedirectType.Temporary)]
     public void CreateRedirect_returns_redirect_with_redirect_type(RedirectType redirectType)
     {
-        var redirectBuilder = new RedirectBuilder(Options(redirectType), Microsoft.Extensions.Options.Options.Create(new NotFoundHandlerOptions()));
+        var redirectBuilder = Builder(redirectType);
         var oldUrl = "/initial";
         var newUrl = "/destination";
         var histories = new List<ContentUrlHistory>
@@ -258,10 +254,12 @@ public class RedirectBuilderTests
         Assert.All(redirects, x => Assert.Equal(redirectType, x.RedirectType));
     }
 
-    private static OptionsWrapper<OptimizelyNotFoundHandlerOptions> Options(RedirectType redirectType)
+    private static RedirectBuilder Builder(RedirectType redirectType, NotFoundHandlerOptions notFoundHandlerOptions = null)
     {
-        return new OptionsWrapper<OptimizelyNotFoundHandlerOptions>(
-            new OptimizelyNotFoundHandlerOptions { AutomaticRedirectType = redirectType });
+        return new RedirectBuilder(
+            new OptionsWrapper<OptimizelyNotFoundHandlerOptions>(
+                new OptimizelyNotFoundHandlerOptions { AutomaticRedirectType = redirectType }),
+            new OptionsWrapper<NotFoundHandlerOptions>(notFoundHandlerOptions ?? new NotFoundHandlerOptions()));
     }
 
     private static ContentUrlHistory HistoryWithSecondaryUrl(string dateString, params string[] secondaryUrls)

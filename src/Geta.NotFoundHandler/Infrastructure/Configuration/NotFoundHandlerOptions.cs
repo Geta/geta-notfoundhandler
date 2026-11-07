@@ -40,7 +40,9 @@ namespace Geta.NotFoundHandler.Infrastructure.Configuration
         /// </summary>
         public bool IsIgnoredResource(string url)
         {
-            var end = url.IndexOfAny(new[] { '?', '#' });
+            if (string.IsNullOrEmpty(url)) return false;
+
+            var end = url.AsSpan().IndexOfAny('?', '#');
             var path = end < 0 ? url : url[..end];
             var extensionPosition = path.LastIndexOf('.');
 
