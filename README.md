@@ -155,6 +155,8 @@ If the `bufferSize` is set to `0`, the `threshold` value will be ignored, and ev
 
 **RedirectsRefreshInterval**: How often each server checks the database for redirect changes it hasn't picked up, in case an update never reached it. On Optimizely, servers normally hear about an update straight away through events, so this is a safety net. Without Optimizely it's how other servers pick up changes, so a new redirect can take up to this long to reach them. A server that reloads this way logs "Reloaded the redirects" at Information level, so on Optimizely, seeing that line regularly means update events aren't reaching it. Set to `TimeSpan.Zero` to turn the check off. Default is 5 minutes. (Ex. ```options.RedirectsRefreshInterval = TimeSpan.FromMinutes(1);```)
 
+**MaxRedirectHops**: How many redirects in a row a request can go through before it gets a 404 instead, which stops redirects that keep leading to more redirects. A warning starting with "Stopped redirecting" is logged when that happens. Browsers give up at around 20. Set to `0` to turn this off. Default is 10. (Ex. ```options.MaxRedirectHops = 5;```)
+
 **DefaultRedirectType**: The redirect type pre-selected when adding a redirect, and used for redirects created from suggestions and by regex redirects. Default is `RedirectType.Temporary`. (Ex. ```options.DefaultRedirectType = RedirectType.Permanent;```)
 
 **ActiveStatusCodes**: A integerlist with the status codes that NotFoundHandler will be active on. (Ex. ```options.ActiveStatusCodes = new int[] { StatusCodes.Status404NotFound, StatusCodes.Status410Gone };```)
@@ -349,7 +351,7 @@ Regex redirects are set up on the *Regex* tab, and are tried in order of their o
 ^https://www\.example\.com/en/(.*)    ->  /new/$1
 ```
 
-Use the whole url to match only one host. A rule anchored at a `/` matches on every host of the site. A rule whose new url matches the rule again (`^/(.*)$` -> `/en/$1`) keeps redirecting if the new url isn't found either, so make sure it can't match its own result.
+Use the whole url to match only one host. A rule anchored at a `/` matches on every host of the site. A rule whose new url matches the rule again (`^/(.*)$` -> `/en/$1`) keeps redirecting if the new url isn't found either, until `MaxRedirectHops` stops it, so make sure it can't match its own result.
 
 ## Wildcards
 
@@ -360,6 +362,8 @@ For example, if we have a redirect: `/a` to `/b`, then:
 - without wildcard setting it will redirect `/a/1` to `/b/1`
 
 A request is only redirected once by a rule that would match it again afterwards. For example, with a redirect from `/a` to `/a/b`, `/a/1` redirects to `/a/b/1`, and a request already under `/a/b` stays a 404.
+
+Redirects that lead to each other (`/a` -> `/b/c` and `/b` -> `/a/d`) are stopped by `MaxRedirectHops`, and the request gets a 404. They are only counted within one server, so behind a load balancer without session affinity, the browser's own limit can be reached first. Browsers also remember permanent redirects and follow them without asking the server, so permanent redirects sending a url back and forth (`/a` -> `/b` and `/b` -> `/a`) still end in the browser's error, and permanent redirects that grow get further on each visit. To avoid that, keep redirects you aren't sure of temporary until you've checked them.
 
 ## 🏁 Getting Started
 

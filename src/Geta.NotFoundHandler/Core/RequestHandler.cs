@@ -21,17 +21,20 @@ namespace Geta.NotFoundHandler.Core
         private readonly IRequestLogger _requestLogger;
         private readonly ILogger<RequestHandler> _logger;
         private readonly NotFoundHandlerOptions _configuration;
+        private readonly RedirectLoopGuard _redirectLoopGuard;
         private const string HandledRequestItemKey = "NotFoundHandler:handled";
 
         public RequestHandler(
             IRedirectHandler redirectHandler,
             IRequestLogger requestLogger,
             IOptions<NotFoundHandlerOptions> options,
-            ILogger<RequestHandler> logger)
+            ILogger<RequestHandler> logger,
+            RedirectLoopGuard redirectLoopGuard)
         {
             _configuration = options.Value;
             _requestLogger = requestLogger ?? throw new ArgumentNullException(nameof(requestLogger));
             _logger = logger;
+            _redirectLoopGuard = redirectLoopGuard ?? throw new ArgumentNullException(nameof(redirectLoopGuard));
             _redirectHandler = redirectHandler ?? throw new ArgumentNullException(nameof(redirectHandler));
         }
 
@@ -158,6 +161,16 @@ namespace Geta.NotFoundHandler.Core
                 {
                     // Found it, however, we need to make sure we're not running in an
                     // infinite loop. The new url must not be the referer to this page
+                    if (!_redirectLoopGuard.TryRedirect(urlNotFound, redirect.NewUrl))
+                    {
+                        _logger.LogWarning(
+                            "Stopped redirecting {Url} to {NewUrl} after {MaxRedirectHops} redirects in a row. Check the redirects for a loop.",
+                            urlNotFound.PathAndQuery,
+                            redirect.NewUrl,
+                            _configuration.MaxRedirectHops);
+                        return false;
+                    }
+
                     foundRedirect = redirect;
                     return true;
                 }

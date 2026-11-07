@@ -40,7 +40,7 @@ namespace Geta.NotFoundHandler.Tests
 
             var requestHandlerLogger = A.Fake<ILogger<RequestHandler>>();
             _sut = A.Fake<RequestHandler>(
-                o => o.WithArgumentsForConstructor(new object[] { _redirectHandler, _requestLogger, options, requestHandlerLogger })
+                o => o.WithArgumentsForConstructor(new object[] { _redirectHandler, _requestLogger, options, requestHandlerLogger, new RedirectLoopGuard(options) })
                     .CallsBaseMethods());
 
             _httpContext = new DefaultHttpContext();

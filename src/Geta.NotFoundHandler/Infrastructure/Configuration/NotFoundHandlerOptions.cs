@@ -38,6 +38,12 @@ namespace Geta.NotFoundHandler.Infrastructure.Configuration
         /// </summary>
         public TimeSpan RedirectsRefreshInterval { get; set; } = TimeSpan.FromMinutes(5);
 
+        /// <summary>
+        /// How many redirects in a row a request can go through before it gets a 404 instead, which stops
+        /// redirects that keep leading to more redirects. Browsers give up at around 20. Set to 0 to turn this off.
+        /// </summary>
+        public int MaxRedirectHops { get; set; } = 10;
+
         public string[] IgnoredResourceExtensions { get; set; } =
             {"jpg", "gif", "png", "css", "js", "ico", "swf", "woff"};
 
