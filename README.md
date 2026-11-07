@@ -310,7 +310,7 @@ services.AddNotFoundHandler(o =>
 ```
 
 Scheduler - mechanism that triggers scheduled jobs in a recurrent manner
-- InternalScheduler - included in the core package, a scheduler that uses [Coravel](https://docs.coravel.net/). It's for sites not using Optimizely: `UseOptimizelyNotFoundHandler` removes the job from it, and logs a warning if the flag is on.
+- InternalScheduler - included in the core package, a scheduler that uses [Coravel](https://docs.coravel.net/). It's for sites not using Optimizely: `UseOptimizelyNotFoundHandler`, when called after `UseNotFoundHandler`, removes the job from it and logs a warning if the flag is on.
   To enable the scheduler, you need to enable UseInternalScheduler flag. Additionally, you can adjust the scheduler run interval:
 ```
 services.AddNotFoundHandler(o =>
