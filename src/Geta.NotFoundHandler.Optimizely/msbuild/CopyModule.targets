@@ -5,15 +5,37 @@
                 Include="$(MSBuildThisFileDirectory)..\..\contentFiles\any\any\modules\_protected\**\*.config"/>
     </ItemGroup>
 
-    <!-- Published from the package, as content files don't reach a site that gets this package through another one.
+    <!-- The relative path uses the platform's separator, as the publish list below is compared to it. -->
+    <PropertyGroup>
+        <_GetaNotFoundHandlerModuleConfig>$([System.IO.Path]::Combine('modules', '_protected', 'Geta.NotFoundHandler.Optimizely', 'module.config'))</_GetaNotFoundHandlerModuleConfig>
+        <_GetaNotFoundHandlerPackageModuleConfig>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\..\contentFiles\any\any\$(_GetaNotFoundHandlerModuleConfig)'))</_GetaNotFoundHandlerPackageModuleConfig>
+    </PropertyGroup>
+
+    <!-- Replaces the package's content file, which by default doesn't reach a site that gets this package through another one.
+         A project excluding these targets still gets the content file.
          The copy below must not be picked up as content as well, which would publish the file twice. -->
     <ItemGroup>
-        <Content Remove="modules\_protected\Geta.NotFoundHandler.Optimizely\module.config"/>
-        <None Include="$(MSBuildThisFileDirectory)..\..\contentFiles\any\any\modules\_protected\Geta.NotFoundHandler.Optimizely\module.config"
-              Link="modules\_protected\Geta.NotFoundHandler.Optimizely\module.config"
+        <Content Remove="$(_GetaNotFoundHandlerModuleConfig)"/>
+        <None Remove="$(_GetaNotFoundHandlerPackageModuleConfig)"/>
+        <None Include="$(_GetaNotFoundHandlerPackageModuleConfig)"
+              Link="$(_GetaNotFoundHandlerModuleConfig)"
               CopyToOutputDirectory="PreserveNewest"
-              CopyToPublishDirectory="PreserveNewest"/>
+              CopyToPublishDirectory="PreserveNewest"
+              ExcludeFromSingleFile="true"/>
     </ItemGroup>
+
+    <!-- A referenced project passes on the file of the version it restored, which can differ from this project's, and a site
+         can add the copy below in other ways. More than one file for this path fails the publish with NETSDK1152. -->
+    <Target Name="_GetaNotFoundHandlerPublishModuleConfig" AfterTargets="ComputeResolvedFilesToPublishList">
+        <ItemGroup>
+            <ResolvedFileToPublish Remove="@(ResolvedFileToPublish)"
+                                   Condition="'%(ResolvedFileToPublish.RelativePath)' == '$(_GetaNotFoundHandlerModuleConfig)'"/>
+            <ResolvedFileToPublish Include="$(_GetaNotFoundHandlerPackageModuleConfig)"
+                                   RelativePath="$(_GetaNotFoundHandlerModuleConfig)"
+                                   CopyToPublishDirectory="PreserveNewest"
+                                   ExcludeFromSingleFile="true"/>
+        </ItemGroup>
+    </Target>
 
     <Target Name="CopyModule" BeforeTargets="Build">
         <Copy

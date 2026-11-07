@@ -43,7 +43,7 @@
     <Content Remove="module.config" />
     <None Include="module.config">
       <Pack>true</Pack>
-      <PackageCopyToOutput>false</PackageCopyToOutput>
+      <PackageCopyToOutput>true</PackageCopyToOutput>
       <BuildAction>None</BuildAction>
       <PackagePath>contentFiles\any\any\modules\_protected\Geta.NotFoundHandler.Optimizely</PackagePath>
     </None>

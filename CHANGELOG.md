@@ -36,6 +36,7 @@ Check these when upgrading, as they change how existing rules and integrations b
 - A redirect that would only request the same url again now stays a 404 in more cases, such as `/a` -> `/a#top`, `//example.com/a` or an empty new url. Moving to another scheme on the same url still redirects.
 - A handler failing on `RedirectsEvents` no longer stops the others, and the failure now reaches the caller as an `AggregateException`.
 - `OptimizelySyncEvents` takes an `ILogger<OptimizelySyncEvents>`, and `RedirectsInitializer` takes an `IRedirectLoader`. This matters only if you construct or inherit from them yourself.
+- The published `module.config` now always comes from the add-on's package. Before, a site that removed the package's file from its publish got the copy in the site's folder instead, so a build step that edits that copy no longer changes what's published.
 
 ### Known issues
 
@@ -66,7 +67,7 @@ Check these when upgrading, as they change how existing rules and integrations b
 - Setting `UseInternalScheduler` no longer crashes the application at startup with `No service for type 'Microsoft.Extensions.Logging.ILogger'`.
 - The notification request of the CMS navigation no longer fails with a `400` on the add-on's page in the CMS on CMS 13. The layout didn't tell the navigation how to send the antiforgery token.
 - `UseOptimizelyNotFoundHandler` now logs a warning when `UseInternalScheduler` is on. It has always removed the suggestions cleanup job from that scheduler, as Optimizely sites use the *[Geta NotFoundHandler] Suggestions cleanup job* scheduled job, so turning on the flag silently did nothing.
-- `dotnet publish` of a site no longer fails with `NETSDK1152: Found multiple publish output files with the same relative path` for `module.config` once the site has been built. A workaround for this in the project file can be removed, but still works.
+- `dotnet publish` of a site no longer fails with `NETSDK1152: Found multiple publish output files with the same relative path` for `module.config` once the site has been built, or when projects in the solution use different versions of the add-on. A workaround for this in the project file can be removed, but still works.
 - A clean `dotnet publish` of a site getting the add-on through `Geta.NotFoundHandler.Optimizely.Commerce` now includes `module.config`. Before, it was only published if the site had been built first.
 
 ## [7.1.0] - 2026-07-10
