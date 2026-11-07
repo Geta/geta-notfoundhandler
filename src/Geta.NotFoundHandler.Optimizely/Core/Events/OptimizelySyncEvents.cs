@@ -2,7 +2,6 @@
 // Licensed under Apache-2.0. See the LICENSE file in the project root for more information
 
 using System;
-using System.Threading;
 using EPiServer.Events.Clients;
 using Geta.NotFoundHandler.Core.Providers.RegexRedirects;
 using Geta.NotFoundHandler.Core.Redirects;
@@ -17,7 +16,8 @@ namespace Geta.NotFoundHandler.Optimizely.Core.Events
         private readonly RedirectsInitializer _redirectsInitializer;
         private readonly IRegexRedirectCache _regexRedirectCache;
         private readonly ILogger<OptimizelySyncEvents> _logger;
-        private int _initialized;
+        private readonly object _initializeLock = new();
+        private volatile bool _initialized;
 
         private static readonly Guid UpdateEventId = new("{AC263F88-6C17-45A5-81E0-DCC28DF26AEF}");
         private static readonly Guid RegexUpdateEventId = new("{334DF0A0-793C-4B19-A0CC-8AD63F705FDD}");
@@ -37,20 +37,29 @@ namespace Geta.NotFoundHandler.Optimizely.Core.Events
             _logger = logger;
         }
 
-        public bool IsInitialized => Volatile.Read(ref _initialized) == 1;
+        public bool IsInitialized => _initialized;
 
         public void Initialize()
         {
             // Note: Subscribing twice would reload the redirects twice for every update.
-            if (Interlocked.Exchange(ref _initialized, 1) == 1)
+            lock (_initializeLock)
             {
-                return;
-            }
+                if (_initialized)
+                {
+                    return;
+                }
 
-            _redirectsEvents.OnRedirectsUpdated += OnRedirectsUpdated;
-            _redirectsEvents.OnRegexRedirectsUpdated += OnRegexRedirectsUpdated;
-            _eventRegistry.Get(UpdateEventId).Raised += SyncRedirectsUpdateEventRaised;
-            _eventRegistry.Get(RegexUpdateEventId).Raised += SyncRegexRedirectsUpdateEventRaised;
+                // Note: Before subscribing to anything, so a failure here leaves nothing to undo on another try.
+                var updateEvent = _eventRegistry.Get(UpdateEventId);
+                var regexUpdateEvent = _eventRegistry.Get(RegexUpdateEventId);
+
+                _redirectsEvents.OnRedirectsUpdated += OnRedirectsUpdated;
+                _redirectsEvents.OnRegexRedirectsUpdated += OnRegexRedirectsUpdated;
+                updateEvent.Raised += SyncRedirectsUpdateEventRaised;
+                regexUpdateEvent.Raised += SyncRegexRedirectsUpdateEventRaised;
+
+                _initialized = true;
+            }
         }
 
         private void SyncRedirectsUpdateEventRaised(object sender, EPiServer.Events.EventNotificationEventArgs e)

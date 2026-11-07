@@ -150,10 +150,11 @@ namespace Geta.NotFoundHandler.Data
 
         public string GetChecksum()
         {
-            // Note: A hash per row, as BINARY_CHECKSUM misses some changes to a string. Separators keep
-            // a change of where one value ends and the next starts from giving the same input.
+            // Note: A hash per row, as BINARY_CHECKSUM misses some changes to a string. The length of OldUrl keeps
+            // a change of where it ends and NewUrl starts from giving the same input, as a url can contain a "|".
+            // The cast is there as CONCAT otherwise cuts the result off at 4000 characters, dropping what's last.
             var sqlCommand = $@"SELECT COUNT_BIG(*) AS Total,
-                                    CHECKSUM_AGG(CAST(HASHBYTES('SHA2_256', CONCAT(Id, N'|', OldUrl, N'|', NewUrl, N'|', State, N'|', WildCardSkipAppend, N'|', RedirectType)) AS int)) AS Checksum
+                                    CHECKSUM_AGG(CAST(HASHBYTES('SHA2_256', CONCAT(CAST(Id AS nvarchar(max)), N'|', State, N'|', WildCardSkipAppend, N'|', RedirectType, N'|', DATALENGTH(OldUrl), N'|', OldUrl, N'|', NewUrl)) AS int)) AS Checksum
                                     FROM {RedirectsTable}";
 
             var row = _dataExecutor.ExecuteQuery(sqlCommand).Rows[0];

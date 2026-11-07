@@ -55,6 +55,20 @@ namespace Geta.NotFoundHandler.Optimizely.Tests
         }
 
         [Fact]
+        public void A_failed_initialize_can_be_tried_again()
+        {
+            A.CallTo(() => _eventRegistry.Get(A<Guid>._))
+                .Throws(new InvalidOperationException("events unavailable")).Once();
+
+            Assert.Throws<InvalidOperationException>(_sut.Initialize);
+            Assert.False(_sut.IsInitialized);
+
+            _sut.Initialize();
+
+            Assert.True(_sut.IsInitialized);
+        }
+
+        [Fact]
         public void An_update_here_is_only_passed_on_once_initialized()
         {
             _redirectsEvents.RedirectsUpdated();

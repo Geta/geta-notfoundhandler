@@ -28,6 +28,11 @@ namespace Geta.NotFoundHandler.Core.Redirects
             redirectsEvents.OnRedirectsUpdated += OnRedirectsUpdated;
         }
 
+        /// <summary>
+        /// Changes every time the redirects are loaded, whatever prompted it.
+        /// </summary>
+        internal long LastLoaded => Volatile.Read(ref _lastLoaded);
+
         private void OnRedirectsUpdated(EventArgs e)
         {
             Initialize();
@@ -52,7 +57,7 @@ namespace Geta.NotFoundHandler.Core.Redirects
                 var loading = Volatile.Read(ref _lastRequested);
                 var redirects = GetCustomRedirects();
                 _redirectHandler.Set(redirects);
-                _lastLoaded = loading;
+                Volatile.Write(ref _lastLoaded, loading);
             }
         }
 

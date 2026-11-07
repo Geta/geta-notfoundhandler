@@ -84,7 +84,10 @@ namespace Geta.NotFoundHandler.Tests
 
             var running = Task.Run(_initializer.Initialize);
             Assert.True(inFirstLoad.Wait(TimeSpan.FromSeconds(10)));
-            var waiting = Enumerable.Range(0, 5).Select(_ => Task.Run(_initializer.Initialize)).ToList();
+            // Own threads, as these block and the thread pool can take longer than the delay below to add more.
+            var waiting = Enumerable.Range(0, 5)
+                .Select(_ => Task.Factory.StartNew(_initializer.Initialize, TaskCreationOptions.LongRunning))
+                .ToList();
             await Task.Delay(300);
             finishFirstLoad.Set();
             await Task.WhenAll(waiting.Append(running));
@@ -220,6 +223,54 @@ namespace Geta.NotFoundHandler.Tests
         }
 
         [Fact]
+        public void Refresh_keeps_the_cached_regex_redirects_when_the_database_is_unavailable()
+        {
+            A.CallTo(() => _redirectLoader.GetChecksum()).Throws(new InvalidOperationException("database unavailable"));
+
+            CreateRefreshService().Refresh();
+
+            A.CallTo(() => _regexCache.Remove()).MustNotHaveHappened();
+        }
+
+        [Fact]
+        public void Refresh_drops_a_redirect_when_the_stored_ones_return_to_the_last_checksum()
+        {
+            GivenStored("v1", "/first");
+            var sut = CreateRefreshService();
+            sut.Refresh();
+
+            // Saved and picked up through an event here, then removed with that event getting lost.
+            GivenStored("v2", "/first", "/second");
+            _initializer.Initialize();
+            GivenStored("v1", "/first");
+
+            sut.Refresh();
+
+            Assert.Null(_redirectHandler.Find(SecondUri));
+        }
+
+        [Fact]
+        public void Refresh_does_not_create_the_initializer_until_it_is_needed()
+        {
+            var created = false;
+            A.CallTo(() => _redirectLoader.GetChecksum()).Returns(null);
+            var sut = new RedirectsRefreshService(
+                () =>
+                {
+                    created = true;
+                    return _initializer;
+                },
+                _redirectLoader,
+                _regexCache,
+                Options.Create(new NotFoundHandlerOptions()),
+                NullLogger<RedirectsRefreshService>.Instance);
+
+            sut.Refresh();
+
+            Assert.False(created);
+        }
+
+        [Fact]
         public void A_custom_loader_has_no_checksum_unless_it_adds_one()
         {
             IRedirectLoader loader = new LoaderWithoutChecksum();
@@ -233,6 +284,17 @@ namespace Geta.NotFoundHandler.Tests
         public async Task The_service_does_not_run_when_the_interval_is_turned_off(int seconds)
         {
             var sut = CreateRefreshService(TimeSpan.FromSeconds(seconds));
+
+            await sut.StartAsync(CancellationToken.None);
+            await sut.ExecuteTask;
+
+            A.CallTo(() => _redirectLoader.GetChecksum()).MustNotHaveHappened();
+        }
+
+        [Fact]
+        public async Task An_interval_too_short_for_the_timer_does_not_stop_the_application()
+        {
+            var sut = CreateRefreshService(TimeSpan.FromTicks(1));
 
             await sut.StartAsync(CancellationToken.None);
             await sut.ExecuteTask;
@@ -284,7 +346,7 @@ namespace Geta.NotFoundHandler.Tests
             }
 
             return new RedirectsRefreshService(
-                _initializer,
+                () => _initializer,
                 _redirectLoader,
                 _regexCache,
                 Options.Create(options),
