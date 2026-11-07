@@ -21,6 +21,9 @@ Check these when upgrading, as they change how existing rules and integrations b
 - A regex rule anchored at a `/`, such as `^/en/(.*)`, now matches against the path and query. It used to never match, as rules see the whole url, so one that has been sitting unused starts redirecting. Check your rules for this before upgrading. All other rules still only see the whole url.
 - `X.PagedList` is upgraded from 8.4.3 to 10.5.9, which moves `ToPagedList` to the `X.PagedList.Extensions` namespace. Code of your own calling it needs that using.
 - The results of the *Index content URLs* and *Register content move redirects* jobs are now only a summary. Details of what failed are written to the log, and the jobs take an `ILogger` in their constructors.
+- Each instance now checks the database for redirect changes every 5 minutes, which adds one query per instance per check that hashes every row of the redirects table. Set `RedirectsRefreshInterval` to `TimeSpan.Zero` to turn it off. A loader implementing `IRedirectLoader` can add `GetChecksum` to take part, and without it the check is skipped.
+- A handler failing on `RedirectsEvents` no longer stops the others, and the failure now reaches the caller as an `AggregateException`.
+- `OptimizelySyncEvents` takes an `ILogger<OptimizelySyncEvents>`, and `RedirectsInitializer` takes an `IRedirectLoader`. This matters only if you construct or inherit from them yourself.
 
 ### Known issues
 
@@ -31,6 +34,10 @@ Check these when upgrading, as they change how existing rules and integrations b
 ### Fixed
 
 - Regex redirects are no longer recompiled on every unmatched request. The cache held a query that built them again each time it was read.
+- Instances that miss an update no longer stay out of date until a restart. A check every 5 minutes picks up redirects and regex redirects that never reached an instance.
+- Two reloads at the same time could leave an instance without a new redirect, when a slow load that read the table before the save finished last.
+- A failed reload on the instance saving a redirect no longer stops the other instances from being told about it.
+- Leaving out `UseOptimizelyNotFoundHandler` no longer silently turns off the sync between servers. The sync starts anyway and a warning is logged.
 - The CMS navigation shows again on the add-on's page in the CMS on CMS 13. The layout's `<platform-navigation />` wasn't bound to its tag helper, so the browser got an empty element.
 - Automatic redirects no longer fail with `Sequence contains no elements` for content with no URL history.
 - A content language with no primary URL no longer stops automatic redirects for the remaining languages.

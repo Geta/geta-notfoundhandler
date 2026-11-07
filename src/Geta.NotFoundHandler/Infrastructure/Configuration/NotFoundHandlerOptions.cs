@@ -31,6 +31,12 @@ namespace Geta.NotFoundHandler.Infrastructure.Configuration
         public int[] ActiveStatusCodes { get; set; } = new int[] { StatusCodes.Status404NotFound };
         public TimeSpan RegexTimeout { get; set; } = TimeSpan.FromMilliseconds(100);
 
+        /// <summary>
+        /// How often each instance checks the database for redirects it hasn't picked up, in case an update
+        /// never reached it. Set to <see cref="TimeSpan.Zero"/> to turn the check off.
+        /// </summary>
+        public TimeSpan RedirectsRefreshInterval { get; set; } = TimeSpan.FromMinutes(5);
+
         public string[] IgnoredResourceExtensions { get; set; } =
             {"jpg", "gif", "png", "css", "js", "ico", "swf", "woff"};
 

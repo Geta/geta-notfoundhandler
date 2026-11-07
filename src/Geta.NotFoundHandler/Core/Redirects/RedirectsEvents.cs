@@ -2,6 +2,7 @@
 // Licensed under Apache-2.0. See the LICENSE file in the project root for more information
 
 using System;
+using System.Collections.Generic;
 
 namespace Geta.NotFoundHandler.Core.Redirects
 {
@@ -12,12 +13,43 @@ namespace Geta.NotFoundHandler.Core.Redirects
 
         public void RedirectsUpdated()
         {
-            OnRedirectsUpdated?.Invoke(new EventArgs());
+            Raise(OnRedirectsUpdated);
         }
 
         public void RegexRedirectsUpdated()
         {
-            OnRegexRedirectsUpdated?.Invoke(new EventArgs());
+            Raise(OnRegexRedirectsUpdated);
+        }
+
+        /// <summary>
+        /// Calls every handler even if one fails, so a failed reload on this instance
+        /// doesn't stop the other instances from being told about the update.
+        /// </summary>
+        private static void Raise(EventHandler handlers)
+        {
+            if (handlers == null)
+            {
+                return;
+            }
+
+            var failures = new List<Exception>();
+
+            foreach (EventHandler handler in handlers.GetInvocationList())
+            {
+                try
+                {
+                    handler(EventArgs.Empty);
+                }
+                catch (Exception ex)
+                {
+                    failures.Add(ex);
+                }
+            }
+
+            if (failures.Count > 0)
+            {
+                throw new AggregateException(failures);
+            }
         }
     }
 
