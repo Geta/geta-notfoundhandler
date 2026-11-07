@@ -3,6 +3,7 @@ using System.Linq;
 using FakeItEasy;
 using Geta.NotFoundHandler.Optimizely.Core.AutomaticRedirects;
 using Geta.NotFoundHandler.Optimizely.Infrastructure.Configuration;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Xunit;
 
@@ -12,6 +13,7 @@ public class RegisterMovedContentRedirectsJobTests
 {
     private readonly IAutomaticRedirectsService _redirectsService = A.Fake<IAutomaticRedirectsService>();
     private readonly IContentUrlHistoryLoader _loader = A.Fake<IContentUrlHistoryLoader>();
+    private readonly ILogger<RegisterMovedContentRedirectsJob> _logger = A.Fake<ILogger<RegisterMovedContentRedirectsJob>>();
 
     [Fact]
     public void Execute_processes_every_page()
@@ -80,13 +82,16 @@ public class RegisterMovedContentRedirectsJobTests
         // All three are attempted even though the middle one throws.
         A.CallTo(() => _redirectsService.CreateRedirects(A<IReadOnlyCollection<ContentUrlHistory>>._))
             .MustHaveHappened(3, Times.Exactly);
-        Assert.Contains("failed", result);
+        Assert.Contains("failed: 1", result);
+        // The result ends up in a database column, so the details go to the log.
+        Assert.DoesNotContain("boom", result);
+        Assert.Equal(1, Fake.GetCalls(_logger).Count(call => call.Method.Name == nameof(ILogger.Log) && call.GetArgument<LogLevel>(0) == LogLevel.Error));
     }
 
     private RegisterMovedContentRedirectsJob CreateJob(int batchSize)
     {
         var options = Options.Create(new OptimizelyNotFoundHandlerOptions { MovedContentBatchSize = batchSize });
-        return new RegisterMovedContentRedirectsJob(_redirectsService, _loader, options);
+        return new RegisterMovedContentRedirectsJob(_redirectsService, _loader, options, _logger);
     }
 
     private static IEnumerable<(string contentKey, IReadOnlyCollection<ContentUrlHistory> histories)> Moved(params string[] keys)

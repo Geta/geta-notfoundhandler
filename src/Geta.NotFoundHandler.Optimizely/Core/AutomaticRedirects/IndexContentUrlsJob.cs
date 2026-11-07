@@ -5,6 +5,7 @@ using System;
 using System.Linq;
 using EPiServer.Scheduler;
 using Geta.NotFoundHandler.Optimizely.Infrastructure;
+using Microsoft.Extensions.Logging;
 
 namespace Geta.NotFoundHandler.Optimizely.Core.AutomaticRedirects
 {
@@ -17,11 +18,16 @@ namespace Geta.NotFoundHandler.Optimizely.Core.AutomaticRedirects
         private readonly ContentUrlIndexer _contentUrlIndexer;
         private readonly ContentLinkLoader _contentLinkLoader;
         private readonly JobStatusLogger _jobStatusLogger;
+        private readonly ILogger<IndexContentUrlsJob> _logger;
 
-        public IndexContentUrlsJob(ContentUrlIndexer contentUrlIndexer, ContentLinkLoader contentLinkLoader)
+        public IndexContentUrlsJob(
+            ContentUrlIndexer contentUrlIndexer,
+            ContentLinkLoader contentLinkLoader,
+            ILogger<IndexContentUrlsJob> logger)
         {
             _contentUrlIndexer = contentUrlIndexer;
             _contentLinkLoader = contentLinkLoader;
+            _logger = logger;
             _jobStatusLogger = new JobStatusLogger(OnStatusChanged);
 
             IsStoppable = true;
@@ -57,7 +63,8 @@ namespace Geta.NotFoundHandler.Optimizely.Core.AutomaticRedirects
                 }
                 catch (Exception ex)
                 {
-                    _jobStatusLogger.Log($"Processing [{contentLink}] failed, exception: {ex}");
+                    // Note: Not in the result, as that's saved in the database with the job and read back with it.
+                    _logger.LogError(ex, "Indexing the urls of content {ContentLink} failed.", contentLink);
                     failedCount++;
                 }
 

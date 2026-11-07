@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Geta.NotFoundHandler.Data;
 using Microsoft.Extensions.Caching.Memory;
 
@@ -31,11 +32,13 @@ public class MemoryCacheRegexRedirectRepository : IRepository<RegexRedirect>, IR
 
     public IEnumerable<RegexRedirect> GetAll()
     {
-        return _cache.GetOrCreate(GetAllCacheKey,
+        return _cache.GetOrCreate<IEnumerable<RegexRedirect>>(GetAllCacheKey,
                                   cacheEntry =>
                                   {
                                       cacheEntry.SlidingExpiration = TimeSpan.FromHours(1);
-                                      return _redirectLoader.GetAll();
+
+                                      // Note: The loader can be lazy, and caching that would compile every regex on every read.
+                                      return _redirectLoader.GetAll().ToList();
                                   });
     }
 

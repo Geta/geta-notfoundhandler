@@ -18,6 +18,9 @@ Check these when upgrading, as they change how existing rules and integrations b
 - A request with no matching redirect keeps the status the application gave it. Before, a response that hadn't started yet was forced to `404`. `RequestHandler.SetStatusCodeAndShow404` is now only called for deleted URLs, so a subclass overriding it no longer runs for unmatched requests.
 - `HttpContextExtensions.SetStatusCode` no longer clears the response, so a custom page keeps its headers when its status changes to `410`.
 - CSV export: an imported file that was exported with escaped values keeps the `'` prefix and the `%3B` as part of the value.
+- Regex redirects are also tried against the path and query, after the whole url. A rule such as `^/en/(.*)` used to never match, so one that has been sitting unused starts redirecting. Check your rules for this before upgrading.
+- `X.PagedList` is upgraded from 8.4.3 to 10.5.9, which moves `ToPagedList` to the `X.PagedList.Extensions` namespace. Code of your own calling it needs that using.
+- The results of the *Index content URLs* and *Register content move redirects* jobs are now only a summary. Details of what failed are written to the log, and the jobs take an `ILogger` in their constructors.
 
 ### Known issues
 
@@ -26,6 +29,7 @@ Check these when upgrading, as they change how existing rules and integrations b
 
 ### Fixed
 
+- Regex redirects are no longer recompiled on every unmatched request. The cache held a query that built them again each time it was read.
 - The CMS navigation shows again on the add-on's page in the CMS on CMS 13. The layout's `<platform-navigation />` wasn't bound to its tag helper, so the browser got an empty element.
 - Automatic redirects no longer fail with `Sequence contains no elements` for content with no URL history.
 - A content language with no primary URL no longer stops automatic redirects for the remaining languages.

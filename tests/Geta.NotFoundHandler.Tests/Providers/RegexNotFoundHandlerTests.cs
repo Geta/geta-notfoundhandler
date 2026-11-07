@@ -84,6 +84,69 @@ public class RegexNotFoundHandlerTests
         Assert.Equal("/catalog-content/redirect-by-code?code=I-123&a=b", result.NewUrl);
     }
 
+    /// <summary>
+    /// https://github.com/Geta/geta-notfoundhandler/issues/178
+    /// </summary>
+    [Theory]
+    [InlineData(@"^/en/blog/(.*)", "/en/resources/blog/$1", "https://test.example.com/en/blog/article", "/en/resources/blog/article")]
+    [InlineData(@"^/en/blog/(.*)$", "/new/$1", "https://test.example.com/en/blog/article?a=b", "/new/article?a=b")]
+    [InlineData(@"^https://test\.example\.com/en/(.*)", "/new/$1", "https://test.example.com/en/article", "/new/article")]
+    [InlineData(@"/en/(.*)", "/new/$1", "https://test.example.com/en/article", "/new/article")]
+    public void RewriteUrl_matches_a_rule_written_for_the_whole_url_or_for_the_path(string pattern, string format, string url, string expected)
+    {
+        A.CallTo(() => _fakeRegexRedirectLoader.GetAll()).Returns(new List<RegexRedirect> { RegexRedirect(pattern, format) });
+
+        var result = _sut.RewriteUrl(url);
+
+        Assert.Equal(expected, result.NewUrl);
+    }
+
+    [Fact]
+    public void RewriteUrl_keeps_the_order_of_the_rules_when_a_later_one_matches_the_whole_url()
+    {
+        A.CallTo(() => _fakeRegexRedirectLoader.GetAll()).Returns(new List<RegexRedirect>
+        {
+            RegexRedirect(@"^/en/(.*)", "/first/$1"),
+            RegexRedirect(@"^https://test\.example\.com/en/(.*)", "/second/$1")
+        });
+
+        var result = _sut.RewriteUrl("https://test.example.com/en/article");
+
+        Assert.Equal("/first/article", result.NewUrl);
+    }
+
+    [Fact]
+    public void RewriteUrl_prefers_the_whole_url_so_a_captured_group_stays_what_it_was()
+    {
+        A.CallTo(() => _fakeRegexRedirectLoader.GetAll()).Returns(new List<RegexRedirect> { RegexRedirect(@"^(.*)/en/(.*)$", "/new$1") });
+
+        var result = _sut.RewriteUrl("https://test.example.com/en/article");
+
+        Assert.Equal("/newhttps://test.example.com", result.NewUrl);
+    }
+
+    [Fact]
+    public void RewriteUrl_does_not_match_a_path_rule_on_another_path()
+    {
+        A.CallTo(() => _fakeRegexRedirectLoader.GetAll()).Returns(new List<RegexRedirect> { RegexRedirect(@"^/en/(.*)", "/new/$1") });
+
+        var result = _sut.RewriteUrl("https://test.example.com/no/en/article");
+
+        Assert.True(result.IsEmpty);
+    }
+
+    [Theory]
+    [InlineData("/$1", "https://test.example.com/x//evil.com", "/evil.com")]
+    [InlineData("$1", "https://test.example.com/x///evil.com", "/evil.com")]
+    public void RewriteUrl_does_not_let_a_path_rule_choose_the_host(string format, string url, string expected)
+    {
+        A.CallTo(() => _fakeRegexRedirectLoader.GetAll()).Returns(new List<RegexRedirect> { RegexRedirect("^/x/(.*)", format) });
+
+        var result = _sut.RewriteUrl(url);
+
+        Assert.Equal(expected, result.NewUrl);
+    }
+
     private static RegexRedirect RegexRedirect(string oldUrlRegex, string newUrlFormat, int orderNumber = 1, int timoutCount = 0)
     {
         return new RegexRedirect(Guid.NewGuid(),

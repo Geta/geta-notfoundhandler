@@ -33,11 +33,19 @@ public class RegexRedirectNotFoundHandler : INotFoundHandler
     {
         var regexRedirects = _regexRedirectLoader.GetAll();
 
+        // Note: A rule like "^/en/blog/(.*)" can't match a whole url, so each rule also gets the path and query.
+        var pathAndQuery = Uri.TryCreate(url, UriKind.Absolute, out var uri) ? uri.PathAndQuery : url;
+
         foreach (var redirect in regexRedirects)
         {
             try
             {
                 var match = redirect.OldUrlRegex.Match(url);
+                if (!match.Success)
+                {
+                    match = redirect.OldUrlRegex.Match(pathAndQuery);
+                }
+
                 if (match.Success)
                 {
                     var newUrl = KeepOnSite(match.Result(redirect.NewUrlFormat), redirect.NewUrlFormat, url);
