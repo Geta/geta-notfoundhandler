@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using FakeItEasy;
 using Geta.NotFoundHandler.Core.Providers.RegexRedirects;
+using Geta.NotFoundHandler.Core.Redirects;
 using Geta.NotFoundHandler.Data;
 using Geta.NotFoundHandler.Infrastructure.Configuration;
 using Microsoft.Extensions.Logging;
@@ -13,6 +14,9 @@ namespace Geta.NotFoundHandler.Tests.Providers;
 
 public class RegexNotFoundHandlerTests
 {
+    // Note: Not the default of the options, so a test can tell the option was read.
+    private const RedirectType DefaultRedirectType = RedirectType.Permanent;
+
     private readonly IRegexRedirectLoader _fakeRegexRedirectLoader;
     private readonly RegexRedirectNotFoundHandler _sut;
 
@@ -20,8 +24,33 @@ public class RegexNotFoundHandlerTests
     {
         _fakeRegexRedirectLoader = A.Fake<IRegexRedirectLoader>();
         var fakeLogger = A.Fake<ILogger<RegexRedirectNotFoundHandler>>();
-        var fakeOptions = A.Fake<IOptions<NotFoundHandlerOptions>>();
-        _sut = new RegexRedirectNotFoundHandler(_fakeRegexRedirectLoader, fakeLogger, fakeOptions);
+        _sut = new RegexRedirectNotFoundHandler(_fakeRegexRedirectLoader,
+                                                fakeLogger,
+                                                Options.Create(new NotFoundHandlerOptions { DefaultRedirectType = DefaultRedirectType }));
+    }
+
+    /// <summary>
+    /// https://github.com/Geta/geta-notfoundhandler/issues/120
+    /// </summary>
+    [Theory]
+    [InlineData(RedirectType.Permanent, RedirectType.Permanent)]
+    [InlineData(RedirectType.Temporary, RedirectType.Temporary)]
+    [InlineData(null, DefaultRedirectType)]
+    public void RewriteUrl_uses_the_redirect_type_of_the_rule(RedirectType? ruleType, RedirectType expected)
+    {
+        var rule = new RegexRedirect(Guid.NewGuid(),
+                                     new Regex("^/a$"),
+                                     "/b",
+                                     1,
+                                     0,
+                                     DateTime.UtcNow,
+                                     DateTime.UtcNow,
+                                     ruleType);
+        A.CallTo(() => _fakeRegexRedirectLoader.GetAll()).Returns(new List<RegexRedirect> { rule });
+
+        var result = _sut.RewriteUrl("https://test.example.com/a");
+
+        Assert.Equal(expected, result.RedirectType);
     }
 
     [Theory]

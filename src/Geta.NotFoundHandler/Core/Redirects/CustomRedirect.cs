@@ -20,6 +20,15 @@ namespace Geta.NotFoundHandler.Core.Redirects
         /// <value><c>true</c> to skip appending old url if wild card match; otherwise, <c>false</c>.</value>
         public bool WildCardSkipAppend { get; set; }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether urls below the old url are left alone.
+        /// Default value is false.
+        /// </summary>
+        /// <remarks>
+        /// With this set, a redirect from /a matches /a, /a/ and /a?b=c, but not /a/b.
+        /// </remarks>
+        public bool ExactMatch { get; set; }
+
         private string _oldUrl;
         public string OldUrl
         {
@@ -64,6 +73,7 @@ namespace Geta.NotFoundHandler.Core.Redirects
             OldUrl = redirect._oldUrl;
             NewUrl = redirect.NewUrl;
             WildCardSkipAppend = redirect.WildCardSkipAppend;
+            ExactMatch = redirect.ExactMatch;
             RedirectType = redirect.RedirectType;
             State = redirect.State;
         }

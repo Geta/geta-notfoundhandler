@@ -4,8 +4,10 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.Common;
 using System.Linq;
 using Geta.NotFoundHandler.Core.Providers.RegexRedirects;
+using Geta.NotFoundHandler.Core.Redirects;
 
 namespace Geta.NotFoundHandler.Data;
 
@@ -13,7 +15,7 @@ public class SqlRegexRedirectRepository : IRepository<RegexRedirect>, IRegexRedi
 {
     private const string RegexRedirectsTable = "[dbo].[NotFoundHandler.RegexRedirects]";
 
-    private const string AllFields = "Id, OldUrlRegex, NewUrlFormat, OrderNumber, TimeoutCount, CreatedAt, ModifiedAt";
+    private const string AllFields = "Id, OldUrlRegex, NewUrlFormat, OrderNumber, TimeoutCount, CreatedAt, ModifiedAt, RedirectType";
 
     private readonly IDataExecutor _dataExecutor;
     private readonly RegexRedirectFactory _regexRedirectFactory;
@@ -59,7 +61,8 @@ public class SqlRegexRedirectRepository : IRepository<RegexRedirect>, IRegexRedi
             x.Field<int>("OrderNumber"),
             x.Field<int>("TimeoutCount"),
             x.Field<DateTime>("CreatedAt"),
-            x.Field<DateTime>("ModifiedAt"));
+            x.Field<DateTime>("ModifiedAt"),
+            (RedirectType?)x.Field<int?>("RedirectType"));
     }
 
     public void Save(RegexRedirect entity)
@@ -76,9 +79,9 @@ public class SqlRegexRedirectRepository : IRepository<RegexRedirect>, IRegexRedi
     private void Create(RegexRedirect entity)
     {
         var sqlCommand = $@"INSERT INTO {RegexRedirectsTable}
-                                    (Id, OldUrlRegex, NewUrlFormat, OrderNumber, TimeoutCount, CreatedAt, ModifiedAt)
+                                    (Id, OldUrlRegex, NewUrlFormat, OrderNumber, TimeoutCount, CreatedAt, ModifiedAt, RedirectType)
                                     VALUES
-                                    (@id, @oldurlregex, @newurlformat, @ordernumber, @timeoutcount, @createdat, @modifiedat)";
+                                    (@id, @oldurlregex, @newurlformat, @ordernumber, @timeoutcount, @createdat, @modifiedat, @redirecttype)";
 
         var now = DateTime.UtcNow;
 
@@ -90,7 +93,8 @@ public class SqlRegexRedirectRepository : IRepository<RegexRedirect>, IRegexRedi
             _dataExecutor.CreateIntParameter("ordernumber", entity.OrderNumber),
             _dataExecutor.CreateIntParameter("timeoutcount", 0),
             _dataExecutor.CreateDateTimeParameter("createdat", now),
-            _dataExecutor.CreateDateTimeParameter("modifiedat", now));
+            _dataExecutor.CreateDateTimeParameter("modifiedat", now),
+            CreateRedirectTypeParameter(entity));
     }
 
     private void Update(RegexRedirect entity)
@@ -105,6 +109,7 @@ public class SqlRegexRedirectRepository : IRepository<RegexRedirect>, IRegexRedi
                                         ,NewUrlFormat = @newurlformat
                                         ,OrderNumber = @ordernumber
                                         ,ModifiedAt = @modifiedat
+                                        ,RedirectType = @redirecttype
                                     WHERE Id = @id";
 
         _dataExecutor.ExecuteNonQuery(
@@ -113,7 +118,16 @@ public class SqlRegexRedirectRepository : IRepository<RegexRedirect>, IRegexRedi
             _dataExecutor.CreateStringParameter("oldurlregex", entity.OldUrlRegex.ToString()),
             _dataExecutor.CreateStringParameter("newurlformat", entity.NewUrlFormat),
             _dataExecutor.CreateIntParameter("ordernumber", entity.OrderNumber),
-            _dataExecutor.CreateDateTimeParameter("modifiedat", DateTime.UtcNow));
+            _dataExecutor.CreateDateTimeParameter("modifiedat", DateTime.UtcNow),
+            CreateRedirectTypeParameter(entity));
+    }
+
+    private DbParameter CreateRedirectTypeParameter(RegexRedirect entity)
+    {
+        var parameter = _dataExecutor.CreateParameter("redirecttype", DbType.Int32);
+        parameter.Value = entity.RedirectType.HasValue ? (int)entity.RedirectType.Value : DBNull.Value;
+
+        return parameter;
     }
 
     public void Delete(RegexRedirect entity)

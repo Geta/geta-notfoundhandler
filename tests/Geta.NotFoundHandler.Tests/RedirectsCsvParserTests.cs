@@ -2,6 +2,8 @@
 // Licensed under Apache-2.0. See the LICENSE file in the project root for more information
 
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Text;
 using Geta.NotFoundHandler.Core.Redirects;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -54,7 +56,7 @@ namespace Geta.NotFoundHandler.Tests
         {
             var row = ExportRow(url, url);
 
-            Assert.Equal($"{expected},{expected},False,Permanent", row);
+            Assert.Equal($"{expected},{expected},False,Permanent,False", row);
         }
 
         [Fact]
@@ -62,7 +64,7 @@ namespace Geta.NotFoundHandler.Tests
         {
             var row = ExportRow("/x;page=1", "/new");
 
-            Assert.Equal("/x;page=1,/new,False,Permanent", row);
+            Assert.Equal("/x;page=1,/new,False,Permanent,False", row);
         }
 
         [Theory]
@@ -73,7 +75,30 @@ namespace Geta.NotFoundHandler.Tests
         {
             var row = ExportRow(url, "/new");
 
-            Assert.Equal($"{url},/new,False,Permanent", row);
+            Assert.Equal($"{url},/new,False,Permanent,False", row);
+        }
+
+        [Fact]
+        public void An_exact_match_survives_an_export_and_import()
+        {
+            var redirects = new List<CustomRedirect> { new("/a", "/b") { ExactMatch = true }, new("/c", "/d") };
+
+            var imported = _sut.LoadFromStream(new MemoryStream(_sut.ExportToCsv(redirects))).ToList();
+
+            Assert.True(imported.Single(x => x.OldUrl == "/a").ExactMatch);
+            Assert.False(imported.Single(x => x.OldUrl == "/c").ExactMatch);
+        }
+
+        [Fact]
+        public void A_file_exported_before_exact_match_was_added_still_imports()
+        {
+            var file = "OldUrl,NewUrl,WildcardSkippedAppend,RedirectType\r\n/a,/b,True,Permanent\r\n";
+
+            var imported = _sut.LoadFromStream(new MemoryStream(Encoding.UTF8.GetBytes(file))).Single();
+
+            Assert.Equal("/b", imported.NewUrl);
+            Assert.True(imported.WildCardSkipAppend);
+            Assert.False(imported.ExactMatch);
         }
 
         private string ExportRow(string oldUrl, string newUrl)

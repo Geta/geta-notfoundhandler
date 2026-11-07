@@ -3,6 +3,7 @@
 
 using System;
 using System.Text.RegularExpressions;
+using Geta.NotFoundHandler.Core.Redirects;
 
 namespace Geta.NotFoundHandler.Core.Providers.RegexRedirects;
 
@@ -15,7 +16,8 @@ public class RegexRedirect
         int orderNumber,
         int? timeoutCount,
         DateTime? createdAt,
-        DateTime? modifiedAt)
+        DateTime? modifiedAt,
+        RedirectType? redirectType = null)
     {
         Id = id;
         OldUrlRegex = oldUrlRegex;
@@ -24,6 +26,7 @@ public class RegexRedirect
         TimeoutCount = timeoutCount;
         CreatedAt = createdAt;
         ModifiedAt = modifiedAt;
+        RedirectType = redirectType;
     }
 
     public Guid? Id { get; }
@@ -33,4 +36,9 @@ public class RegexRedirect
     public int? TimeoutCount { get; }
     public DateTime? CreatedAt { get; }
     public DateTime? ModifiedAt { get; }
+
+    /// <summary>
+    /// The type of the redirect. Null means the configured default redirect type.
+    /// </summary>
+    public RedirectType? RedirectType { get; }
 }

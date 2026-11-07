@@ -54,7 +54,7 @@ public class RegexRedirectNotFoundHandler : INotFoundHandler
                 if (match.Success)
                 {
                     var newUrl = KeepOnSite(match.Result(redirect.NewUrlFormat), redirect.NewUrlFormat, url);
-                    return new RewriteResult(newUrl, _options.DefaultRedirectType);
+                    return new RewriteResult(newUrl, redirect.RedirectType ?? _options.DefaultRedirectType);
                 }
             }
             catch (RegexMatchTimeoutException e)

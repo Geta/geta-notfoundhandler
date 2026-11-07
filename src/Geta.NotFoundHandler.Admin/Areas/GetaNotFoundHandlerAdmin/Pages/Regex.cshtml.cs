@@ -8,8 +8,10 @@ using Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin.Models;
 using Geta.NotFoundHandler.Core.Providers.RegexRedirects;
 using Geta.NotFoundHandler.Data;
 using Geta.NotFoundHandler.Infrastructure;
+using Geta.NotFoundHandler.Infrastructure.Configuration;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 
 namespace Geta.NotFoundHandler.Admin.Areas.Geta.NotFoundHandler.Admin;
 
@@ -18,13 +20,16 @@ public class RegexModel : AbstractSortablePageModel
 {
     private readonly IRegexRedirectLoader _redirectLoader;
     private readonly IRegexRedirectsService _regexRedirectsService;
+    private readonly NotFoundHandlerOptions _options;
 
     public RegexModel(
         IRegexRedirectsService regexRedirectsService,
-        IRegexRedirectLoader redirectLoader)
+        IRegexRedirectLoader redirectLoader,
+        IOptions<NotFoundHandlerOptions> options)
     {
         _regexRedirectsService = regexRedirectsService;
         _redirectLoader = redirectLoader;
+        _options = options.Value;
     }
 
     public string Message { get; set; }
@@ -50,7 +55,10 @@ public class RegexModel : AbstractSortablePageModel
 
         if (ModelState.IsValid)
         {
-            _regexRedirectsService.Create(RegexRedirect.OldUrlRegex, RegexRedirect.NewUrlFormat, RegexRedirect.OrderNumber);
+            _regexRedirectsService.Create(RegexRedirect.OldUrlRegex,
+                                          RegexRedirect.NewUrlFormat,
+                                          RegexRedirect.OrderNumber,
+                                          RegexRedirect.RedirectType);
 
             Confirmation = $"Saved the regex redirect from {RegexRedirect.OldUrlRegex} to {RegexRedirect.NewUrlFormat}.";
 
@@ -80,7 +88,8 @@ public class RegexModel : AbstractSortablePageModel
             _regexRedirectsService.Update(EditRedirect.Id.Value,
                                           EditRedirect.OldUrlRegex,
                                           EditRedirect.NewUrlFormat,
-                                          EditRedirect.OrderNumber);
+                                          EditRedirect.OrderNumber,
+                                          EditRedirect.RedirectType);
 
             Confirmation = $"Saved the regex redirect from {EditRedirect.OldUrlRegex} to {EditRedirect.NewUrlFormat}.";
 
@@ -97,7 +106,11 @@ public class RegexModel : AbstractSortablePageModel
         var items = FindRedirects();
         Message = $"There are currently stored {items.Count()} Regex redirects.";
         Items = items;
-        RegexRedirect = new RegexRedirectModel { OrderNumber = items.Select(x => x.OrderNumber).DefaultIfEmpty().Max() + 1 };
+        RegexRedirect = new RegexRedirectModel
+        {
+            OrderNumber = items.Select(x => x.OrderNumber).DefaultIfEmpty().Max() + 1,
+            RedirectType = _options.DefaultRedirectType
+        };
     }
 
     private IEnumerable<RegexRedirect> FindRedirects()
