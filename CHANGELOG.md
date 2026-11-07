@@ -14,6 +14,7 @@ All notable changes to this project will be documented in this file.
 
 - Wildcard and regex redirects no longer let a request choose the host of the redirect. Before, `/content` -> `/` turned `/content//evil.com` into a redirect to `//evil.com`, and the regex format `/$1` did the same, as did `$1` capturing `https://evil.com`. A format that names a host itself, such as `//cdn.example.com/$1`, is left alone, and a capture naming the host of the request stays as it is. A rule that relied on `$1` capturing another host from the request now redirects to a path on the site.
 - The CSV export now escapes values a spreadsheet would run as a formula, whichever way they got into the database. A value starting with `=`, `@`, `+`, `-`, tab, carriage return or line feed is prefixed with `'`. A `;` followed by one of those characters inside a value is written as `%3B`, because spreadsheets using `;` as the list separator would otherwise start a new cell there.
+- `System.Security.Cryptography.Xml` is raised from 10.0.7 to 10.0.13 in `Geta.NotFoundHandler.Optimizely.Commerce`. A site on ASP.NET Core uses the copy in its .NET runtime instead of this package, so make sure the site runs on .NET 10.0.13 or later.
 
 ### Changed
 
@@ -39,6 +40,7 @@ Check these when upgrading, as they change how existing rules and integrations b
 - A redirect that would only request the same url again now stays a 404 in more cases, such as `/a` -> `/a#top`, `//example.com/a` or an empty new url. Moving to another scheme on the same url still redirects.
 - A handler failing on `RedirectsEvents` no longer stops the others, and the failure now reaches the caller as an `AggregateException`.
 - `OptimizelySyncEvents` takes an `ILogger<OptimizelySyncEvents>`, and `RedirectsInitializer` takes an `IRedirectLoader`. This matters only if you construct or inherit from them yourself.
+- The published `module.config` now always comes from the add-on's package. Before, a site that removed the package's file from its publish got the copy in the site's folder instead, so a build step that edits that copy no longer changes what's published.
 
 ### Known issues
 
@@ -70,6 +72,8 @@ Check these when upgrading, as they change how existing rules and integrations b
 - Setting `UseInternalScheduler` no longer crashes the application at startup with `No service for type 'Microsoft.Extensions.Logging.ILogger'`.
 - The notification request of the CMS navigation no longer fails with a `400` on the add-on's page in the CMS on CMS 13. The layout didn't tell the navigation how to send the antiforgery token.
 - `UseOptimizelyNotFoundHandler` now logs a warning when `UseInternalScheduler` is on. It has always removed the suggestions cleanup job from that scheduler, as Optimizely sites use the *[Geta NotFoundHandler] Suggestions cleanup job* scheduled job, so turning on the flag silently did nothing.
+- `dotnet publish` of a site no longer fails with `NETSDK1152: Found multiple publish output files with the same relative path` for `module.config` once the site has been built, or when projects in the solution use different versions of the add-on. A workaround for this in the project file can be removed, but still works.
+- A clean `dotnet publish` of a site getting the add-on through `Geta.NotFoundHandler.Optimizely.Commerce` now includes `module.config`. Before, it was only published if the site had been built first.
 
 ## [7.1.0] - 2026-07-10
 
