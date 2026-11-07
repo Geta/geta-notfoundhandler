@@ -49,7 +49,7 @@ namespace Geta.NotFoundHandler.Optimizely.Core.AutomaticRedirects
                 if (_stopped)
                 {
                     _jobStatusLogger.Log(
-                        $"Job was stopped, successful references before stopped: {successCount} out of total {totalCount} references");
+                        $"Job was stopped, successful references before stopped: {successCount} out of total {totalCount} references; failed: {failedCount}");
                     return _jobStatusLogger.ToString();
                 }
 

@@ -92,6 +92,12 @@ public class RegexNotFoundHandlerTests
     [InlineData(@"^/en/blog/(.*)$", "/new/$1", "https://test.example.com/en/blog/article?a=b", "/new/article?a=b")]
     [InlineData(@"^https://test\.example\.com/en/(.*)", "/new/$1", "https://test.example.com/en/article", "/new/article")]
     [InlineData(@"/en/(.*)", "/new/$1", "https://test.example.com/en/article", "/new/article")]
+    [InlineData(@"^\/en\/(.*)", "/new/$1", "https://test.example.com/en/article", "/new/article")]
+    [InlineData(@"^(/en/)(.+)$", "/new/$2", "https://test.example.com/en/article", "/new/article")]
+    [InlineData(@"^(?:/en/)(.+)$", "/new/$1", "https://test.example.com/en/article", "/new/article")]
+    [InlineData(@"^(?<lang>/en/)(?<rest>.+)$", "/new/${rest}", "https://test.example.com/en/article", "/new/article")]
+    [InlineData(@"(?i)^/EN/(.*)", "/new/$1", "https://test.example.com/en/article", "/new/article")]
+    [InlineData(@"\A/en/(.*)", "/new/$1", "https://test.example.com/en/article", "/new/article")]
     public void RewriteUrl_matches_a_rule_written_for_the_whole_url_or_for_the_path(string pattern, string format, string url, string expected)
     {
         A.CallTo(() => _fakeRegexRedirectLoader.GetAll()).Returns(new List<RegexRedirect> { RegexRedirect(pattern, format) });
@@ -123,6 +129,18 @@ public class RegexNotFoundHandlerTests
         var result = _sut.RewriteUrl("https://test.example.com/en/article");
 
         Assert.Equal("/newhttps://test.example.com", result.NewUrl);
+    }
+
+    [Theory]
+    [InlineData(@"^(?!https://www\.example\.com/).*")]
+    [InlineData(@"^[^:]+$")]
+    public void RewriteUrl_only_gives_the_path_to_a_rule_that_could_never_match_a_whole_url(string pattern)
+    {
+        A.CallTo(() => _fakeRegexRedirectLoader.GetAll()).Returns(new List<RegexRedirect> { RegexRedirect(pattern, "https://www.example.com/") });
+
+        var result = _sut.RewriteUrl("https://www.example.com/missing");
+
+        Assert.True(result.IsEmpty);
     }
 
     [Fact]

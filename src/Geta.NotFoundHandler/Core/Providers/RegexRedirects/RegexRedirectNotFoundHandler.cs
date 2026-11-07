@@ -15,6 +15,9 @@ public class RegexRedirectNotFoundHandler : INotFoundHandler
     // Note: Browsers also read "https:evil.com" as a host, which Uri doesn't parse as absolute.
     private static readonly Regex StartsWithScheme = new("^[a-z][a-z0-9+.-]*:", RegexOptions.IgnoreCase);
 
+    // Note: Matches a pattern anchored at a "/", after any inline options and opening groups: "^/a", "^\/a", "^(/a)", "(?i)^(?:/a)".
+    private static readonly Regex StartsAtPath = new(@"^(\(\?[a-z-]+\))?(\^|\\A)(\((\?:|\?<\w+>)?)*\\?/", RegexOptions.Compiled);
+
     private readonly IRegexRedirectLoader _regexRedirectLoader;
     private readonly ILogger<RegexRedirectNotFoundHandler> _logger;
     private readonly NotFoundHandlerOptions _options;
@@ -33,7 +36,6 @@ public class RegexRedirectNotFoundHandler : INotFoundHandler
     {
         var regexRedirects = _regexRedirectLoader.GetAll();
 
-        // Note: A rule like "^/en/blog/(.*)" can't match a whole url, so each rule also gets the path and query.
         var pathAndQuery = Uri.TryCreate(url, UriKind.Absolute, out var uri) ? uri.PathAndQuery : url;
 
         foreach (var redirect in regexRedirects)
@@ -41,7 +43,10 @@ public class RegexRedirectNotFoundHandler : INotFoundHandler
             try
             {
                 var match = redirect.OldUrlRegex.Match(url);
-                if (!match.Success)
+
+                // Note: Only a rule that could never match a whole url. Trying every rule would turn one
+                // excluding a host, like "^(?!https://www\.example\.com/).*", into one matching on that host.
+                if (!match.Success && StartsAtPath.IsMatch(redirect.OldUrlRegex.ToString()))
                 {
                     match = redirect.OldUrlRegex.Match(pathAndQuery);
                 }

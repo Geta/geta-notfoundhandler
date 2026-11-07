@@ -35,4 +35,22 @@ public class MemoryCacheRegexRedirectRepositoryTests
         Assert.Equal(3, builds);
         Assert.Same(first[0], second[0]);
     }
+
+    [Fact]
+    public void UpdateOrder_makes_the_next_read_load_the_new_order()
+    {
+        var loader = A.Fake<IRegexRedirectLoader>();
+        using var cache = new MemoryCache(new MemoryCacheOptions());
+        var sut = new MemoryCacheRegexRedirectRepository(
+            A.Fake<IRepository<RegexRedirect>>(),
+            loader,
+            A.Fake<IRegexRedirectOrderUpdater>(),
+            cache);
+
+        sut.GetAll();
+        sut.UpdateOrder();
+        sut.GetAll();
+
+        A.CallTo(() => loader.GetAll()).MustHaveHappenedTwiceExactly();
+    }
 }

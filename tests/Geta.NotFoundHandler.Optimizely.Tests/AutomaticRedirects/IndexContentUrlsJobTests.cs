@@ -35,6 +35,22 @@ public class IndexContentUrlsJobTests
     }
 
     [Fact]
+    public void Execute_reports_the_failures_when_the_job_is_stopped()
+    {
+        var links = new[] { new ContentReference(1), new ContentReference(2) };
+        A.CallTo(() => _linkLoader.GetAllLinks()).Returns(links);
+        var job = new IndexContentUrlsJob(_indexer, _linkLoader, _logger);
+        A.CallTo(() => _indexer.IndexContentUrls(links[0]))
+            .Invokes(() => job.Stop())
+            .Throws(new InvalidOperationException("failure"));
+
+        var result = job.Execute();
+
+        Assert.Contains("stopped", result);
+        Assert.Contains("failed: 1", result);
+    }
+
+    [Fact]
     public void Execute_keeps_the_result_short_however_many_fail()
     {
         var links = Enumerable.Range(1, 1000).Select(id => new ContentReference(id)).ToList();

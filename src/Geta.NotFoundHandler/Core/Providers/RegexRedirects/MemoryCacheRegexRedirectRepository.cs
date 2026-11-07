@@ -62,6 +62,9 @@ public class MemoryCacheRegexRedirectRepository : IRepository<RegexRedirect>, IR
     public void UpdateOrder(bool isIncrease = false)
     {
         _orderUpdater.UpdateOrder(isIncrease);
+
+        // Note: A request between saving and renumbering can have cached the old order.
+        Remove();
     }
 
     public void Remove()
