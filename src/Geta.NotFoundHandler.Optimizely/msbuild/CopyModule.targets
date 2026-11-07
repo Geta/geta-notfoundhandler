@@ -5,6 +5,16 @@
                 Include="$(MSBuildThisFileDirectory)..\..\contentFiles\any\any\modules\_protected\**\*.config"/>
     </ItemGroup>
 
+    <!-- Published from the package, as content files don't reach a site that gets this package through another one.
+         The copy below must not be picked up as content as well, which would publish the file twice. -->
+    <ItemGroup>
+        <Content Remove="modules\_protected\Geta.NotFoundHandler.Optimizely\module.config"/>
+        <None Include="$(MSBuildThisFileDirectory)..\..\contentFiles\any\any\modules\_protected\Geta.NotFoundHandler.Optimizely\module.config"
+              Link="modules\_protected\Geta.NotFoundHandler.Optimizely\module.config"
+              CopyToOutputDirectory="PreserveNewest"
+              CopyToPublishDirectory="PreserveNewest"/>
+    </ItemGroup>
+
     <Target Name="CopyModule" BeforeTargets="Build">
         <Copy
                 SourceFiles="@(SourceScripts)"
