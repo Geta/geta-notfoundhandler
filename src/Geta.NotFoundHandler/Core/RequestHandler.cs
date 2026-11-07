@@ -159,13 +159,13 @@ namespace Geta.NotFoundHandler.Core
                     && string.Compare(redirect.NewUrl, urlNotFound.PathAndQuery, StringComparison.InvariantCultureIgnoreCase) != 0
                     && string.Compare(redirect.NewUrl, urlNotFound.AbsoluteUri, StringComparison.InvariantCultureIgnoreCase) != 0)
                 {
-                    // Found it, however, we need to make sure we're not running in an
-                    // infinite loop. The new url must not be the referer to this page
+                    // Found it, however, rules can lead to each other, so we need to
+                    // make sure we're not running in an infinite loop.
                     if (!_redirectLoopGuard.TryRedirect(urlNotFound, redirect.NewUrl))
                     {
                         _logger.LogWarning(
                             "Stopped redirecting {Url} to {NewUrl} after {MaxRedirectHops} redirects in a row. Check the redirects for a loop.",
-                            urlNotFound.PathAndQuery,
+                            GetLogUrl(urlNotFound),
                             redirect.NewUrl,
                             _configuration.MaxRedirectHops);
                         return false;
@@ -178,7 +178,7 @@ namespace Geta.NotFoundHandler.Core
             else
             {
                 // Safe logging
-                var logUrl = _configuration.LogWithHostname ? urlNotFound.ToString() : urlNotFound.PathAndQuery;
+                var logUrl = GetLogUrl(urlNotFound);
 
                 if (_requestLogger.ShouldLogRequest(logUrl))
                 {
@@ -187,6 +187,11 @@ namespace Geta.NotFoundHandler.Core
             }
 
             return false;
+        }
+
+        private string GetLogUrl(Uri url)
+        {
+            return _configuration.LogWithHostname ? url.ToString() : url.PathAndQuery;
         }
 
         public virtual void SetStatusCodeAndShow404(HttpContext context, int statusCode = 404)

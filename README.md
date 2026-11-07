@@ -363,7 +363,7 @@ For example, if we have a redirect: `/a` to `/b`, then:
 
 A request is only redirected once by a rule that would match it again afterwards. For example, with a redirect from `/a` to `/a/b`, `/a/1` redirects to `/a/b/1`, and a request already under `/a/b` stays a 404.
 
-Redirects that lead to each other (`/a` -> `/b/c` and `/b` -> `/a/d`) are stopped by `MaxRedirectHops`, and the request gets a 404. They are only counted within one server, so behind a load balancer without session affinity, the browser's own limit can be reached first. Browsers also remember permanent redirects and follow them without asking the server, so permanent redirects sending a url back and forth (`/a` -> `/b` and `/b` -> `/a`) still end in the browser's error, and permanent redirects that grow get further on each visit. To avoid that, keep redirects you aren't sure of temporary until you've checked them.
+Redirects that lead to each other (`/a` -> `/b/c` and `/b` -> `/a/d`) are stopped by `MaxRedirectHops`, and the request gets a 404. They are only counted within one server, so behind a load balancer without session affinity, the browser's own limit can be reached first. Browsers also remember permanent redirects and follow them without asking the server, so permanent redirects sending a url back and forth (`/a` -> `/b` and `/b` -> `/a`) still end in the browser's error, and permanent redirects that grow get further on each visit until they do too. To avoid that, keep redirects you aren't sure of temporary until you've checked them.
 
 ## 🏁 Getting Started
 

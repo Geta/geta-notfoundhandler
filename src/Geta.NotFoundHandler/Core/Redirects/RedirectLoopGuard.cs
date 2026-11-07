@@ -45,14 +45,30 @@ public sealed class RedirectLoopGuard : IDisposable
 
         if (hops >= _maxHops)
         {
-            // Note: Start over, so a corrected rule works for the next request.
-            _hops.Remove(key);
+            // Note: Start over, so a corrected rule works for the next request. The other urls of a loop
+            // hold counts too, and would stop that request again if only this url was forgotten.
+            _hops.Clear();
             return false;
         }
 
-        if (Uri.TryCreate(url, newUrl, out var target))
+        if (!Uri.TryCreate(url, newUrl, out var target))
         {
-            _hops.Set(ToKey(target), hops + 1, new MemoryCacheEntryOptions { Size = 1, AbsoluteExpirationRelativeToNow = HopLifetime });
+            return true;
+        }
+
+        var targetKey = ToKey(target);
+
+        // Note: A url redirecting to another spelling of itself (http://site/a -> https://site/a) would raise
+        // its own count, which then adds up over separate requests. The fragment isn't sent, so /a -> /a#top is a loop.
+        if (targetKey == key && target.GetLeftPart(UriPartial.Query) != url.GetLeftPart(UriPartial.Query))
+        {
+            return true;
+        }
+
+        // Note: Only raise a count, or a request coming into a loop from outside would reset it.
+        if (!_hops.TryGetValue(targetKey, out int existing) || existing <= hops)
+        {
+            _hops.Set(targetKey, hops + 1, new MemoryCacheEntryOptions { Size = 1, AbsoluteExpirationRelativeToNow = HopLifetime });
         }
 
         return true;
@@ -66,9 +82,14 @@ public sealed class RedirectLoopGuard : IDisposable
     /// <summary>
     /// A hash, so requests with long urls can't fill the memory. A collision only adds to a count.
     /// The scheme is left out, as a request can reach the site over another one than a proxy forwards.
+    /// The host is in its ASCII form and the rest decoded, as a new url can be written differently than
+    /// the request following it arrives: a browser and the server encode more than <see cref="Uri"/> does.
+    /// Case is kept, as a browser keeps it, so a rule correcting the case of a url isn't seen as a loop.
     /// </summary>
     private static int ToKey(Uri url)
     {
-        return StringComparer.OrdinalIgnoreCase.GetHashCode(url.Authority + url.PathAndQuery);
+        var host = url.IsDefaultPort ? url.IdnHost : $"{url.IdnHost}:{url.Port}";
+
+        return (host + Uri.UnescapeDataString(url.PathAndQuery)).GetHashCode();
     }
 }
