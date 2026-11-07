@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Geta.NotFoundHandler.Core;
 using Geta.NotFoundHandler.Core.Suggestions;
 using Geta.NotFoundHandler.Core.Redirects;
@@ -33,6 +34,18 @@ namespace Geta.NotFoundHandler.Infrastructure.Configuration
 
         public string[] IgnoredResourceExtensions { get; set; } =
             {"jpg", "gif", "png", "css", "js", "ico", "swf", "woff"};
+
+        /// <summary>
+        /// Whether a url has one of the <see cref="IgnoredResourceExtensions"/>, which are never redirected.
+        /// </summary>
+        public bool IsIgnoredResource(string url)
+        {
+            var end = url.IndexOfAny(new[] { '?', '#' });
+            var path = end < 0 ? url : url[..end];
+            var extensionPosition = path.LastIndexOf('.');
+
+            return extensionPosition > 0 && IgnoredResourceExtensions.Contains(path[(extensionPosition + 1)..]);
+        }
 
         public LoggerMode Logging { get; set; } = LoggerMode.On;
         public string IgnoreSuggestionsUrlRegexPattern { get; set; }

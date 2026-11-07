@@ -20,6 +20,9 @@ public class SuggestionsModel : PageModel
         _suggestionService = suggestionService;
     }
 
+    [TempData]
+    public string Confirmation { get; set; }
+
     public string Message { get; set; }
 
     public IPagedList<SuggestionRedirectModel> Items { get; set; } = Enumerable.Empty<SuggestionRedirectModel>().ToPagedList();
@@ -44,12 +47,16 @@ public class SuggestionsModel : PageModel
 
         _suggestionService.AddRedirect(new SuggestionRedirect(item.OldUrl, item.NewUrl));
 
+        Confirmation = $"Saved the redirect from {item.OldUrl} to {item.NewUrl}.";
+
         return RedirectToPage();
     }
 
     public IActionResult OnPostIgnore(string oldUrl)
     {
         _suggestionService.IgnoreSuggestion(oldUrl);
+
+        Confirmation = $"Ignored {oldUrl}.";
 
         return RedirectToPage();
     }

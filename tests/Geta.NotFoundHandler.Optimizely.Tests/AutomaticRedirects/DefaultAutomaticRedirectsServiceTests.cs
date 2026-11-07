@@ -16,7 +16,7 @@ public class DefaultAutomaticRedirectsServiceTests
     public DefaultAutomaticRedirectsServiceTests()
     {
         var redirectBuilder = new RedirectBuilder(
-            new OptionsWrapper<OptimizelyNotFoundHandlerOptions>(new OptimizelyNotFoundHandlerOptions()));
+            new OptionsWrapper<OptimizelyNotFoundHandlerOptions>(new OptimizelyNotFoundHandlerOptions()), Microsoft.Extensions.Options.Options.Create(new Geta.NotFoundHandler.Infrastructure.Configuration.NotFoundHandlerOptions()));
         _sut = new DefaultAutomaticRedirectsService(_redirectsService, redirectBuilder);
     }
 

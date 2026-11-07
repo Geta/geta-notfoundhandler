@@ -6,6 +6,7 @@
 @model Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin.IndexModel
 @inject IOptions<NotFoundHandlerOptions> Options;
 
+@await Component.InvokeAsync("Card", new { message = Model.Confirmation, cardType = CardType.Success })
 @await Component.InvokeAsync("Card", new { message = Model.Message })
 
 <!-- Search form -->

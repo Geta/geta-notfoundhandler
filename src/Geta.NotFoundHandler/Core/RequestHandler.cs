@@ -191,18 +191,11 @@ namespace Geta.NotFoundHandler.Core
         /// </returns>
         public virtual bool IsResourceFile(Uri notFoundUri)
         {
-            var extension = notFoundUri.AbsolutePath;
-            var extPos = extension.LastIndexOf('.');
-
-            if (extPos <= 0) return false;
-
-            extension = extension.Substring(extPos + 1);
-            if (_configuration.IgnoredResourceExtensions.Any(x => x == extension))
+            if (_configuration.IsIgnoredResource(notFoundUri.AbsolutePath))
             {
                 // Ignoring 404 rewrite of known resource extension
-                _logger.LogDebug("Ignoring rewrite of '{NotFoundUrl}'. '{Extension}' is a known resource extension",
-                                 notFoundUri.ToString(),
-                                 extension);
+                _logger.LogDebug("Ignoring rewrite of '{NotFoundUrl}', as it has a known resource extension",
+                                 notFoundUri.ToString());
                 return true;
             }
 

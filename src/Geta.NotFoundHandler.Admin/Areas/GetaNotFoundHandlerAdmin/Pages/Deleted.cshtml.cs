@@ -22,6 +22,9 @@ public class DeletedModel : AbstractSortablePageModel
         _redirectsService = redirectsService;
     }
 
+    [TempData]
+    public string Confirmation { get; set; }
+
     public string Message { get; set; }
 
     public IPagedList<CustomRedirect> Items { get; set; } = Enumerable.Empty<CustomRedirect>().ToPagedList();
@@ -49,12 +52,17 @@ public class DeletedModel : AbstractSortablePageModel
 
         _redirectsService.AddDeletedRedirect(DeletedRedirect.OldUrl);
 
+        Confirmation = $"Added {DeletedRedirect.OldUrl} to the deleted urls.";
+
         return RedirectToPage();
     }
 
     public IActionResult OnPostDelete(string oldUrl)
     {
         _redirectsService.DeleteByOldUrl(oldUrl);
+
+        Confirmation = $"Removed {oldUrl} from the deleted urls.";
+
         return RedirectToPage();
     }
 

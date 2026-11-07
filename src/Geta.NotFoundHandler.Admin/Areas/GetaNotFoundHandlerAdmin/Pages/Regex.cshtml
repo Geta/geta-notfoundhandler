@@ -3,6 +3,7 @@
 @using Microsoft.AspNetCore.Mvc.TagHelpers
 @model Geta.NotFoundHandler.Admin.Areas.Geta.NotFoundHandler.Admin.RegexModel
 
+@await Component.InvokeAsync("Card", new { message = Model.Confirmation, cardType = CardType.Success })
 @await Component.InvokeAsync("Card", new { message = Model.Message })
 
 <div class="table-responsive mt-3">

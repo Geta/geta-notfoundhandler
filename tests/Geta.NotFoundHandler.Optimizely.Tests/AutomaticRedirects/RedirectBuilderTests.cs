@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Geta.NotFoundHandler.Core.Redirects;
+using Geta.NotFoundHandler.Infrastructure.Configuration;
 using Geta.NotFoundHandler.Optimizely.Core.AutomaticRedirects;
 using Geta.NotFoundHandler.Optimizely.Infrastructure.Configuration;
 using Microsoft.Extensions.Options;
@@ -17,7 +18,63 @@ public class RedirectBuilderTests
 
     public RedirectBuilderTests()
     {
-        _redirectBuilder = new(Options(RedirectType.Permanent));
+        _redirectBuilder = new(
+            Options(RedirectType.Permanent),
+            Microsoft.Extensions.Options.Options.Create(new NotFoundHandlerOptions()));
+    }
+
+    /// <summary>
+    /// https://github.com/Geta/geta-notfoundhandler/issues/154
+    /// </summary>
+    [Theory]
+    [InlineData("/contentassets/e4f9/image.jpg")]
+    [InlineData("/contentassets/e4f9/image.png?v=1")]
+    [InlineData("https://example.com/globalassets/styles.css")]
+    public void CreateRedirects_skips_urls_the_request_handler_never_redirects(string url)
+    {
+        var redirects = _redirectBuilder.CreateRedirects(new List<ContentUrlHistory>
+        {
+            History(DateTime.UtcNow, new TypedUrl { Url = "/new-location", Language = "en", Type = UrlType.Primary }),
+            History(DateTime.UtcNow.AddDays(-1), new TypedUrl { Url = url, Language = "en", Type = UrlType.Primary })
+        });
+
+        Assert.Empty(redirects);
+    }
+
+    [Theory]
+    [InlineData("/contentassets/e4f9/document.pdf")]
+    [InlineData("/about.us/page")]
+    [InlineData("/page")]
+    public void CreateRedirects_keeps_other_urls_of_moved_content(string url)
+    {
+        var redirects = _redirectBuilder.CreateRedirects(new List<ContentUrlHistory>
+        {
+            History(DateTime.UtcNow, new TypedUrl { Url = "/new-location", Language = "en", Type = UrlType.Primary }),
+            History(DateTime.UtcNow.AddDays(-1), new TypedUrl { Url = url, Language = "en", Type = UrlType.Primary })
+        });
+
+        Assert.Equal(url, Assert.Single(redirects).OldUrl);
+    }
+
+    [Fact]
+    public void CreateRedirects_keeps_a_resource_url_when_the_site_no_longer_ignores_that_extension()
+    {
+        var builder = new RedirectBuilder(
+            Options(RedirectType.Permanent),
+            Microsoft.Extensions.Options.Options.Create(new NotFoundHandlerOptions { IgnoredResourceExtensions = new[] { "css" } }));
+
+        var redirects = builder.CreateRedirects(new List<ContentUrlHistory>
+        {
+            History(DateTime.UtcNow, new TypedUrl { Url = "/new.jpg", Language = "en", Type = UrlType.Primary }),
+            History(DateTime.UtcNow.AddDays(-1), new TypedUrl { Url = "/old.jpg", Language = "en", Type = UrlType.Primary })
+        });
+
+        Assert.Equal("/old.jpg", Assert.Single(redirects).OldUrl);
+    }
+
+    private static ContentUrlHistory History(DateTime created, params TypedUrl[] urls)
+    {
+        return new ContentUrlHistory { ContentKey = DefaultContentKey, CreatedUtc = created, Urls = urls.ToList() };
     }
 
     /// <summary>
@@ -188,7 +245,7 @@ public class RedirectBuilderTests
     [InlineData(RedirectType.Temporary)]
     public void CreateRedirect_returns_redirect_with_redirect_type(RedirectType redirectType)
     {
-        var redirectBuilder = new RedirectBuilder(Options(redirectType));
+        var redirectBuilder = new RedirectBuilder(Options(redirectType), Microsoft.Extensions.Options.Options.Create(new NotFoundHandlerOptions()));
         var oldUrl = "/initial";
         var newUrl = "/destination";
         var histories = new List<ContentUrlHistory>

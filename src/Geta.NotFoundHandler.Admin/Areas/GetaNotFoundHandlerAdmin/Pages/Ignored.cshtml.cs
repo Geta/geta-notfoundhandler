@@ -22,6 +22,9 @@ public class IgnoredModel : AbstractSortablePageModel
         _redirectsService = redirectsService;
     }
 
+    [TempData]
+    public string Confirmation { get; set; }
+
     public string Message { get; set; }
 
     public IPagedList<CustomRedirect> Items { get; set; } = Enumerable.Empty<CustomRedirect>().ToPagedList();
@@ -39,6 +42,8 @@ public class IgnoredModel : AbstractSortablePageModel
     public IActionResult OnPostUnignore(string oldUrl)
     {
         _redirectsService.DeleteByOldUrl(oldUrl);
+
+        Confirmation = $"Removed {oldUrl} from the ignored suggestions.";
 
         return RedirectToPage();
     }
