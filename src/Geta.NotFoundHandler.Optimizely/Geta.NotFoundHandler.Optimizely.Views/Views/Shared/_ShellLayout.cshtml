@@ -31,6 +31,8 @@
     <title>NotFound handler</title>
 </head> 
 <body>
+    @* Note: Tells the navigation how to send the antiforgery token below. Without it, its notification request fails with a 400. *@
+    <episerver-common-settings></episerver-common-settings>
     @Html.AntiForgeryToken()
     <platform-navigation />
     <platform-navigation-wrapper>

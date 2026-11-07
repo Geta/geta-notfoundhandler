@@ -14,7 +14,7 @@ namespace Geta.NotFoundHandler.Infrastructure.Configuration
     public class NotFoundHandlerOptions
     {
         public const string Section = "Geta:NotFoundHandler";
-        public const int CurrentDbVersion = 2;
+        public const int CurrentDbVersion = 3;
 
         public int BufferSize { get; set; } = 30;
         public int ThreshHold { get; set; } = 5;

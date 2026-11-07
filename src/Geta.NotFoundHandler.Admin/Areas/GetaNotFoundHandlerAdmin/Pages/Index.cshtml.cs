@@ -59,7 +59,10 @@ public class IndexModel : AbstractSortablePageModel
             var customRedirect = new CustomRedirect(CustomRedirect.OldUrl,
                                                     CustomRedirect.NewUrl,
                                                     CustomRedirect.WildCardSkipAppend,
-                                                    CustomRedirect.RedirectType);
+                                                    CustomRedirect.RedirectType)
+            {
+                ExactMatch = CustomRedirect.ExactMatch
+            };
 
             _redirectsService.AddOrUpdate(customRedirect);
 
@@ -102,7 +105,8 @@ public class IndexModel : AbstractSortablePageModel
                 OldUrl = EditRedirect.OldUrl,
                 RedirectType = EditRedirect.RedirectType,
                 NewUrl = EditRedirect.NewUrl,
-                WildCardSkipAppend = EditRedirect.WildCardSkipAppend
+                WildCardSkipAppend = EditRedirect.WildCardSkipAppend,
+                ExactMatch = EditRedirect.ExactMatch
             });
 
             Confirmation = $"Saved the redirect from {EditRedirect.OldUrl} to {EditRedirect.NewUrl}.";

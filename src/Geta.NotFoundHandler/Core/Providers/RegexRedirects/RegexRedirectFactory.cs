@@ -3,6 +3,7 @@
 
 using System;
 using System.Text.RegularExpressions;
+using Geta.NotFoundHandler.Core.Redirects;
 using Geta.NotFoundHandler.Infrastructure.Configuration;
 using Microsoft.Extensions.Options;
 
@@ -24,7 +25,8 @@ public class RegexRedirectFactory
         int orderNumber,
         int? timeoutCount = null,
         DateTime? createdAt = null,
-        DateTime? modifiedAt = null)
+        DateTime? modifiedAt = null,
+        RedirectType? redirectType = null)
     {
         return new RegexRedirect(id,
                                  new Regex(oldUrlRegex, RegexOptions.Compiled, _configuration.RegexTimeout),
@@ -32,10 +34,11 @@ public class RegexRedirectFactory
                                  orderNumber,
                                  timeoutCount,
                                  createdAt,
-                                 modifiedAt);
+                                 modifiedAt,
+                                 redirectType);
     }
 
-    public virtual RegexRedirect CreateNew(string oldUrlRegex, string newUrlFormat, int orderNumber)
+    public virtual RegexRedirect CreateNew(string oldUrlRegex, string newUrlFormat, int orderNumber, RedirectType? redirectType = null)
     {
         return new RegexRedirect(null,
                                  new Regex(oldUrlRegex, RegexOptions.Compiled, _configuration.RegexTimeout),
@@ -43,7 +46,8 @@ public class RegexRedirectFactory
                                  orderNumber,
                                  0,
                                  null,
-                                 null);
+                                 null,
+                                 redirectType);
     }
 
     public virtual RegexRedirect CreateForDeletion(Guid id)

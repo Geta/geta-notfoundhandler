@@ -15,7 +15,7 @@ namespace Geta.NotFoundHandler.Data
 
         private const string RedirectsTable = "[dbo].[NotFoundHandler.Redirects]";
 
-        private const string AllFields = "Id, OldUrl, NewUrl, State, WildCardSkipAppend, RedirectType";
+        private const string AllFields = "Id, OldUrl, NewUrl, State, WildCardSkipAppend, RedirectType, ExactMatch";
 
         public SqlRedirectRepository(IDataExecutor dataExecutor)
         {
@@ -36,9 +36,9 @@ namespace Geta.NotFoundHandler.Data
         private void Create(CustomRedirect entity)
         {
             var sqlCommand = $@"INSERT INTO {RedirectsTable}
-                                    (Id, OldUrl, NewUrl, State, WildCardSkipAppend, RedirectType)
+                                    (Id, OldUrl, NewUrl, State, WildCardSkipAppend, RedirectType, ExactMatch)
                                     VALUES
-                                    (@id, @oldurl, @newurl, @state, @wildcardskipappend, @redirectType)";
+                                    (@id, @oldurl, @newurl, @state, @wildcardskipappend, @redirectType, @exactmatch)";
 
             _dataExecutor.ExecuteNonQuery(
                 sqlCommand,
@@ -47,7 +47,8 @@ namespace Geta.NotFoundHandler.Data
                 _dataExecutor.CreateStringParameter("newurl", entity.NewUrl),
                 _dataExecutor.CreateIntParameter("state", entity.State),
                 _dataExecutor.CreateBoolParameter("wildcardskipappend", entity.WildCardSkipAppend),
-                _dataExecutor.CreateIntParameter("redirectType", (int)entity.RedirectType));
+                _dataExecutor.CreateIntParameter("redirectType", (int)entity.RedirectType),
+                _dataExecutor.CreateBoolParameter("exactmatch", entity.ExactMatch));
         }
 
         private void Update(CustomRedirect entity)
@@ -63,6 +64,7 @@ namespace Geta.NotFoundHandler.Data
                                         ,State = @state
                                         ,WildCardSkipAppend = @wildcardskipappend
                                         ,RedirectType = @redirectType
+                                        ,ExactMatch = @exactmatch
                                     WHERE Id = @id";
 
             _dataExecutor.ExecuteNonQuery(
@@ -72,7 +74,8 @@ namespace Geta.NotFoundHandler.Data
                 _dataExecutor.CreateStringParameter("newurl", entity.NewUrl),
                 _dataExecutor.CreateIntParameter("state", entity.State),
                 _dataExecutor.CreateBoolParameter("wildcardskipappend", entity.WildCardSkipAppend),
-                _dataExecutor.CreateIntParameter("redirectType", (int)entity.RedirectType));
+                _dataExecutor.CreateIntParameter("redirectType", (int)entity.RedirectType),
+                _dataExecutor.CreateBoolParameter("exactmatch", entity.ExactMatch));
         }
 
         public void Delete(CustomRedirect entity)
@@ -154,7 +157,7 @@ namespace Geta.NotFoundHandler.Data
             // hash, which keeps the input below the 4000 characters where CONCAT cuts it off. Its fixed length also
             // keeps a change of where OldUrl ends from giving the same input, as a url can contain a "|".
             var sqlCommand = $@"SELECT COUNT_BIG(*) AS Total,
-                                    CHECKSUM_AGG(CAST(HASHBYTES('SHA2_256', CONCAT(Id, N'|', State, N'|', WildCardSkipAppend, N'|', RedirectType, N'|', OldUrl, N'|', CONVERT(nchar(64), HASHBYTES('SHA2_256', NewUrl), 2))) AS int)) AS Checksum
+                                    CHECKSUM_AGG(CAST(HASHBYTES('SHA2_256', CONCAT(Id, N'|', State, N'|', WildCardSkipAppend, N'|', RedirectType, N'|', ExactMatch, N'|', OldUrl, N'|', CONVERT(nchar(64), HASHBYTES('SHA2_256', NewUrl), 2))) AS int)) AS Checksum
                                     FROM {RedirectsTable}";
 
             var row = _dataExecutor.ExecuteQuery(sqlCommand).Rows[0];
@@ -173,7 +176,12 @@ namespace Geta.NotFoundHandler.Data
                 x.Field<string>("OldUrl"),
                 x.Field<string>("NewUrl"),
                 x.Field<bool>("WildCardSkipAppend"),
-                x.Field<RedirectType>("RedirectType")) { Id = x.Field<Guid>("Id"), State = x.Field<int>("State") };
+                x.Field<RedirectType>("RedirectType"))
+            {
+                Id = x.Field<Guid>("Id"),
+                State = x.Field<int>("State"),
+                ExactMatch = x.Field<bool>("ExactMatch")
+            };
         }
     }
 }

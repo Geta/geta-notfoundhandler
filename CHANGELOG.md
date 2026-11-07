@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+
+- Redirects can be set to *Exact match*, so a redirect from `/a` no longer also applies to `/a/b`. `/a/` and `/a?b=c` still match, as the query string isn't part of it. It's available on the Redirects tab, and in imported and exported CSV and XML files. Files without it still import, as a redirect that isn't exact. An import or an automatic redirect for an old url that's already saved replaces the row, so it clears the setting unless it sets it too, as it does with the wildcard setting and the redirect type.
+- Each regex redirect can have its own redirect type. Rules saved earlier keep following `DefaultRedirectType` until you edit them, which saves the type shown on the form.
+
 ### Security
 
 - Wildcard and regex redirects no longer let a request choose the host of the redirect. Before, `/content` -> `/` turned `/content//evil.com` into a redirect to `//evil.com`, and the regex format `/$1` did the same, as did `$1` capturing `https://evil.com`. A format that names a host itself, such as `//cdn.example.com/$1`, is left alone, and a capture naming the host of the request stays as it is. A rule that relied on `$1` capturing another host from the request now redirects to a path on the site.
@@ -13,6 +18,9 @@ All notable changes to this project will be documented in this file.
 
 Check these when upgrading, as they change how existing rules and integrations behave:
 
+- The database version goes from 2 to 3. At startup, the application adds `ExactMatch` to `NotFoundHandler.Redirects` and `RedirectType` to `NotFoundHandler.RegexRedirects`, so its database user needs permission to alter those tables. If that fails, an error is logged and reading the redirects then fails at startup.
+- `IRegexRedirectsService` has new overloads of `Create` and `Update` taking a `RedirectType?`, so a class implementing it needs them too. The existing `Update` keeps the type of the rule. `RegexRedirectFactory.Create` and `CreateNew` and the `RegexRedirect` constructor take an optional `RedirectType?`, so code calling them needs recompiling, and code overriding the factory needs updating.
+- The CSV export has a new `ExactMatch` column.
 - A redirect that would only append to itself now stops. With `/a` -> `/a/b`, `/a/x` still redirects to `/a/b/x`, but a request already under `/a/b` stays a 404. With `/a` -> `/a?x=1`, `/a?y=2` still redirects to `/a?y=2&x=1`, and that URL stays a 404. Before, these grew on every hop until the browser gave up.
 - URLs under an entry in the Deleted list now return `410`. Before, `/gone/`, `/gone?a=1` and `/gone/child` were redirected, often to the home page.
 - A request with no matching redirect keeps the status the application gave it. Before, a response that hadn't started yet was forced to `404`. `RequestHandler.SetStatusCodeAndShow404` is now only called for deleted URLs, so a subclass overriding it no longer runs for unmatched requests.
@@ -31,11 +39,11 @@ Check these when upgrading, as they change how existing rules and integrations b
 
 ### Known issues
 
-- With `UseInternalScheduler`, the cleanup job runs in a plain ASP.NET Core host, but it didn't fire in the Optimizely CMS 13 sample site, for reasons not yet known. On Optimizely sites, use the *[Geta NotFoundHandler] Suggestions cleanup job* scheduled job.
 - The confirmations in the admin UI use the TempData cookie, so on a site requiring cookie consent they don't show until the editor has consented.
 
 ### Fixed
 
+- Editing a regex redirect keeps its place in the order. Before, the edit form didn't send the order number, which moved the rule to the top, where it was tried first.
 - The admin pages confirm that a redirect was saved, deleted or ignored. Before, the page just reloaded.
 - Redirects that keep leading to more redirects now end in a 404 after `MaxRedirectHops` redirects in a row (default 10), with a warning in the log, and stay that way for up to 30 seconds. Before, two rules pointing into each other (`/a` -> `/b/c` and `/b` -> `/a/d`) or a regex rule matching its own result (`^/(.*)$` -> `/en/$1`) went on until the browser gave up. Each server counts on its own, so behind a load balancer without session affinity, the browser's limit can still be reached first. Browsers follow remembered permanent redirects without asking the server, so permanent redirects sending a url back and forth still end in the browser's error, and permanent redirects that grow do so after a few visits.
 - Regex redirects are no longer recompiled on every unmatched request. The cache held a query that built them again each time it was read.
@@ -56,6 +64,8 @@ Check these when upgrading, as they change how existing rules and integrations b
 - `CustomRedirectCollection.Find` no longer throws `ArgumentOutOfRangeException` when the request repeats the old URL after extra slashes (`/content/` with `/content//content`) or when `/` is the old URL and the request is `/?param=value`.
 - The guard against redirects building up now also applies when the old URL ends in a slash, so `/content/` -> `/legacy` turns `/content/content/file` into `/legacy/file`, the same as `/content` -> `/legacy` already did.
 - Setting `UseInternalScheduler` no longer crashes the application at startup with `No service for type 'Microsoft.Extensions.Logging.ILogger'`.
+- The notification request of the CMS navigation no longer fails with a `400` on the add-on's page in the CMS on CMS 13. The layout didn't tell the navigation how to send the antiforgery token.
+- `UseOptimizelyNotFoundHandler` now logs a warning when `UseInternalScheduler` is on. It has always removed the suggestions cleanup job from that scheduler, as Optimizely sites use the *[Geta NotFoundHandler] Suggestions cleanup job* scheduled job, so turning on the flag silently did nothing.
 
 ## [7.1.0] - 2026-07-10
 

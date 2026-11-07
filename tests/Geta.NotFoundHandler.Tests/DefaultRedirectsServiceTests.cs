@@ -3,12 +3,77 @@ using System.Collections.Generic;
 using System.Linq;
 using FakeItEasy;
 using Geta.NotFoundHandler.Core;
+using Geta.NotFoundHandler.Core.Providers.RegexRedirects;
 using Geta.NotFoundHandler.Core.Redirects;
 using Geta.NotFoundHandler.Data;
+using Geta.NotFoundHandler.Infrastructure.Configuration;
+using Microsoft.Extensions.Options;
 using Xunit;
 
 namespace Geta.NotFoundHandler.Tests
 {
+    public class CustomRedirectEqualityComparerTests
+    {
+        [Fact]
+        public void Equals_sees_a_change_of_exact_match()
+        {
+            var comparer = new CustomRedirectEqualityComparer();
+            var redirect = new CustomRedirect("/a", "/b");
+            var exact = new CustomRedirect("/a", "/b") { ExactMatch = true };
+
+            Assert.False(comparer.Equals(redirect, exact));
+        }
+
+        [Fact]
+        public void Copy_keeps_exact_match()
+        {
+            var copy = new CustomRedirect(new CustomRedirect("/a", "/b") { ExactMatch = true });
+
+            Assert.True(copy.ExactMatch);
+        }
+    }
+
+    public class DefaultRegexRedirectsServiceTests
+    {
+        private static readonly Guid Id = Guid.NewGuid();
+
+        private readonly IRepository<RegexRedirect> _repository = A.Fake<IRepository<RegexRedirect>>();
+        private readonly DefaultRegexRedirectsService _sut;
+
+        public DefaultRegexRedirectsServiceTests()
+        {
+            var factory = new RegexRedirectFactory(Options.Create(new NotFoundHandlerOptions()));
+            var loader = A.Fake<IRegexRedirectLoader>();
+            A.CallTo(() => loader.Get(Id)).Returns(factory.Create(Id, "^/a$", "/b", 1, redirectType: RedirectType.Permanent));
+
+            _sut = new DefaultRegexRedirectsService(factory,
+                                                    _repository,
+                                                    loader,
+                                                    A.Fake<IRegexRedirectOrderUpdater>(),
+                                                    new RedirectsEvents());
+        }
+
+        [Fact]
+        public void Update_without_a_redirect_type_keeps_the_saved_one()
+        {
+            _sut.Update(Id, "^/a$", "/c", 1);
+
+            A.CallTo(() => _repository.Save(A<RegexRedirect>.That.Matches(x => x.RedirectType == RedirectType.Permanent)))
+                .MustHaveHappenedOnceExactly();
+        }
+
+        [Theory]
+        [InlineData(RedirectType.Temporary)]
+        [InlineData(null)]
+        public void Update_with_a_redirect_type_stores_what_it_was_given(RedirectType? redirectType)
+        {
+            _sut.Update(Id, "^/a$", "/c", 1, redirectType);
+
+            A.CallTo(() => _repository.Save(A<RegexRedirect>.That.Matches(x => x.RedirectType == redirectType)))
+                .MustHaveHappenedOnceExactly();
+        }
+    }
+
     public class DefaultRedirectsServiceTests
     {
         private static readonly Uri OldUri = new Uri("http://example.com/old");

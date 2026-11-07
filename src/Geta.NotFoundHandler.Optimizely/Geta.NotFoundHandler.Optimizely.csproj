@@ -32,6 +32,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <InternalsVisibleTo Include="Geta.NotFoundHandler.Optimizely.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Include="..\..\images\icon.png" Pack="true" PackagePath="\" />
   </ItemGroup>
 

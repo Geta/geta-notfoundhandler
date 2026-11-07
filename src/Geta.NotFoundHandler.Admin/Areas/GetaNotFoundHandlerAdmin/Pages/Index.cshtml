@@ -38,6 +38,9 @@
             <th class="col-1 text-center">
                 <vc:sortable-header-cell key="@nameof(CustomRedirect.WildCardSkipAppend)" display-name="Wildcard"/>
             </th>
+            <th class="col-1 text-center">
+                <vc:sortable-header-cell key="@nameof(CustomRedirect.ExactMatch)" display-name="Exact match"/>
+            </th>
             <th class="col-1">
                 <vc:sortable-header-cell key="@nameof(CustomRedirect.RedirectType)" display-name="Redirect Type"/>
             </th>
@@ -57,6 +60,9 @@
                 </td>
                 <td class="text-center align-middle">
                     <input type="checkbox" class="form-check-input" asp-for="CustomRedirect.WildCardSkipAppend">
+                </td>
+                <td class="text-center align-middle">
+                    <input type="checkbox" class="form-check-input" asp-for="CustomRedirect.ExactMatch">
                 </td>
                 <td>
                     <select class="form-select" asp-for="CustomRedirect.RedirectType">
@@ -87,6 +93,9 @@
                 <td>@item.NewUrl</td>
                 <td class="text-center align-middle">
                     @await Component.InvokeAsync("CheckboxReadonly", new { isChecked = item.WildCardSkipAppend })
+                </td>
+                <td class="text-center align-middle">
+                    @await Component.InvokeAsync("CheckboxReadonly", new { isChecked = item.ExactMatch })
                 </td>
                 <td>@item.RedirectType</td>
                 <td>
@@ -123,18 +132,18 @@
                                             <div class="flex-fill">
                                                 <label>Wildcard</label>
                                                 <div class="input-group mb-2 text-center align-middle">
-                                                    @if (item.WildCardSkipAppend)
-                                                    {
-                                                        <input type="checkbox" class="form-check-input"
-                                                               asp-for="EditRedirect.WildCardSkipAppend" value="true"
-                                                               checked="checked"/>
-                                                    }
-                                                    else
-                                                    {
-                                                        <input type="checkbox" class="form-check-input"
-                                                               asp-for="EditRedirect.WildCardSkipAppend"
-                                                               value="true"/>
-                                                    }
+                                                    <input type="checkbox" class="form-check-input"
+                                                           asp-for="EditRedirect.WildCardSkipAppend"
+                                                           checked="@item.WildCardSkipAppend"/>
+                                                </div>
+                                            </div>
+
+                                            <div class="flex-fill">
+                                                <label>Exact match</label>
+                                                <div class="input-group mb-2 text-center align-middle">
+                                                    <input type="checkbox" class="form-check-input"
+                                                           asp-for="EditRedirect.ExactMatch"
+                                                           checked="@item.ExactMatch"/>
                                                 </div>
                                             </div>
 

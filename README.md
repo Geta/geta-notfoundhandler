@@ -157,7 +157,7 @@ If the `bufferSize` is set to `0`, the `threshold` value will be ignored, and ev
 
 **MaxRedirectHops**: How many redirects in a row a request can go through before it gets a 404 instead, which stops redirects that keep leading to more redirects. A warning starting with "Stopped redirecting" is logged when that happens. Browsers give up at around 20. Set to `0` to turn this off. Default is 10. (Ex. ```options.MaxRedirectHops = 5;```)
 
-**DefaultRedirectType**: The redirect type pre-selected when adding a redirect, and used for redirects created from suggestions and by regex redirects. Default is `RedirectType.Temporary`. (Ex. ```options.DefaultRedirectType = RedirectType.Permanent;```)
+**DefaultRedirectType**: The redirect type pre-selected when adding a redirect or a regex redirect, and used for redirects created from suggestions and for regex redirects saved before they had a type of their own. Default is `RedirectType.Temporary`. (Ex. ```options.DefaultRedirectType = RedirectType.Permanent;```)
 
 **ActiveStatusCodes**: A integerlist with the status codes that NotFoundHandler will be active on. (Ex. ```options.ActiveStatusCodes = new int[] { StatusCodes.Status404NotFound, StatusCodes.Status410Gone };```)
 
@@ -312,7 +312,7 @@ services.AddNotFoundHandler(o =>
 ```
 
 Scheduler - mechanism that triggers scheduled jobs in a recurrent manner
-- InternalScheduler - default scheduler, included in the core package, a scheduler that uses [Coravel](https://docs.coravel.net/).
+- InternalScheduler - included in the core package, a scheduler that uses [Coravel](https://docs.coravel.net/). It's for sites not using Optimizely: `UseOptimizelyNotFoundHandler`, when called after `UseNotFoundHandler`, removes the job from it and logs a warning if the flag is on.
   To enable the scheduler, you need to enable UseInternalScheduler flag. Additionally, you can adjust the scheduler run interval:
 ```
 services.AddNotFoundHandler(o =>
@@ -323,7 +323,7 @@ services.AddNotFoundHandler(o =>
 });
 ```
 - OptimizelyScheduler - uses Optimizely to schedule job runs.
-An Optimizely scheduled job was added - <code>[Geta NotFoundHandler] Suggestions cleanup job</code>.
+An Optimizely scheduled job was added - <code>[Geta NotFoundHandler] Suggestions cleanup job</code>. This is what cleans up the suggestions on an Optimizely site, so make sure it's scheduled.
 
 Additionally, there are two optimizely scheduled jobs responsible for:
 - *[Geta NotFoundHandler] Index content URLs* - as mentioned before, this job indexes URLs of content. Usually, it is required to run this job only once. All new content is automatically indexed. But if for some reason content publish events are not firing when creating new content (for example, during the import), then you should set this job to run frequently.
@@ -351,7 +351,7 @@ Regex redirects are set up on the *Regex* tab, and are tried in order of their o
 ^https://www\.example\.com/en/(.*)    ->  /new/$1
 ```
 
-Use the whole url to match only one host. A rule anchored at a `/` matches on every host of the site. A rule whose new url matches the rule again (`^/(.*)$` -> `/en/$1`) keeps redirecting if the new url isn't found either, until `MaxRedirectHops` stops it, so make sure it can't match its own result.
+Use the whole url to match only one host. A rule anchored at a `/` matches on every host of the site. Each rule has its own redirect type, and rules saved before that was added use `DefaultRedirectType` until you edit them. A rule whose new url matches the rule again (`^/(.*)$` -> `/en/$1`) keeps redirecting if the new url isn't found either, until `MaxRedirectHops` stops it, so make sure it can't match its own result.
 
 ## Wildcards
 
@@ -360,6 +360,16 @@ If you want to redirect many addresses below a specific one to one new URL, set 
 For example, if we have a redirect: `/a` to `/b`, then:
 - with wildcard setting it will redirect `/a/1` to `/b`
 - without wildcard setting it will redirect `/a/1` to `/b/1`
+
+## Exact match
+
+By default, a redirect also applies to the urls below its old url, as described above. Tick *Exact match* on a redirect to only match the url itself. For example, with an exact match from `/a` to `/b`:
+- `/a` and `/a/` redirect to `/b`, and `/a?c=d` redirects to `/b?c=d`
+- `/a/1` isn't touched by this redirect, so it stays a 404 unless another redirect matches it
+
+The query string of the request isn't part of the exact match, so links with tracking parameters still redirect. An old url with a query string of its own needs those parameters in full, so `/a?x=1` matches `/a?x=1&y=2` but not `/a?x=12`. In a redirects file, use the `ExactMatch` column in a CSV file, and the `exactMatch="true"` attribute on `<old>` in an XML file.
+
+## Redirect loops
 
 A request is only redirected once by a rule that would match it again afterwards. For example, with a redirect from `/a` to `/a/b`, `/a/1` redirects to `/a/b/1`, and a request already under `/a/b` stays a 404.
 
