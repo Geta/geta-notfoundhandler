@@ -30,6 +30,11 @@ public class CustomRedirectCollection : IEnumerable<CustomRedirect>
     /// </summary>
     private KeyValuePair<string, CustomRedirect>[] _redirectsZACache;
 
+    /// <summary>
+    /// Cache of the ignored urls that are patterns
+    /// </summary>
+    private KeyValuePair<string, CustomRedirect>[] _ignorePatternsCache;
+
     public CustomRedirectCollection()
     {
     }
@@ -75,11 +80,14 @@ public class CustomRedirectCollection : IEnumerable<CustomRedirect>
             foundRedirect = FindInProviders(url);
         }
 
-        return foundRedirect;
+        // Note: Last, so a pattern only stops suggestions, and never a redirect that applies to the url.
+        return foundRedirect ?? FindIgnorePattern(urlNotFound);
     }
 
     public void Add(CustomRedirect customRedirect)
     {
+        _ignorePatternsCache = null;
+
         var oldUrl = HttpUtility.UrlDecode(customRedirect.OldUrl);
         if (_quickLookupTable.ContainsKey(oldUrl))
         {
@@ -419,6 +427,37 @@ public class CustomRedirectCollection : IEnumerable<CustomRedirect>
         var isSameUrl = normalizedUrlWithoutQuery.Equals(normalizedOldUrl, StringComparison.OrdinalIgnoreCase);
         var isPartOfOldUrl = normalizedUrlWithoutQuery[..normalizedOldUrl.Length].StartsWith("/");
         return isSameUrl || isPartOfOldUrl;
+    }
+
+    private CustomRedirect FindIgnorePattern(Uri urlNotFound)
+    {
+        // working with local copy to avoid multi-threading issues
+        var patterns = _ignorePatternsCache;
+        if (patterns == null)
+        {
+            patterns = _quickLookupTable
+                .Where(x => x.Value.State == (int)RedirectState.Ignored && IgnorePattern.IsPattern(x.Key))
+                .ToArray();
+            _ignorePatternsCache = patterns;
+        }
+
+        if (patterns.Length == 0)
+        {
+            return null;
+        }
+
+        var absoluteUrl = HttpUtility.UrlDecode(urlNotFound.AbsoluteUri);
+        var localUrl = HttpUtility.UrlDecode(urlNotFound.PathAndQuery);
+
+        foreach (var pattern in patterns)
+        {
+            if (IgnorePattern.IsMatch(pattern.Key, localUrl) || IgnorePattern.IsMatch(pattern.Key, absoluteUrl))
+            {
+                return pattern.Value;
+            }
+        }
+
+        return null;
     }
 
     private CustomRedirect FindInProviders(string oldUrl)

@@ -10,6 +10,14 @@ namespace Geta.NotFoundHandler.Data
         void DeleteAll();
         void Delete(int maxErrors, int minimumDaysOld);
         void DeleteForRequest(string oldUrl);
+
+        /// <summary>
+        /// Deletes the suggestions for the urls matching a pattern with * as the wildcard, such as /api/*.
+        /// </summary>
+        void DeleteMatching(string pattern)
+        {
+        }
+
         void Save(string oldUrl, string referer, DateTime requestedOn);
     }
 }

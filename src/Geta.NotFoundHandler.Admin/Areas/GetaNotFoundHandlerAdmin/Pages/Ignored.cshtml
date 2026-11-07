@@ -18,6 +18,21 @@
             </tr>
             </thead>
             <tbody>
+            <tr>
+                <td>
+                    <input type="text" class="form-control" placeholder="/api/*" aria-label="URL pattern" asp-for="NewPattern.Pattern">
+                    <span asp-validation-for="NewPattern.Pattern" class="text-danger"></span>
+                    <div class="form-text">Use * to ignore every url matching it. Redirects that apply to those urls keep working.</div>
+                </td>
+                <td>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary"
+                                asp-page-handler="create">
+                            <span data-feather="plus"></span> add
+                        </button>
+                    </div>
+                </td>
+            </tr>
             @foreach (var item in Model.Items)
             {
                 <tr class="align-middle">
