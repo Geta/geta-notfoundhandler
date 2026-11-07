@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace Geta.NotFoundHandler.Core.Redirects
 {
@@ -11,6 +12,9 @@ namespace Geta.NotFoundHandler.Core.Redirects
         private readonly CustomRedirectHandler _redirectHandler;
         private readonly Func<IRedirectsService> _redirectsServiceFactory;
         private readonly IEnumerable<INotFoundHandler> _providers;
+        private readonly object _loadLock = new();
+        private long _lastRequested;
+        private long _lastLoaded;
 
         public RedirectsInitializer(
             RedirectsEvents redirectsEvents,
@@ -29,10 +33,27 @@ namespace Geta.NotFoundHandler.Core.Redirects
             Initialize();
         }
 
+        /// <summary>
+        /// Loads the redirects. Only one load runs at a time, so a slow one that read the table before
+        /// a save can't finish last and drop that redirect from this instance.
+        /// </summary>
         public void Initialize()
         {
-            var redirects = GetCustomRedirects();
-            _redirectHandler.Set(redirects);
+            var requested = Interlocked.Increment(ref _lastRequested);
+
+            lock (_loadLock)
+            {
+                // Note: A load that started after this call covers whatever prompted it.
+                if (_lastLoaded >= requested)
+                {
+                    return;
+                }
+
+                var loading = Volatile.Read(ref _lastRequested);
+                var redirects = GetCustomRedirects();
+                _redirectHandler.Set(redirects);
+                _lastLoaded = loading;
+            }
         }
 
         protected CustomRedirectCollection GetCustomRedirects()

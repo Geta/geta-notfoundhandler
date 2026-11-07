@@ -26,6 +26,7 @@ namespace Geta.NotFoundHandler.Optimizely.Infrastructure.Configuration
             Action<OptimizelyNotFoundHandlerOptions> setupAction)
         {
             services.AddSingleton<OptimizelySyncEvents>();
+            services.AddHostedService<OptimizelySyncEventsStartupCheck>();
             services.AddSingleton<ContentUrlHistoryEvents>();
             services.AddTransient<Upgrader>();
             services.AddSingleton<ContentLinkLoader>();

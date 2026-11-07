@@ -37,6 +37,7 @@ namespace Geta.NotFoundHandler.Infrastructure.Configuration
             services.AddTransient<Upgrader>();
 
             services.AddSingleton<RedirectsInitializer>();
+            services.AddHostedService<RedirectsRefreshService>();
             services.AddSingleton<CustomRedirectHandler>();
             services.AddSingleton<IRedirectHandler, CustomRedirectHandler>(s => s.GetRequiredService<CustomRedirectHandler>());
             services.AddSingleton<RedirectsEvents>();
