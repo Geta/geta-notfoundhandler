@@ -36,7 +36,6 @@ Check these when upgrading, as they change how existing rules and integrations b
 
 ### Known issues
 
-- With `UseInternalScheduler`, the cleanup job runs in a plain ASP.NET Core host, but it didn't fire in the Optimizely CMS 13 sample site, for reasons not yet known. On Optimizely sites, use the *[Geta NotFoundHandler] Suggestions cleanup job* scheduled job.
 - Two rules pointing into each other (`/a` -> `/b/c` and `/b` -> `/a/d`) can still grow on every hop.
 - The confirmations in the admin UI use the TempData cookie, so on a site requiring cookie consent they don't show until the editor has consented.
 
@@ -66,6 +65,8 @@ Check these when upgrading, as they change how existing rules and integrations b
 - `CustomRedirectCollection.Find` no longer throws `ArgumentOutOfRangeException` when the request repeats the old URL after extra slashes (`/content/` with `/content//content`) or when `/` is the old URL and the request is `/?param=value`.
 - The guard against redirects building up now also applies when the old URL ends in a slash, so `/content/` -> `/legacy` turns `/content/content/file` into `/legacy/file`, the same as `/content` -> `/legacy` already did.
 - Setting `UseInternalScheduler` no longer crashes the application at startup with `No service for type 'Microsoft.Extensions.Logging.ILogger'`.
+- The notification request of the CMS navigation no longer fails with a `400` on the add-on's page in the CMS on CMS 13. The layout didn't tell the navigation how to send the antiforgery token.
+- `UseOptimizelyNotFoundHandler` now logs a warning when `UseInternalScheduler` is on. It has always removed the suggestions cleanup job from that scheduler, as Optimizely sites use the *[Geta NotFoundHandler] Suggestions cleanup job* scheduled job, so turning on the flag silently did nothing.
 
 ## [7.1.0] - 2026-07-10
 
