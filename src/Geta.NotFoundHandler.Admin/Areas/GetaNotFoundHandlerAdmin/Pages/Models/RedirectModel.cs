@@ -12,6 +12,7 @@ namespace Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin.Models
         [Required]
         public string NewUrl { get; set; }
         public bool WildCardSkipAppend { get; set; }
+        public bool ExactMatch { get; set; }
         public RedirectType RedirectType { get; set; }
     }
 }

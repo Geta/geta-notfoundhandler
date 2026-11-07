@@ -16,4 +16,8 @@ public class CsvImportModel
     public string WildcardSkippedAppend { get; set; }
     [Name("RedirectType")]
     public string RedirectType { get; set; }
+    // Note: Files exported before this column was added don't have it.
+    [Name("ExactMatch")]
+    [Optional]
+    public string ExactMatch { get; set; }
 }

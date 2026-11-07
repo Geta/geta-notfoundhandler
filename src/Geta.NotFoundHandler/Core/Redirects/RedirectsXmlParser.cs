@@ -20,6 +20,7 @@ namespace Geta.NotFoundHandler.Core.Redirects
         private const string NewUrl = "new";
         private const string OldUrl = "old";
         private const string SkipWildcard = "onWildCardMatchSkipAppend";
+        private const string ExactMatch = "exactMatch";
         private const string RedirectType = "redirectType";
 
         public RedirectsXmlParser(ILogger<RedirectsXmlParser> logger)
@@ -89,6 +90,13 @@ namespace Geta.NotFoundHandler.Core.Redirects
                     oldElement.Attributes.Append(wildCardAttribute);
                 }
 
+                if (redirect.ExactMatch)
+                {
+                    var exactMatchAttribute = document.CreateAttribute(string.Empty, ExactMatch, string.Empty);
+                    exactMatchAttribute.Value = "true";
+                    oldElement.Attributes.Append(exactMatchAttribute);
+                }
+
                 var redirectTypeAttribute = document.CreateAttribute(string.Empty, RedirectType, string.Empty);
                 redirectTypeAttribute.Value = redirect.RedirectType.ToString();
                 oldElement.Attributes.Append(redirectTypeAttribute);
@@ -136,7 +144,10 @@ namespace Geta.NotFoundHandler.Core.Redirects
                     var redirectType = GetRedirectType(oldNode);
 
                     // Create new custom redirect nodes
-                    var redirect = new CustomRedirect(oldNode.InnerText, newNode.InnerText, skipWildCardAppend, redirectType);
+                    var redirect = new CustomRedirect(oldNode.InnerText, newNode.InnerText, skipWildCardAppend, redirectType)
+                    {
+                        ExactMatch = GetExactMatch(oldNode)
+                    };
                     redirects.Add(redirect);
                 }
             }
@@ -153,6 +164,11 @@ namespace Geta.NotFoundHandler.Core.Redirects
             }
 
             return false;
+        }
+
+        private static bool GetExactMatch(XmlNode oldNode)
+        {
+            return bool.TryParse(oldNode.Attributes?[ExactMatch]?.Value, out var exactMatch) && exactMatch;
         }
 
         private static RedirectType GetRedirectType(XmlNode oldNode)

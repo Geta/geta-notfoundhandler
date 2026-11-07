@@ -276,6 +276,61 @@ namespace Geta.NotFoundHandler.Tests
         }
 
         /// <summary>
+        /// https://github.com/Geta/geta-notfoundhandler/issues/177
+        /// </summary>
+        [Theory]
+        [InlineData("/test-1", "http://localhost:80/test-1", "/test-2")]
+        [InlineData("/test-1", "http://localhost:80/test-1/", "/test-2")]
+        [InlineData("/test-1", "http://localhost:80/TEST-1", "/test-2")]
+        [InlineData("/test-1/", "http://localhost:80/test-1", "/test-2")]
+        [InlineData("/test-1", "http://localhost:80/test-1?a=b", "/test-2?a=b")]
+        [InlineData("/test-1?a=b", "http://localhost:80/test-1?a=b", "/test-2")]
+        [InlineData("http://localhost/test-1", "http://localhost:80/test-1", "/test-2")]
+        public void Find_redirects_the_url_itself_with_an_exact_match(string oldUrl, string notFoundUrl, string expected)
+        {
+            _sut.Add(new CustomRedirect(oldUrl, "/test-2") { ExactMatch = true });
+
+            var actual = _sut.Find(notFoundUrl.ToUri());
+
+            Assert.Equal(expected, actual?.NewUrl);
+        }
+
+        [Theory]
+        [InlineData("/test-1", "http://localhost:80/test-1/testing")]
+        [InlineData("/test-1", "http://localhost:80/test-1/testing?a=b")]
+        [InlineData("/test-1/", "http://localhost:80/test-1/testing")]
+        [InlineData("/test-1?a=b", "http://localhost:80/test-1/testing?a=b")]
+        [InlineData("/", "http://localhost:80/testing")]
+        [InlineData("http://localhost/test-1", "http://localhost:80/test-1/testing")]
+        public void Find_leaves_urls_below_alone_with_an_exact_match(string oldUrl, string notFoundUrl)
+        {
+            _sut.Add(new CustomRedirect(oldUrl, "/test-2") { ExactMatch = true });
+
+            var actual = _sut.Find(notFoundUrl.ToUri());
+
+            Assert.Null(actual);
+        }
+
+        [Fact]
+        public void Find_leaves_urls_below_to_a_shorter_redirect_with_an_exact_match()
+        {
+            _sut.Add(new CustomRedirect("/a/b", "/exact") { ExactMatch = true });
+            _sut.Add(new CustomRedirect("/a", "/wildcard"));
+
+            Assert.Equal("/exact", _sut.Find("http://localhost:80/a/b".ToUri())?.NewUrl);
+            Assert.Equal("/wildcard/b/c", _sut.Find("http://localhost:80/a/b/c".ToUri())?.NewUrl);
+        }
+
+        [Fact]
+        public void Find_keeps_the_query_string_with_exact_match_and_skip_append()
+        {
+            _sut.Add(new CustomRedirect("/a", "/b", true, RedirectType.Permanent) { ExactMatch = true });
+
+            Assert.Equal("/b/?c=d", _sut.Find("http://localhost:80/a?c=d".ToUri())?.NewUrl);
+            Assert.Null(_sut.Find("http://localhost:80/a/c".ToUri()));
+        }
+
+        /// <summary>
         /// https://github.com/Geta/404handler/issues/38
         /// </summary>
         [Fact]

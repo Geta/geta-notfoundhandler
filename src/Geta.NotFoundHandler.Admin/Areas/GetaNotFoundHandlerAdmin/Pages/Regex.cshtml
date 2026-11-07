@@ -1,7 +1,11 @@
 ﻿@page "{handler?}"
 @using Geta.NotFoundHandler.Core.Providers.RegexRedirects
+@using Geta.NotFoundHandler.Core.Redirects
+@using Geta.NotFoundHandler.Infrastructure.Configuration
 @using Microsoft.AspNetCore.Mvc.TagHelpers
+@using Microsoft.Extensions.Options
 @model Geta.NotFoundHandler.Admin.Areas.Geta.NotFoundHandler.Admin.RegexModel
+@inject IOptions<NotFoundHandlerOptions> Options;
 
 @await Component.InvokeAsync("Card", new { message = Model.Confirmation, cardType = CardType.Success })
 @await Component.InvokeAsync("Card", new { message = Model.Message })
@@ -18,6 +22,9 @@
             </th>
             <th>
                 <vc:sortable-header-cell key="@nameof(RegexRedirect.NewUrlFormat)" display-name="New URL Format"/>
+            </th>
+            <th class="col-1">
+                <vc:sortable-header-cell key="@nameof(RegexRedirect.RedirectType)" display-name="Redirect Type"/>
             </th>
             <th class="col-1"></th>
             <th class="col-1"></th>
@@ -39,6 +46,14 @@
                     <span asp-validation-for="RegexRedirect.NewUrlFormat" class="text-danger"></span>
                 </td>
                 <td>
+                    <select class="form-select" name="@Html.NameFor(m => m.RegexRedirect.RedirectType)" aria-label="Redirect Type">
+                        <option value="@RedirectType.Temporary"
+                                selected="@(Options.Value.DefaultRedirectType == RedirectType.Temporary)">@RedirectType.Temporary</option>
+                        <option value="@RedirectType.Permanent"
+                                selected="@(Options.Value.DefaultRedirectType == RedirectType.Permanent)">@RedirectType.Permanent</option>
+                    </select>
+                </td>
+                <td>
                     <div class="d-grid gap-2">
                         <button type="submit" class="btn btn-primary"
                                 asp-page-handler="create">
@@ -52,10 +67,13 @@
 
         @foreach (var item in Model.Items)
         {
+            var redirectType = item.RedirectType ?? Options.Value.DefaultRedirectType;
+
             <tr class="align-middle">
                 <td>@item.OrderNumber</td>
                 <td>@item.OldUrlRegex</td>
                 <td>@item.NewUrlFormat</td>
+                <td>@redirectType</td>
                 <td>
                     @{
                         var editModalId = $"editModal{item.Id}";
@@ -93,6 +111,18 @@
 
                                         <span asp-validation-for="EditRedirect.NewUrlFormat"
                                               class="text-danger"></span>
+
+                                        <div class="input-group mb-2">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text">Redirect Type</span>
+                                            </div>
+                                            <select class="form-select" name="@Html.NameFor(m => m.EditRedirect.RedirectType)" aria-label="Redirect Type">
+                                                <option value="@RedirectType.Temporary"
+                                                        selected="@(redirectType == RedirectType.Temporary)">@RedirectType.Temporary</option>
+                                                <option value="@RedirectType.Permanent"
+                                                        selected="@(redirectType == RedirectType.Permanent)">@RedirectType.Permanent</option>
+                                            </select>
+                                        </div>
 
                                         <input type="hidden" asp-for="EditRedirect.Id" value="@item.Id"/>
 

@@ -138,6 +138,13 @@ public class CustomRedirectCollection : IEnumerable<CustomRedirect>
             if (path.UrlPathMatch(oldPath) && query.StartsWith(oldQuery, StringComparison.InvariantCultureIgnoreCase))
             {
                 var cr = redirectPair.Value;
+
+                // Note: Leave it to a shorter old url, which may still apply to the request.
+                if (cr.ExactMatch && !path.TrimEnd('/').Equals(oldPath.TrimEnd('/'), StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
                 if (cr.State == (int)RedirectState.Ignored)
                 {
                     return null;

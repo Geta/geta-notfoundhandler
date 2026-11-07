@@ -53,7 +53,10 @@ public class RedirectsCsvParser : IRedirectsParser
             // Create new custom redirect nodes
             var redirectType = GetRedirectType(item.RedirectType);
             var skipWildCardAppend = GetSkipWildCardAppend(item.WildcardSkippedAppend);
-            var redirect = new CustomRedirect(item.OldUrl, item.NewUrl, skipWildCardAppend, redirectType);
+            var redirect = new CustomRedirect(item.OldUrl, item.NewUrl, skipWildCardAppend, redirectType)
+            {
+                ExactMatch = bool.TryParse(item.ExactMatch, out var exactMatch) && exactMatch
+            };
             redirects.Add(redirect);
         }
 
@@ -87,7 +90,8 @@ public class RedirectsCsvParser : IRedirectsParser
                 NewUrl = item.NewUrl,
                 OldUrl = item.OldUrl,
                 RedirectType = item.RedirectType.ToString(),
-                WildcardSkippedAppend = item.WildCardSkipAppend.ToString()
+                WildcardSkippedAppend = item.WildCardSkipAppend.ToString(),
+                ExactMatch = item.ExactMatch.ToString()
             }).ToList();
     }
 

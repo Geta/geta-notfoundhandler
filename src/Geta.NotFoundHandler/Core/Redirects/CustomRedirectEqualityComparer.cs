@@ -32,6 +32,7 @@ namespace Geta.NotFoundHandler.Core.Redirects
 
             return
                 x.WildCardSkipAppend == y.WildCardSkipAppend
+                && x.ExactMatch == y.ExactMatch
                 && x.OldUrl == y.OldUrl
                 && x.NewUrl == y.NewUrl
                 && x.State == y.State
@@ -40,7 +41,7 @@ namespace Geta.NotFoundHandler.Core.Redirects
 
         public int GetHashCode(CustomRedirect obj)
         {
-            return HashCode.Combine(obj.WildCardSkipAppend, obj.OldUrl, obj.NewUrl, obj.State, (int)obj.RedirectType);
+            return HashCode.Combine(obj.WildCardSkipAppend, obj.ExactMatch, obj.OldUrl, obj.NewUrl, obj.State, (int)obj.RedirectType);
         }
     }
 }

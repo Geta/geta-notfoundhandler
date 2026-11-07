@@ -77,6 +77,7 @@ public class Upgrader
                                         [State] [int] NOT NULL,
                                         [WildCardSkipAppend] [bit] NOT NULL,
                                         [RedirectType] [int] NOT NULL,
+                                        [ExactMatch] [bit] NOT NULL CONSTRAINT [DF_NotFoundHandlerRedirects_ExactMatch] DEFAULT 0,
                                         CONSTRAINT [PK_NotFoundHandlerRedirects] PRIMARY KEY CLUSTERED ([Id] ASC) ON [PRIMARY]
                                         ) ON [PRIMARY]";
         var created = _dataExecutor.ExecuteNonQuery(createTableScript);
@@ -133,6 +134,7 @@ public class Upgrader
                                         [TimeoutCount] [int] NOT NULL,
                                         [CreatedAt] [datetime] NOT NULL,
                                         [ModifiedAt] [datetime] NOT NULL,
+                                        [RedirectType] [int] NULL,
                                         CONSTRAINT [PK_NotFoundHandlerRegexRedirects] PRIMARY KEY CLUSTERED ([Id] ASC) ON [PRIMARY]
                                         ) ON [PRIMARY]";
         var created = _dataExecutor.ExecuteNonQuery(createTableScript);
@@ -143,7 +145,9 @@ public class Upgrader
 
     private void Upgrade()
     {
-        var updated = UpdateRegexRedirectsTable();
+        var updated = UpdateRegexRedirectsTable()
+                      && AddColumn(RedirectsTableName, "ExactMatch", "[bit] NOT NULL CONSTRAINT [DF_NotFoundHandlerRedirects_ExactMatch] DEFAULT 0")
+                      && AddColumn(RegexRedirectsTableName, "RedirectType", "[int] NULL");
 
         if (updated)
         {
@@ -154,6 +158,18 @@ public class Upgrader
     private bool UpdateRegexRedirectsTable()
     {
         return TableExists(RegexRedirectsTableName) || CreateRegexRedirectsTable();
+    }
+
+    private bool AddColumn(string tableName, string columnName, string definition)
+    {
+        if (ColumnExists(tableName, columnName))
+        {
+            return true;
+        }
+
+        _logger.LogInformation("Add column {ColumnName} to {TableName}", columnName, tableName);
+
+        return _dataExecutor.ExecuteNonQuery($"ALTER TABLE {GetFullTableName(tableName)} ADD [{columnName}] {definition}");
     }
 
     private void CreateVersionNumberSp()

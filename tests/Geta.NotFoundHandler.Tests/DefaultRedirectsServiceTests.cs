@@ -9,6 +9,27 @@ using Xunit;
 
 namespace Geta.NotFoundHandler.Tests
 {
+    public class CustomRedirectEqualityComparerTests
+    {
+        [Fact]
+        public void Equals_sees_a_change_of_exact_match()
+        {
+            var comparer = new CustomRedirectEqualityComparer();
+            var redirect = new CustomRedirect("/a", "/b");
+            var exact = new CustomRedirect("/a", "/b") { ExactMatch = true };
+
+            Assert.False(comparer.Equals(redirect, exact));
+        }
+
+        [Fact]
+        public void Copy_keeps_exact_match()
+        {
+            var copy = new CustomRedirect(new CustomRedirect("/a", "/b") { ExactMatch = true });
+
+            Assert.True(copy.ExactMatch);
+        }
+    }
+
     public class DefaultRedirectsServiceTests
     {
         private static readonly Uri OldUri = new Uri("http://example.com/old");

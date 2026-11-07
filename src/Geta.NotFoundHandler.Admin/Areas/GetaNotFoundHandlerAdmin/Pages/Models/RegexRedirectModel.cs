@@ -3,6 +3,7 @@
 
 using System;
 using System.ComponentModel.DataAnnotations;
+using Geta.NotFoundHandler.Core.Redirects;
 
 namespace Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin.Models;
 
@@ -18,4 +19,6 @@ public class RegexRedirectModel
     [Required]
     [Display(Name = "Order Number")]
     public int OrderNumber { get; set; }
+    [Display(Name = "Redirect Type")]
+    public RedirectType? RedirectType { get; set; }
 }

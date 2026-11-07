@@ -29,19 +29,19 @@ public class DefaultRegexRedirectsService : IRegexRedirectsService
         _redirectsEvents = redirectsEvents;
     }
 
-    public void Create(string oldUrlRegex, string newUrlFormat, int orderNumber)
+    public void Create(string oldUrlRegex, string newUrlFormat, int orderNumber, RedirectType? redirectType = null)
     {
-        var regexRedirect = _regexRedirectFactory.CreateNew(oldUrlRegex, newUrlFormat, orderNumber);
+        var regexRedirect = _regexRedirectFactory.CreateNew(oldUrlRegex, newUrlFormat, orderNumber, redirectType);
         _repository.Save(regexRedirect);
         _orderUpdater.UpdateOrder();
         _redirectsEvents.RegexRedirectsUpdated();
     }
 
-    public void Update(Guid id, string oldUrlRegex, string newUrlFormat, int orderNumber)
+    public void Update(Guid id, string oldUrlRegex, string newUrlFormat, int orderNumber, RedirectType? redirectType = null)
     {
         var original = _redirectLoader.Get(id);
         var isIncrease = original.OrderNumber < orderNumber;
-        var regexRedirect = _regexRedirectFactory.Create(id, oldUrlRegex, newUrlFormat, orderNumber);
+        var regexRedirect = _regexRedirectFactory.Create(id, oldUrlRegex, newUrlFormat, orderNumber, redirectType: redirectType);
         _repository.Save(regexRedirect);
         _orderUpdater.UpdateOrder(isIncrease);
         _redirectsEvents.RegexRedirectsUpdated();

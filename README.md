@@ -155,7 +155,7 @@ If the `bufferSize` is set to `0`, the `threshold` value will be ignored, and ev
 
 **RedirectsRefreshInterval**: How often each server checks the database for redirect changes it hasn't picked up, in case an update never reached it. On Optimizely, servers normally hear about an update straight away through events, so this is a safety net. Without Optimizely it's how other servers pick up changes, so a new redirect can take up to this long to reach them. A server that reloads this way logs "Reloaded the redirects" at Information level, so on Optimizely, seeing that line regularly means update events aren't reaching it. Set to `TimeSpan.Zero` to turn the check off. Default is 5 minutes. (Ex. ```options.RedirectsRefreshInterval = TimeSpan.FromMinutes(1);```)
 
-**DefaultRedirectType**: The redirect type pre-selected when adding a redirect, and used for redirects created from suggestions and by regex redirects. Default is `RedirectType.Temporary`. (Ex. ```options.DefaultRedirectType = RedirectType.Permanent;```)
+**DefaultRedirectType**: The redirect type pre-selected when adding a redirect or a regex redirect, and used for redirects created from suggestions and for regex redirects saved before they had a type of their own. Default is `RedirectType.Temporary`. (Ex. ```options.DefaultRedirectType = RedirectType.Permanent;```)
 
 **ActiveStatusCodes**: A integerlist with the status codes that NotFoundHandler will be active on. (Ex. ```options.ActiveStatusCodes = new int[] { StatusCodes.Status404NotFound, StatusCodes.Status410Gone };```)
 
@@ -349,7 +349,7 @@ Regex redirects are set up on the *Regex* tab, and are tried in order of their o
 ^https://www\.example\.com/en/(.*)    ->  /new/$1
 ```
 
-Use the whole url to match only one host. A rule anchored at a `/` matches on every host of the site. A rule whose new url matches the rule again (`^/(.*)$` -> `/en/$1`) keeps redirecting if the new url isn't found either, so make sure it can't match its own result.
+Use the whole url to match only one host. A rule anchored at a `/` matches on every host of the site. Each rule has its own redirect type, and rules saved before that was added use `DefaultRedirectType` until you edit them. A rule whose new url matches the rule again (`^/(.*)$` -> `/en/$1`) keeps redirecting if the new url isn't found either, so make sure it can't match its own result.
 
 ## Wildcards
 
@@ -358,6 +358,16 @@ If you want to redirect many addresses below a specific one to one new URL, set 
 For example, if we have a redirect: `/a` to `/b`, then:
 - with wildcard setting it will redirect `/a/1` to `/b`
 - without wildcard setting it will redirect `/a/1` to `/b/1`
+
+## Exact match
+
+By default, a redirect also applies to the urls below its old url, as described above. Tick *Exact match* on a redirect to only match the url itself. For example, with an exact match from `/a` to `/b`:
+- `/a` and `/a/` redirect to `/b`, and `/a?c=d` redirects to `/b?c=d`
+- `/a/1` isn't touched by this redirect, so it stays a 404 unless another redirect matches it
+
+The query string isn't part of the exact match, so links with tracking parameters still redirect. In a redirects file, use the `ExactMatch` column in a CSV file, and the `exactMatch="true"` attribute on `<old>` in an XML file.
+
+## Redirect loops
 
 A request is only redirected once by a rule that would match it again afterwards. For example, with a redirect from `/a` to `/a/b`, `/a/1` redirects to `/a/b/1`, and a request already under `/a/b` stays a 404.
 

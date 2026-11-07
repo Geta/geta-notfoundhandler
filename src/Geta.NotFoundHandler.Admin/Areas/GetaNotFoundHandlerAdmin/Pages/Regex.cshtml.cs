@@ -50,7 +50,10 @@ public class RegexModel : AbstractSortablePageModel
 
         if (ModelState.IsValid)
         {
-            _regexRedirectsService.Create(RegexRedirect.OldUrlRegex, RegexRedirect.NewUrlFormat, RegexRedirect.OrderNumber);
+            _regexRedirectsService.Create(RegexRedirect.OldUrlRegex,
+                                          RegexRedirect.NewUrlFormat,
+                                          RegexRedirect.OrderNumber,
+                                          RegexRedirect.RedirectType);
 
             Confirmation = $"Saved the regex redirect from {RegexRedirect.OldUrlRegex} to {RegexRedirect.NewUrlFormat}.";
 
@@ -80,7 +83,8 @@ public class RegexModel : AbstractSortablePageModel
             _regexRedirectsService.Update(EditRedirect.Id.Value,
                                           EditRedirect.OldUrlRegex,
                                           EditRedirect.NewUrlFormat,
-                                          EditRedirect.OrderNumber);
+                                          EditRedirect.OrderNumber,
+                                          EditRedirect.RedirectType);
 
             Confirmation = $"Saved the regex redirect from {EditRedirect.OldUrlRegex} to {EditRedirect.NewUrlFormat}.";
 
