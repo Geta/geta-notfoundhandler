@@ -18,6 +18,9 @@ Check these when upgrading, as they change how existing rules and integrations b
 - A request with no matching redirect keeps the status the application gave it. Before, a response that hadn't started yet was forced to `404`. `RequestHandler.SetStatusCodeAndShow404` is now only called for deleted URLs, so a subclass overriding it no longer runs for unmatched requests.
 - `HttpContextExtensions.SetStatusCode` no longer clears the response, so a custom page keeps its headers when its status changes to `410`.
 - CSV export: an imported file that was exported with escaped values keeps the `'` prefix and the `%3B` as part of the value.
+- A regex rule anchored at a `/`, such as `^/en/(.*)`, now matches against the path and query. It used to never match, as rules see the whole url, so one that has been sitting unused starts redirecting. Check your rules for this before upgrading. All other rules still only see the whole url.
+- `X.PagedList` is upgraded from 8.4.3 to 10.5.9, which moves `ToPagedList` to the `X.PagedList.Extensions` namespace. Code of your own calling it needs that using.
+- The results of the *Index content URLs* and *Register content move redirects* jobs are now only a summary. Details of what failed are written to the log, and the jobs take an `ILogger` in their constructors.
 - Each instance now checks the database for redirect changes every 5 minutes, which adds one query per instance per check that hashes every row of the redirects table. Set `RedirectsRefreshInterval` to `TimeSpan.Zero` to turn it off. A loader implementing `IRedirectLoader` can add `GetChecksum` to take part, and without it the check is skipped.
 - A handler failing on `RedirectsEvents` no longer stops the others, and the failure now reaches the caller as an `AggregateException`.
 - `OptimizelySyncEvents` takes an `ILogger<OptimizelySyncEvents>`, and `RedirectsInitializer` takes an `IRedirectLoader`. This matters only if you construct or inherit from them yourself.
@@ -26,9 +29,11 @@ Check these when upgrading, as they change how existing rules and integrations b
 
 - With `UseInternalScheduler`, the cleanup job runs in a plain ASP.NET Core host, but it didn't fire in the Optimizely CMS 13 sample site, for reasons not yet known. On Optimizely sites, use the *[Geta NotFoundHandler] Suggestions cleanup job* scheduled job.
 - Two rules pointing into each other (`/a` -> `/b/c` and `/b` -> `/a/d`) can still grow on every hop.
+- A regex rule whose new url matches the rule again (`^/(.*)$` -> `/en/$1`) grows on every hop when the new url is also not found.
 
 ### Fixed
 
+- Regex redirects are no longer recompiled on every unmatched request. The cache held a query that built them again each time it was read.
 - Instances that miss an update no longer stay out of date until a restart. A check every 5 minutes picks up redirects and regex redirects that never reached an instance.
 - Two reloads at the same time could leave an instance without a new redirect, when a slow load that read the table before the save finished last.
 - A failed reload on the instance saving a redirect no longer stops the other instances from being told about it.

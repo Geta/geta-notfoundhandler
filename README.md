@@ -340,6 +340,17 @@ The module has extensive logging. Turn on debug logging for the `Geta.NotFoundHa
 
 # Usage
 
+## Regex redirects
+
+Regex redirects are set up on the *Regex* tab, and are tried in order of their order number when nothing else matched. A rule sees the whole url, and a rule anchored at a `/` also sees the path and query, so both of these work for `https://www.example.com/en/blog/article`:
+
+```
+^/en/blog/(.*)                        ->  /en/resources/blog/$1
+^https://www\.example\.com/en/(.*)    ->  /new/$1
+```
+
+Use the whole url to match only one host. A rule anchored at a `/` matches on every host of the site. A rule whose new url matches the rule again (`^/(.*)$` -> `/en/$1`) keeps redirecting if the new url isn't found either, so make sure it can't match its own result.
+
 ## Wildcards
 
 If you want to redirect many addresses below a specific one to one new URL, set this to true. If we get a wild card match on this URL, the new URL will be used in its raw format and the old URL will not be appended to the new one.
