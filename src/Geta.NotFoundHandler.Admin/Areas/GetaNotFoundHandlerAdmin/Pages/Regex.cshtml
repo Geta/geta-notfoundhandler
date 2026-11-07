@@ -10,10 +10,6 @@
 @await Component.InvokeAsync("Card", new { message = Model.Confirmation, cardType = CardType.Success })
 @await Component.InvokeAsync("Card", new { message = Model.Message })
 
-@{
-    var newRedirectType = Model.RegexRedirect?.RedirectType ?? Options.Value.DefaultRedirectType;
-}
-
 <div class="table-responsive mt-3">
     <table class="table table-hover table-sm" aria-label="Redirects">
         <thead>
@@ -50,11 +46,9 @@
                     <span asp-validation-for="RegexRedirect.NewUrlFormat" class="text-danger"></span>
                 </td>
                 <td>
-                    <select class="form-select" name="@Html.NameFor(m => m.RegexRedirect.RedirectType)" aria-label="Redirect Type">
-                        <option value="@RedirectType.Temporary"
-                                selected="@(newRedirectType == RedirectType.Temporary)">@RedirectType.Temporary</option>
-                        <option value="@RedirectType.Permanent"
-                                selected="@(newRedirectType == RedirectType.Permanent)">@RedirectType.Permanent</option>
+                    <select class="form-select" asp-for="RegexRedirect.RedirectType" aria-label="Redirect Type">
+                        <option value="@RedirectType.Temporary">@RedirectType.Temporary</option>
+                        <option value="@RedirectType.Permanent">@RedirectType.Permanent</option>
                     </select>
                 </td>
                 <td>

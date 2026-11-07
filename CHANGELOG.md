@@ -19,7 +19,7 @@ All notable changes to this project will be documented in this file.
 Check these when upgrading, as they change how existing rules and integrations behave:
 
 - The database version goes from 2 to 3. At startup, the application adds `ExactMatch` to `NotFoundHandler.Redirects` and `RedirectType` to `NotFoundHandler.RegexRedirects`, so its database user needs permission to alter those tables. If that fails, an error is logged and reading the redirects then fails at startup.
-- `IRegexRedirectsService.Create` and `Update`, `RegexRedirectFactory.Create` and `CreateNew`, and the `RegexRedirect` constructor take an optional `RedirectType?`. Calling code still compiles, and `Update` without a type keeps the type of the rule, but code implementing the interface or overriding the factory needs updating.
+- `IRegexRedirectsService` has new overloads of `Create` and `Update` taking a `RedirectType?`, so a class implementing it needs them too. The existing `Update` keeps the type of the rule. `RegexRedirectFactory.Create` and `CreateNew` and the `RegexRedirect` constructor take an optional `RedirectType?`, so code calling them needs recompiling, and code overriding the factory needs updating.
 - The CSV export has a new `ExactMatch` column.
 - A redirect that would only append to itself now stops. With `/a` -> `/a/b`, `/a/x` still redirects to `/a/b/x`, but a request already under `/a/b` stays a 404. With `/a` -> `/a?x=1`, `/a?y=2` still redirects to `/a?y=2&x=1`, and that URL stays a 404. Before, these grew on every hop until the browser gave up.
 - URLs under an entry in the Deleted list now return `410`. Before, `/gone/`, `/gone?a=1` and `/gone/child` were redirected, often to the home page.

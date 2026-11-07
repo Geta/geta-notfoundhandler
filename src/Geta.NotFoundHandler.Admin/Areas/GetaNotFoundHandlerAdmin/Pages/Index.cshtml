@@ -132,36 +132,18 @@
                                             <div class="flex-fill">
                                                 <label>Wildcard</label>
                                                 <div class="input-group mb-2 text-center align-middle">
-                                                    @if (item.WildCardSkipAppend)
-                                                    {
-                                                        <input type="checkbox" class="form-check-input"
-                                                               asp-for="EditRedirect.WildCardSkipAppend" value="true"
-                                                               checked="checked"/>
-                                                    }
-                                                    else
-                                                    {
-                                                        <input type="checkbox" class="form-check-input"
-                                                               asp-for="EditRedirect.WildCardSkipAppend"
-                                                               value="true"/>
-                                                    }
+                                                    <input type="checkbox" class="form-check-input"
+                                                           asp-for="EditRedirect.WildCardSkipAppend"
+                                                           checked="@item.WildCardSkipAppend"/>
                                                 </div>
                                             </div>
 
                                             <div class="flex-fill">
                                                 <label>Exact match</label>
                                                 <div class="input-group mb-2 text-center align-middle">
-                                                    @if (item.ExactMatch)
-                                                    {
-                                                        <input type="checkbox" class="form-check-input"
-                                                               asp-for="EditRedirect.ExactMatch" value="true"
-                                                               checked="checked"/>
-                                                    }
-                                                    else
-                                                    {
-                                                        <input type="checkbox" class="form-check-input"
-                                                               asp-for="EditRedirect.ExactMatch"
-                                                               value="true"/>
-                                                    }
+                                                    <input type="checkbox" class="form-check-input"
+                                                           asp-for="EditRedirect.ExactMatch"
+                                                           checked="@item.ExactMatch"/>
                                                 </div>
                                             </div>
 

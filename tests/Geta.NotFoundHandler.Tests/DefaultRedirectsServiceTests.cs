@@ -53,14 +53,23 @@ namespace Geta.NotFoundHandler.Tests
                                                     new RedirectsEvents());
         }
 
+        [Fact]
+        public void Update_without_a_redirect_type_keeps_the_saved_one()
+        {
+            _sut.Update(Id, "^/a$", "/c", 1);
+
+            A.CallTo(() => _repository.Save(A<RegexRedirect>.That.Matches(x => x.RedirectType == RedirectType.Permanent)))
+                .MustHaveHappenedOnceExactly();
+        }
+
         [Theory]
-        [InlineData(null, RedirectType.Permanent)]
-        [InlineData(RedirectType.Temporary, RedirectType.Temporary)]
-        public void Update_only_changes_the_redirect_type_when_given_one(RedirectType? redirectType, RedirectType expected)
+        [InlineData(RedirectType.Temporary)]
+        [InlineData(null)]
+        public void Update_with_a_redirect_type_stores_what_it_was_given(RedirectType? redirectType)
         {
             _sut.Update(Id, "^/a$", "/c", 1, redirectType);
 
-            A.CallTo(() => _repository.Save(A<RegexRedirect>.That.Matches(x => x.RedirectType == expected)))
+            A.CallTo(() => _repository.Save(A<RegexRedirect>.That.Matches(x => x.RedirectType == redirectType)))
                 .MustHaveHappenedOnceExactly();
         }
     }
