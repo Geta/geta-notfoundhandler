@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Geta.NotFoundHandler.Core.Redirects
 {
@@ -33,14 +32,13 @@ namespace Geta.NotFoundHandler.Core.Redirects
                 return;
             }
 
-            var args = new EventArgs();
             var failures = new List<Exception>();
 
-            foreach (var handler in handlers.GetInvocationList().Cast<EventHandler>())
+            foreach (EventHandler handler in handlers.GetInvocationList())
             {
                 try
                 {
-                    handler(args);
+                    handler(EventArgs.Empty);
                 }
                 catch (Exception ex)
                 {

@@ -27,8 +27,6 @@ namespace Geta.NotFoundHandler.Core.Redirects
         private readonly IRegexRedirectCache _regexRedirectCache;
         private readonly ILogger<RedirectsRefreshService> _logger;
         private readonly TimeSpan _interval;
-        private string _loadedChecksum;
-        private long _lastLoaded;
 
         public RedirectsRefreshService(
             Func<RedirectsInitializer> redirectsInitializerFactory,
@@ -55,55 +53,43 @@ namespace Geta.NotFoundHandler.Core.Redirects
             // Note: PeriodicTimer throws above about 49 days, and an exception here would stop the application.
             using var timer = new PeriodicTimer(_interval < MaxInterval ? _interval : MaxInterval);
 
-            try
+            while (await timer.WaitForNextTickAsync(stoppingToken))
             {
-                while (await timer.WaitForNextTickAsync(stoppingToken))
-                {
-                    Refresh();
-                }
-            }
-            catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
-            {
-                // The application is stopping.
+                Refresh();
             }
         }
 
         /// <summary>
-        /// Reloads the redirects if the stored ones changed since the last check.
+        /// Reloads the redirects if the stored ones differ from what this instance last loaded.
         /// </summary>
         public void Refresh()
         {
             try
             {
-                // Note: Read before loading, so a save during the load causes another load rather than being missed.
                 var checksum = _redirectLoader.GetChecksum();
-
-                // Note: After the read above, as without a database the cached regex redirects are
-                // all there is, and every unmatched request would fail trying to load them again.
-                _regexRedirectCache.Remove();
-
                 if (checksum == null)
                 {
                     return;
                 }
 
-                var redirectsInitializer = _redirectsInitializerFactory();
+                // Note: After the read above, as without a database the cached regex redirects are
+                // all there is, and every unmatched request would fail trying to load them again.
+                _regexRedirectCache.Remove();
 
-                // Note: A load since the last check counts too. It can hold a redirect that has since been
-                // removed again, in which case the stored redirects are back at the checksum of that check.
-                if (checksum == _loadedChecksum && redirectsInitializer.LastLoaded == _lastLoaded)
+                var redirectsInitializer = _redirectsInitializerFactory();
+                if (checksum == redirectsInitializer.LoadedChecksum)
                 {
                     return;
                 }
 
                 redirectsInitializer.Initialize();
-                _loadedChecksum = checksum;
-                _lastLoaded = redirectsInitializer.LastLoaded;
-                _logger.LogDebug("Reloaded the redirects, as the stored ones have changed since the last check.");
+                _logger.LogInformation(
+                    "Reloaded the redirects, as the stored ones differ from the ones this instance had loaded. "
+                    + "Either an update didn't reach this instance, or a save was in progress.");
             }
             catch (Exception ex)
             {
-                // Note: Keeps the last checksum, so the next check tries again.
+                // Note: The next check tries again, as a failed load doesn't change the loaded checksum.
                 _logger.LogWarning(ex, "Failed to check for changed redirects. Will try again in {Interval}.", _interval);
             }
         }

@@ -4,7 +4,6 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
@@ -17,16 +16,16 @@ namespace Geta.NotFoundHandler.Optimizely.Core.Events
     public class OptimizelySyncEventsStartupCheck : IHostedService
     {
         private readonly IHostApplicationLifetime _lifetime;
-        private readonly IServiceProvider _services;
+        private readonly Func<OptimizelySyncEvents> _syncEventsFactory;
         private readonly ILogger<OptimizelySyncEventsStartupCheck> _logger;
 
         public OptimizelySyncEventsStartupCheck(
             IHostApplicationLifetime lifetime,
-            IServiceProvider services,
+            Func<OptimizelySyncEvents> syncEventsFactory,
             ILogger<OptimizelySyncEventsStartupCheck> logger)
         {
             _lifetime = lifetime;
-            _services = services;
+            _syncEventsFactory = syncEventsFactory;
             _logger = logger;
         }
 
@@ -42,20 +41,15 @@ namespace Geta.NotFoundHandler.Optimizely.Core.Events
             return Task.CompletedTask;
         }
 
-        internal void EnsureInitialized()
+        private void EnsureInitialized()
         {
-            var syncEvents = _services.GetRequiredService<OptimizelySyncEvents>();
-            if (syncEvents.IsInitialized)
+            if (_syncEventsFactory().Initialize())
             {
-                return;
+                _logger.LogWarning(
+                    "UseOptimizelyNotFoundHandler has not been called, so NotFoundHandler has started the sync between "
+                    + "servers on its own. Add it next to UseNotFoundHandler, as automatic redirects and database "
+                    + "upgrades for them also depend on it.");
             }
-
-            _logger.LogWarning(
-                "UseOptimizelyNotFoundHandler has not been called, so NotFoundHandler has started the sync between "
-                + "servers on its own. Add it next to UseNotFoundHandler, as automatic redirects and database "
-                + "upgrades for them also depend on it.");
-
-            syncEvents.Initialize();
         }
     }
 }

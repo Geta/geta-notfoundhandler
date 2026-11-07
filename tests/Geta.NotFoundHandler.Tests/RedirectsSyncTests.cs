@@ -33,7 +33,8 @@ namespace Geta.NotFoundHandler.Tests
                 _redirectsEvents,
                 _redirectHandler,
                 () => _redirectsService,
-                Enumerable.Empty<INotFoundHandler>());
+                Enumerable.Empty<INotFoundHandler>(),
+                _redirectLoader);
         }
 
         [Fact]
@@ -110,6 +111,28 @@ namespace Geta.NotFoundHandler.Tests
         }
 
         [Fact]
+        public void Initialize_still_loads_when_the_checksum_fails()
+        {
+            GivenStored("v1", "/first");
+            A.CallTo(() => _redirectLoader.GetChecksum()).Throws(new InvalidOperationException("no checksum"));
+
+            _initializer.Initialize();
+
+            Assert.NotNull(_redirectHandler.Find(FirstUri));
+        }
+
+        [Fact]
+        public void Initialize_reads_the_checksum_before_the_redirects()
+        {
+            GivenStored("v1", "/first");
+
+            _initializer.Initialize();
+
+            A.CallTo(() => _redirectLoader.GetChecksum()).MustHaveHappened()
+                .Then(A.CallTo(() => _redirectsService.GetAll()).MustHaveHappened());
+        }
+
+        [Fact]
         public void RedirectsUpdated_reaches_every_handler_when_one_fails()
         {
             var events = new RedirectsEvents();
@@ -137,7 +160,7 @@ namespace Geta.NotFoundHandler.Tests
         }
 
         [Fact]
-        public void Refresh_reloads_on_the_first_check_as_an_update_could_have_been_missed_since_startup()
+        public void Refresh_loads_when_nothing_has_been_loaded_yet()
         {
             GivenStored("v1", "/first");
 
@@ -150,11 +173,24 @@ namespace Geta.NotFoundHandler.Tests
         public void Refresh_does_not_reload_when_nothing_changed()
         {
             GivenStored("v1", "/first");
-            var sut = CreateRefreshService();
-            sut.Refresh();
+            _initializer.Initialize();
             Fake.ClearRecordedCalls(_redirectsService);
 
-            sut.Refresh();
+            CreateRefreshService().Refresh();
+
+            A.CallTo(() => _redirectsService.GetAll()).MustNotHaveHappened();
+        }
+
+        [Fact]
+        public void Refresh_does_not_reload_an_update_already_picked_up_through_an_event()
+        {
+            GivenStored("v1", "/first");
+            _initializer.Initialize();
+            GivenStored("v2", "/first", "/second");
+            _redirectsEvents.RedirectsUpdated();
+            Fake.ClearRecordedCalls(_redirectsService);
+
+            CreateRefreshService().Refresh();
 
             A.CallTo(() => _redirectsService.GetAll()).MustNotHaveHappened();
         }
@@ -163,11 +199,10 @@ namespace Geta.NotFoundHandler.Tests
         public void Refresh_picks_up_a_redirect_saved_on_another_instance()
         {
             GivenStored("v1", "/first");
-            var sut = CreateRefreshService();
-            sut.Refresh();
+            _initializer.Initialize();
             GivenStored("v2", "/first", "/second");
 
-            sut.Refresh();
+            CreateRefreshService().Refresh();
 
             Assert.NotNull(_redirectHandler.Find(SecondUri));
         }
@@ -176,8 +211,8 @@ namespace Geta.NotFoundHandler.Tests
         public void Refresh_tries_again_after_a_failed_reload()
         {
             GivenStored("v1", "/first");
+            _initializer.Initialize();
             var sut = CreateRefreshService();
-            sut.Refresh();
             A.CallTo(() => _redirectLoader.GetChecksum()).Returns("v2");
             A.CallTo(() => _redirectsService.GetAll())
                 .Throws(new InvalidOperationException("database unavailable")).Once()
@@ -208,6 +243,7 @@ namespace Geta.NotFoundHandler.Tests
             CreateRefreshService().Refresh();
 
             A.CallTo(() => _redirectsService.GetAll()).MustNotHaveHappened();
+            A.CallTo(() => _regexCache.Remove()).MustNotHaveHappened();
         }
 
         [Fact]
@@ -236,6 +272,7 @@ namespace Geta.NotFoundHandler.Tests
         public void Refresh_drops_a_redirect_when_the_stored_ones_return_to_the_last_checksum()
         {
             GivenStored("v1", "/first");
+            _initializer.Initialize();
             var sut = CreateRefreshService();
             sut.Refresh();
 
@@ -280,21 +317,11 @@ namespace Geta.NotFoundHandler.Tests
 
         [Theory]
         [InlineData(0)]
-        [InlineData(-1)]
-        public async Task The_service_does_not_run_when_the_interval_is_turned_off(int seconds)
+        [InlineData(-10_000_000)]
+        [InlineData(1)] // Too short for the timer, which would stop the application by throwing.
+        public async Task The_service_does_not_run_when_the_interval_is_turned_off(long ticks)
         {
-            var sut = CreateRefreshService(TimeSpan.FromSeconds(seconds));
-
-            await sut.StartAsync(CancellationToken.None);
-            await sut.ExecuteTask;
-
-            A.CallTo(() => _redirectLoader.GetChecksum()).MustNotHaveHappened();
-        }
-
-        [Fact]
-        public async Task An_interval_too_short_for_the_timer_does_not_stop_the_application()
-        {
-            var sut = CreateRefreshService(TimeSpan.FromTicks(1));
+            var sut = CreateRefreshService(TimeSpan.FromTicks(ticks));
 
             await sut.StartAsync(CancellationToken.None);
             await sut.ExecuteTask;
