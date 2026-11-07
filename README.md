@@ -99,7 +99,7 @@ In addition, the configuration can be read from the `appsettings.json`:
 The configuration from the `appsettings.json` will override any configuration set in the Startup. Note that you cannot provide a connection string or add providers in the `appsetings.json`. All other settings are supported.
 
 Next, initialize NotFound handler in the `Configure` method as the first registration. It will make sure that NotFound handler will catch all 404 errors.
-For Optimizely project, also call `UseOptimizelyNotFoundHandler`. This will make sure that any updates are synchronized between servers (on DXP, for example).
+For Optimizely project, also call `UseOptimizelyNotFoundHandler`. This will make sure that any updates are synchronized between servers (on DXP, for example). If it's left out, the sync starts on its own and a warning is logged.
 
 ```
 public void Configure(IApplicationBuilder app)
@@ -152,6 +152,8 @@ If the `bufferSize` is set to `0`, the `threshold` value will be ignored, and ev
 **LogWithHostname**: Set to `true` to include hostname in the log. Useful in a multisite environment with several hostnames/domains. Default is `false`
 
 **CommandTimeout**: Command timeout, in seconds, applied to SQL queries issued by the NotFound handler. Raise it past the SqlClient default of 30 if you have very large NotFound handler tables. Default is 30
+
+**RedirectsRefreshInterval**: How often each server checks the database for redirect changes it hasn't picked up, in case an update never reached it. On Optimizely, servers normally hear about an update straight away through events, so this is a safety net. Without Optimizely it's how other servers pick up changes, so a new redirect can take up to this long to reach them. A server that reloads this way logs "Reloaded the redirects" at Information level, so on Optimizely, seeing that line regularly means update events aren't reaching it. Set to `TimeSpan.Zero` to turn the check off. Default is 5 minutes. (Ex. ```options.RedirectsRefreshInterval = TimeSpan.FromMinutes(1);```)
 
 **DefaultRedirectType**: The redirect type pre-selected when adding a redirect, and used for redirects created from suggestions and by regex redirects. Default is `RedirectType.Temporary`. (Ex. ```options.DefaultRedirectType = RedirectType.Permanent;```)
 
@@ -337,6 +339,17 @@ services.AddOptimizelyNotFoundHandler(o =>
 The module has extensive logging. Turn on debug logging for the `Geta.NotFoundHandler` namespace in your logging configuration.
 
 # Usage
+
+## Regex redirects
+
+Regex redirects are set up on the *Regex* tab, and are tried in order of their order number when nothing else matched. A rule sees the whole url, and a rule anchored at a `/` also sees the path and query, so both of these work for `https://www.example.com/en/blog/article`:
+
+```
+^/en/blog/(.*)                        ->  /en/resources/blog/$1
+^https://www\.example\.com/en/(.*)    ->  /new/$1
+```
+
+Use the whole url to match only one host. A rule anchored at a `/` matches on every host of the site. A rule whose new url matches the rule again (`^/(.*)$` -> `/en/$1`) keeps redirecting if the new url isn't found either, so make sure it can't match its own result.
 
 ## Wildcards
 

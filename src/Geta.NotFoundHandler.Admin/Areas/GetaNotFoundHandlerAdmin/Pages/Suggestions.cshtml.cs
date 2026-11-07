@@ -7,6 +7,7 @@ using Geta.NotFoundHandler.Infrastructure;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using X.PagedList;
+using X.PagedList.Extensions;
 
 namespace Geta.NotFoundHandler.Admin.Pages.Geta.NotFoundHandler.Admin;
 

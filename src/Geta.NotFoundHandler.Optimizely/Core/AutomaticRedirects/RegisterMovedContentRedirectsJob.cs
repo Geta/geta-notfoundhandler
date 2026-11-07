@@ -6,6 +6,7 @@ using System.Linq;
 using EPiServer.Scheduler;
 using Geta.NotFoundHandler.Optimizely.Infrastructure;
 using Geta.NotFoundHandler.Optimizely.Infrastructure.Configuration;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Geta.NotFoundHandler.Optimizely.Core.AutomaticRedirects
@@ -17,14 +18,17 @@ namespace Geta.NotFoundHandler.Optimizely.Core.AutomaticRedirects
         private readonly IContentUrlHistoryLoader _contentUrlHistoryLoader;
         private readonly JobStatusLogger _jobStatusLogger;
         private readonly IAutomaticRedirectsService _automaticRedirectsService;
+        private readonly ILogger<RegisterMovedContentRedirectsJob> _logger;
         private readonly int _batchSize;
         private bool _stopped;
 
         public RegisterMovedContentRedirectsJob(
             IAutomaticRedirectsService automaticRedirectsService,
             IContentUrlHistoryLoader contentUrlHistoryLoader,
-            IOptions<OptimizelyNotFoundHandlerOptions> options)
+            IOptions<OptimizelyNotFoundHandlerOptions> options,
+            ILogger<RegisterMovedContentRedirectsJob> logger)
         {
+            _logger = logger;
             _automaticRedirectsService = automaticRedirectsService;
             _contentUrlHistoryLoader = contentUrlHistoryLoader;
             // Clamp to >= 1: a misconfigured 0/negative would page with FETCH NEXT 0 ROWS (invalid SQL) and fail the job.
@@ -55,7 +59,7 @@ namespace Geta.NotFoundHandler.Optimizely.Core.AutomaticRedirects
                     if (_stopped)
                     {
                         _jobStatusLogger.Log(
-                            $"Job was stopped, successful content handled before stopped: {successCount} out of {currentCount} processed");
+                            $"Job was stopped, successful content handled before stopped: {successCount} out of {currentCount} processed; failed: {failedCount}");
                         return _jobStatusLogger.ToString();
                     }
 
@@ -68,7 +72,8 @@ namespace Geta.NotFoundHandler.Optimizely.Core.AutomaticRedirects
                     }
                     catch (Exception ex)
                     {
-                        _jobStatusLogger.Log($"Processing [{content.contentKey}] failed, exception: {ex}");
+                        // Note: Not in the result, as that's saved in the database with the job and read back with it.
+                        _logger.LogError(ex, "Processing moved content {ContentKey} failed.", content.contentKey);
                         failedCount++;
                     }
 

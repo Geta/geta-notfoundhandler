@@ -29,7 +29,7 @@
     <PackageReference Include="Coravel" Version="5.0.4" />
     <PackageReference Include="CsvHelper" Version="33.0.0" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="6.1.5" />
-    <PackageReference Include="X.PagedList" Version="8.4.3" />
+    <PackageReference Include="X.PagedList" Version="10.5.9" />
   </ItemGroup>
 
 </Project>

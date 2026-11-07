@@ -14,5 +14,11 @@ namespace Geta.NotFoundHandler.Data
         IEnumerable<CustomRedirect> GetByState(RedirectState state);
         IEnumerable<CustomRedirect> Find(string searchText);
         CustomRedirect Get(Guid id);
+
+        /// <summary>
+        /// Gets a value that changes when the stored redirects change, used to cheaply check whether
+        /// this instance has missed an update. A loader without one returns null, which skips the check.
+        /// </summary>
+        string GetChecksum() => null;
     }
 }
