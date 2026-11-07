@@ -18,6 +18,9 @@ Check these when upgrading, as they change how existing rules and integrations b
 - A request with no matching redirect keeps the status the application gave it. Before, a response that hadn't started yet was forced to `404`. `RequestHandler.SetStatusCodeAndShow404` is now only called for deleted URLs, so a subclass overriding it no longer runs for unmatched requests.
 - `HttpContextExtensions.SetStatusCode` no longer clears the response, so a custom page keeps its headers when its status changes to `410`.
 - CSV export: an imported file that was exported with escaped values keeps the `'` prefix and the `%3B` as part of the value.
+- Each instance now checks the database for redirect changes every 5 minutes, which adds one query per instance per check that hashes every row of the redirects table. Set `RedirectsRefreshInterval` to `TimeSpan.Zero` to turn it off. A loader implementing `IRedirectLoader` can add `GetChecksum` to take part, and without it the check is skipped.
+- A handler failing on `RedirectsEvents` no longer stops the others, and the failure now reaches the caller as an `AggregateException`.
+- `OptimizelySyncEvents` takes an `ILogger<OptimizelySyncEvents>`, and `RedirectsInitializer` takes an `IRedirectLoader`. This matters only if you construct or inherit from them yourself.
 
 ### Known issues
 
@@ -26,6 +29,10 @@ Check these when upgrading, as they change how existing rules and integrations b
 
 ### Fixed
 
+- Instances that miss an update no longer stay out of date until a restart. A check every 5 minutes picks up redirects and regex redirects that never reached an instance.
+- Two reloads at the same time could leave an instance without a new redirect, when a slow load that read the table before the save finished last.
+- A failed reload on the instance saving a redirect no longer stops the other instances from being told about it.
+- Leaving out `UseOptimizelyNotFoundHandler` no longer silently turns off the sync between servers. The sync starts anyway and a warning is logged.
 - The CMS navigation shows again on the add-on's page in the CMS on CMS 13. The layout's `<platform-navigation />` wasn't bound to its tag helper, so the browser got an empty element.
 - Automatic redirects no longer fail with `Sequence contains no elements` for content with no URL history.
 - A content language with no primary URL no longer stops automatic redirects for the remaining languages.

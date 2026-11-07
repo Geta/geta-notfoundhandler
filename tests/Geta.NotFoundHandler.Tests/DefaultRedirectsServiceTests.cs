@@ -42,7 +42,8 @@ namespace Geta.NotFoundHandler.Tests
                 _redirectsEvents,
                 _redirectHandler,
                 () => _sut,
-                Enumerable.Empty<INotFoundHandler>());
+                Enumerable.Empty<INotFoundHandler>(),
+                redirectLoader);
         }
 
         [Fact]

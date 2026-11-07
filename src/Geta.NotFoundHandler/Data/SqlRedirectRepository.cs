@@ -148,6 +148,20 @@ namespace Geta.NotFoundHandler.Data
             return ToCustomRedirects(dataTable).FirstOrDefault();
         }
 
+        public string GetChecksum()
+        {
+            // Note: A hash per row, as BINARY_CHECKSUM misses some changes to a string. NewUrl goes in as its own
+            // hash, which keeps the input below the 4000 characters where CONCAT cuts it off. Its fixed length also
+            // keeps a change of where OldUrl ends from giving the same input, as a url can contain a "|".
+            var sqlCommand = $@"SELECT COUNT_BIG(*) AS Total,
+                                    CHECKSUM_AGG(CAST(HASHBYTES('SHA2_256', CONCAT(Id, N'|', State, N'|', WildCardSkipAppend, N'|', RedirectType, N'|', OldUrl, N'|', CONVERT(nchar(64), HASHBYTES('SHA2_256', NewUrl), 2))) AS int)) AS Checksum
+                                    FROM {RedirectsTable}";
+
+            var row = _dataExecutor.ExecuteQuery(sqlCommand).Rows[0];
+
+            return $"{row["Total"]}:{row["Checksum"]}";
+        }
+
         private static IEnumerable<CustomRedirect> ToCustomRedirects(DataTable table)
         {
             return table.AsEnumerable().Select(ToCustomRedirect);
