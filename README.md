@@ -24,6 +24,8 @@ The perfect companion if you're transitioning to your site from another system a
 
 # Installation
 
+The add-on needs .NET 10. The Optimizely packages need Optimizely CMS 13.1 or later, and `Geta.NotFoundHandler.Optimizely.Commerce` needs Optimizely Commerce 15. A site created from the Alloy or empty CMS template can start on CMS 13.0, so update `EPiServer.CMS` and `EPiServer.Cms.UI.AspNetIdentity` to 13.1 or later before installing. Otherwise the restore fails with `NU1107` for `EPiServer.ImageLibrary.ImageSharp`.
+
 The command below will install Admin UI and NotFound handler into your ASP.NET Core project.
 
 ```
@@ -48,7 +50,7 @@ For the Optimizely Commerce project, if you want to use Automatic redirects, ins
 Install-Package Geta.NotFoundHandler.Optimizely.Commerce
 ```
 
-The package can be found in the [Optimizely Nuget Feed](https://nuget.episerver.com/package/?id=Geta.NotFoundHandler).
+The packages can be found in the [Optimizely NuGet feed](https://nuget.optimizely.com/packages/Geta.NotFoundHandler/).
 
 # Configuration
 
@@ -81,6 +83,10 @@ public void ConfigureServices(IServiceCollection services)
 ...
 }
 ```
+
+The extension methods are in the `Geta.NotFoundHandler.Infrastructure.Configuration` and `Geta.NotFoundHandler.Infrastructure.Initialization` namespaces, and for Optimizely in `Geta.NotFoundHandler.Optimizely.Infrastructure.Configuration` and `Geta.NotFoundHandler.Optimizely.Infrastructure.Initialization`.
+
+On Optimizely, also give the Admin UI a policy, as described in [Restricting access to the Admin UI](#restricting-access-to-the-admin-ui). Without it, only users in an `Administrators` role can open it.
 
 The first and the mandatory configuration is a connection string. Use `UseSqlServer` method to set up the database connection string.
 
@@ -193,6 +199,17 @@ A pattern only stops suggestions. A redirect or a regex redirect that applies to
 
 By default, only users of `Administrators` role can access Admin UI. But you can configure your authorization policy when registering the NotFound handler.
 
+A new Optimizely CMS 13 site has no `Administrators` role: the first admin of an Alloy site is only in `WebAdmins`. On Optimizely, use the `CmsAdmins` virtual role, which includes `WebAdmins` through the mapped roles. Without that policy, admins don't see the *NotFound handler* menu item, and opening the Admin UI sends them to the login page.
+
+```
+using EPiServer.Authorization;
+...
+services.AddNotFoundHandler(o => o.UseSqlServer(connectionString),
+    policy => policy.RequireRole(Roles.CmsAdmins));
+```
+
+For other sites, set your own rule:
+
 ```
  services.AddNotFoundHandler(o => { },
             policy =>
@@ -296,6 +313,8 @@ See the *Configuration* section how to enable it.
 Once you enabled Automatic redirects, you should run *[Geta NotFoundHandler] Index content URLs* scheduled job. It will index all URLs of content and will start monitoring those for changes.
 
 Now Automatic redirects will create redirects on content move. It will create redirects with the old URLs by checking the indexed URLs for the content and new URLs of the new place where a content is moved to. After that, it will index new URLs too.
+
+Changing the *Name in URL* of a published page doesn't create redirects straight away. The *[Geta NotFoundHandler] Register content move redirects* scheduled job creates them for the old URLs, so schedule it if editors rename pages. Redirects for a moved or renamed page also cover the pages below it.
 
 It will monitor primary, secondary and SEO URLs:
 - a primary URL will be redirected to the new primary URL,

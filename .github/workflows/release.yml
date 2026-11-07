@@ -34,6 +34,15 @@ jobs:
         run: |
           $version = ("${{github.ref_name}}").Remove(0, 1)
           echo "VERSION=$version" >> $env:GITHUB_ENV
+      - name: Take the release notes from the changelog
+        run: |
+          $lines = Get-Content CHANGELOG.md
+          $start = ($lines | Select-String -Pattern "^## \[$([regex]::Escape($env:VERSION))\]" | Select-Object -First 1).LineNumber
+          if (-not $start) { throw "CHANGELOG.md has no section for $env:VERSION. Add it before tagging." }
+          $rest = @($lines | Select-Object -Skip $start)
+          $next = ($rest | Select-String -Pattern '^## \[' | Select-Object -First 1).LineNumber
+          $section = if ($next) { $rest | Select-Object -First ($next - 1) } else { $rest }
+          ($section -join "`n").Trim() | Set-Content release-notes.md
       - name: Release
         run: |
           echo "${env:VERSION}"
@@ -50,14 +59,9 @@ jobs:
           dotnet nuget push Geta.NotFoundHandler.Optimizely.Commerce.${{env.VERSION}}.nupkg --source https://nuget.pkg.github.com/Geta/index.json --api-key ${{env.GITHUB_TOKEN}}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Create GitHub Release with Auto-Generated Notes
+      - name: Create GitHub Release with the changelog and auto-generated notes
         run: |
-          $notes = @"
-          ## Release notes
-
-          - Removed the explicit ``System.Text.Json`` package reference. It now comes as a transitive dependency from Optimizely, so it no longer needs to be declared in the package.
-          "@
-          gh release create ${{ github.ref_name }} --notes "$notes" --generate-notes
+          gh release create ${{ github.ref_name }} --notes-file release-notes.md --generate-notes
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Loop through all .nupkg files in the current directory and upload them to the release
