@@ -14,6 +14,7 @@ All notable changes to this project will be documented in this file.
 
 - Wildcard and regex redirects no longer let a request choose the host of the redirect. Before, `/content` -> `/` turned `/content//evil.com` into a redirect to `//evil.com`, and the regex format `/$1` did the same, as did `$1` capturing `https://evil.com`. A format that names a host itself, such as `//cdn.example.com/$1`, is left alone, and a capture naming the host of the request stays as it is. A rule that relied on `$1` capturing another host from the request now redirects to a path on the site.
 - The CSV export now escapes values a spreadsheet would run as a formula, whichever way they got into the database. A value starting with `=`, `@`, `+`, `-`, tab, carriage return or line feed is prefixed with `'`. A `;` followed by one of those characters inside a value is written as `%3B`, because spreadsheets using `;` as the list separator would otherwise start a new cell there.
+- `System.Security.Cryptography.Xml` is raised from 10.0.7 to 10.0.13 in `Geta.NotFoundHandler.Optimizely.Commerce`. A site on ASP.NET Core uses the copy in its .NET runtime instead of this package, so make sure the site runs on .NET 10.0.13 or later.
 
 ### Changed
 
