@@ -8,6 +8,7 @@ using Geta.NotFoundHandler.Optimizely.Core.AutomaticRedirects;
 using Geta.NotFoundHandler.Optimizely.Core.Events;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace Geta.NotFoundHandler.Optimizely.Infrastructure.Initialization
 {
@@ -28,7 +29,12 @@ namespace Geta.NotFoundHandler.Optimizely.Infrastructure.Initialization
 
             // For optimizely we will use built-in scheduler for this job
             var scheduler = services.GetService<IScheduler>();
-            (scheduler as Scheduler)?.TryUnschedule(nameof(SuggestionsCleanupJob));
+            if ((scheduler as Scheduler)?.TryUnschedule(nameof(SuggestionsCleanupJob)) == true)
+            {
+                services.GetRequiredService<ILoggerFactory>()
+                    .CreateLogger(typeof(ApplicationBuilderExtensions))
+                    .LogWarning("UseInternalScheduler has no effect on the suggestions cleanup on Optimizely sites. Schedule the [Geta NotFoundHandler] Suggestions cleanup job in the CMS instead.");
+            }
 
             return app;
         }

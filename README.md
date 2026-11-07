@@ -310,7 +310,7 @@ services.AddNotFoundHandler(o =>
 ```
 
 Scheduler - mechanism that triggers scheduled jobs in a recurrent manner
-- InternalScheduler - default scheduler, included in the core package, a scheduler that uses [Coravel](https://docs.coravel.net/).
+- InternalScheduler - included in the core package, a scheduler that uses [Coravel](https://docs.coravel.net/). It's for sites not using Optimizely: `UseOptimizelyNotFoundHandler` removes the job from it, and logs a warning if the flag is on.
   To enable the scheduler, you need to enable UseInternalScheduler flag. Additionally, you can adjust the scheduler run interval:
 ```
 services.AddNotFoundHandler(o =>
@@ -321,7 +321,7 @@ services.AddNotFoundHandler(o =>
 });
 ```
 - OptimizelyScheduler - uses Optimizely to schedule job runs.
-An Optimizely scheduled job was added - <code>[Geta NotFoundHandler] Suggestions cleanup job</code>.
+An Optimizely scheduled job was added - <code>[Geta NotFoundHandler] Suggestions cleanup job</code>. This is what cleans up the suggestions on an Optimizely site, so make sure it's scheduled.
 
 Additionally, there are two optimizely scheduled jobs responsible for:
 - *[Geta NotFoundHandler] Index content URLs* - as mentioned before, this job indexes URLs of content. Usually, it is required to run this job only once. All new content is automatically indexed. But if for some reason content publish events are not firing when creating new content (for example, during the import), then you should set this job to run frequently.
